@@ -1,0 +1,53 @@
+{
+    "name": "microcode",
+    "version": "2.5.30",
+    "description": "Physical computing library for micro:bit V2",
+    "dependencies": {
+        "core": "*",
+        "game---light": "*",
+        "settings": "*"
+    },
+    "files": [
+        "protocol.ts",
+        "keymap.ts",
+        "analytics.ts",
+        "config.ts",
+        "main.ts",
+        "accessibility.ts",
+        "button.ts",
+        "component.ts",
+        "assets.ts",
+        "scene.ts",
+        "language.ts",
+        "tiles.ts",
+        "app.ts",
+        "sprite.ts",
+        "editor.ts",
+        "ruleeditor.ts",
+        "cursor.ts",
+        "home.ts",
+        "bounds.ts",
+        "picker.ts",
+        "affine.ts",
+        "math.ts",
+        "screen.ts",
+        "version.ts",
+        "fieldeditors.ts",
+        "navigator.ts",
+        "cursorscene.ts",
+        "options.ts",
+        "samples.ts",
+        "gallery.ts",
+        "pointerevents.ts",
+        "tooltips.ts",
+        "utils.ts",
+        "jacs.ts"
+    ],
+    "testFiles": [],
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "tsprj",
+    "disableTargetTemplateFiles": true,
+    "binaryonly": true
+}
