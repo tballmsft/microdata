@@ -73,8 +73,7 @@ namespace microcode {
          */
         captureBackground() {
             control.assert(
-                !this.backgroundCaptured_,
-                "ERROR_DOUBLE_BACKGROUND_CAPTURE"
+                !this.backgroundCaptured_, 142
             )
             this.backgroundCaptured_ = true
         }
