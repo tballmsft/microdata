@@ -72,9 +72,6 @@ namespace microcode {
          * Captures the current screen image as background image. You must call releaseBackground to resume usual rendering.
          */
         captureBackground() {
-            control.assert(
-                !this.backgroundCaptured_, 142
-            )
             this.backgroundCaptured_ = true
         }
 
