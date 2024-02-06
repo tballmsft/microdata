@@ -5,7 +5,8 @@
     "dependencies": {
         "core": "file:../core",
         "game---light": "file:../game---light",
-        "settings": "file:../settings"
+        "settings": "file:../settings",
+        "microphone": "*"
     },
     "files": [
         "protocol.ts",
@@ -44,6 +45,10 @@
         "jacs.ts"
     ],
     "testFiles": [],
+    "targetVersions": {
+        "target": "6.1.8",
+        "targetId": "microbit"
+    },
     "supportedTargets": [
         "microbit"
     ],
