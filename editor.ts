@@ -2,22 +2,6 @@ namespace microcode {
     const TOOLBAR_HEIGHT = 17
     const TOOLBAR_MARGIN = 2
 
-    //% shim=TD_NOOP
-    function connectJacdac() {
-        const buf = Buffer.fromUTF8(JSON.stringify({ type: "connect" }))
-        control.simmessages.send("usb", buf)
-    }
-
-    //% shim=TD_NOOP
-    function editorSkipBack(editor: Editor, skipBack: boolean) {
-        if (!skipBack) editor.back()
-    }
-
-    //% shim=TD_NOOP
-    function editorSkipForward(editor: Editor, skipBack: boolean) {
-        if (!skipBack) editor.forward()
-    }
-
     export function diskSlots() {
         return ["disk1", "disk2", "disk3"]
     }
@@ -210,7 +194,7 @@ namespace microcode {
 
         /* override */ startup() {
             const makeOnEvent = (id: number, dir: CursorDir) => {
-                control.onEvent(ControllerButtonEvent.Pressed, id, () =>
+                scontrol.onEvent(ControllerButtonEvent.Pressed, id, () =>
                     this.scrollAndMove(dir)
                 )
             }
@@ -221,7 +205,7 @@ namespace microcode {
             makeOnEvent(controller.up.id, CursorDir.Up)
             makeOnEvent(controller.down.id, CursorDir.Down)
             if (!Options.menuProfiling)
-                control.onEvent(
+                scontrol.onEvent(
                     ControllerButtonEvent.Pressed,
                     controller.menu.id,
                     () => {
@@ -284,17 +268,17 @@ namespace microcode {
                 this.cursor.click()
                 this.dirty = true
             }
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 forward
             )
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id + keymap.PLAYER_OFFSET,
                 forward
             )
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => this.back()
@@ -323,23 +307,23 @@ namespace microcode {
             const nextPage = () => this.nextPage()
             const prevPage = () => this.prevPage()
             // page up, page down
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Up + keymap.PLAYER_OFFSET,
                 nextPage
             )
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Down + keymap.PLAYER_OFFSET,
                 prevPage
             )
             // next, prev page
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Left + keymap.PLAYER_OFFSET,
                 prevPage
             )
-            control.onEvent(
+            scontrol.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Right + keymap.PLAYER_OFFSET,
                 nextPage
@@ -623,7 +607,6 @@ namespace microcode {
         }
 
         draw() {
-            control.enablePerfCounter()
             this.ruleEditors.forEach(rule => rule.draw())
         }
     }

@@ -27,30 +27,16 @@ namespace microcode {
         }
 
         /* abstract */ startup() {
-            if (Options.menuProfiling) {
-                control.onEvent(
-                    ControllerButtonEvent.Pressed,
-                    controller.menu.id,
-                    () => {
-                        control.heapSnapshot()
-                    }
-                )
-            }
+
         }
 
         /* abstract */ shutdown() {}
 
         /* override */ activate() {
-            pointerevents.pushContext(
-                (x, y) => this.handleClick(x, y),
-                (x, y) => this.handleMove(x, y),
-                (dx, dy) => this.handleWheel(dx, dy)
-            )
             profile()
         }
 
         /* override */ deactivate() {
-            pointerevents.popContext()
             profile()
         }
 
@@ -80,30 +66,26 @@ namespace microcode {
         }
 
         __init() {
-            control.eventContext().registerFrameHandler(INPUT_PRIORITY, () => {
-                control.enablePerfCounter()
-                const dtms = (control.eventContext().deltaTime * 1000) | 0
+            scontrol.eventContext().registerFrameHandler(INPUT_PRIORITY, () => {
+                const dtms = (scontrol.eventContext().deltaTime * 1000) | 0
                 controller.left.__update(dtms)
                 controller.right.__update(dtms)
                 controller.up.__update(dtms)
                 controller.down.__update(dtms)
             })
             // Setup frame callbacks.
-            control.eventContext().registerFrameHandler(UPDATE_PRIORITY, () => {
-                control.enablePerfCounter()
+            scontrol.eventContext().registerFrameHandler(UPDATE_PRIORITY, () => {
                 this.update()
             })
-            control.eventContext().registerFrameHandler(RENDER_PRIORITY, () => {
-                control.enablePerfCounter()
+            scontrol.eventContext().registerFrameHandler(RENDER_PRIORITY, () => {
                 // perf: render directly on the background image buffer
                 this.draw()
                 if (Options.fps)
-                    Screen.image.print(control.EventContext.lastStats, 1, 1, 15)
+                    Screen.image.print(scontrol.EventContext.lastStats, 1, 1, 15)
                 if (screen !== Screen.image)
                     screen.drawImage(Screen.image, 0, 0)
             })
-            control.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {
-                control.enablePerfCounter()
+            scontrol.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {
                 control.__screen.update()
             })
         }
@@ -121,7 +103,7 @@ namespace microcode {
             if (currScene) {
                 currScene.deactivate()
             }
-            control.pushEventContext()
+            scontrol.pushEventContext()
             this.scenes.push(scene)
             scene.startup()
             scene.activate()
@@ -133,7 +115,7 @@ namespace microcode {
             if (prevScene) {
                 prevScene.deactivate()
                 prevScene.shutdown()
-                control.popEventContext()
+                scontrol.popEventContext()
             }
             const currScene = this.currScene()
             if (currScene) {

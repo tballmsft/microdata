@@ -107,7 +107,6 @@ namespace microcode {
         }
 
         draw() {
-            control.enablePerfCounter()
             if (!this.visible) return
 
             Screen.outlineBoundsXfrm(

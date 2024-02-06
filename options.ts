@@ -6,9 +6,6 @@ namespace microcode {
     }
 
     export function profile() {
-        if (Options.profiling) {
-            control.heapSnapshot()
-            control.gc() // displays stats on hardware
-        }
+
     }
 }
