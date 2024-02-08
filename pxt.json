@@ -3,17 +3,10 @@
     "version": "2.5.30",
     "description": "Physical computing library for micro:bit V2",
     "dependencies": {
-<<<<<<< HEAD
         "core": "*",
         "radio": "*",
         "microphone": "*",
         "arcadeshield": "github:microsoft/pxt-arcadeshield"
-=======
-        "core": "file:../core",
-        "game---light": "file:../game---light",
-        "settings": "file:../settings",
-        "microphone": "*"
->>>>>>> 276e9086356dc7297cd875eeae553cd0ec70ed84
     },
     "files": [
         "protocol.ts",
