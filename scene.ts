@@ -41,16 +41,10 @@ namespace microcode {
         /* abstract */ shutdown() {}
 
         /* override */ activate() {
-            pointerevents.pushContext(
-                (x, y) => this.handleClick(x, y),
-                (x, y) => this.handleMove(x, y),
-                (dx, dy) => this.handleWheel(dx, dy)
-            )
             profile()
         }
 
         /* override */ deactivate() {
-            pointerevents.popContext()
             profile()
         }
 
@@ -72,9 +66,6 @@ namespace microcode {
          * Captures the current screen image as background image. You must call releaseBackground to resume usual rendering.
          */
         captureBackground() {
-            control.assert(
-                !this.backgroundCaptured_, 142
-            )
             this.backgroundCaptured_ = true
         }
 

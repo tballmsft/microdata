@@ -519,7 +519,6 @@ namespace microcode {
         }
 
         draw() {
-            control.enablePerfCounter()
             if (this.isOffScreen()) return
 
             this.drawBackground()
@@ -537,7 +536,6 @@ namespace microcode {
         }
 
         private drawBackground() {
-            control.enablePerfCounter()
             Screen.fillBoundsXfrm(this.xfrm, this.bounds, 11)
             Screen.fillBoundsXfrm(this.xfrm, this.whenBounds, 13)
             Screen.outlineBoundsXfrm(this.xfrm, this.bounds, 1, 12)

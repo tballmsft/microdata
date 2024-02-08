@@ -107,7 +107,6 @@ namespace microcode {
         }
 
         draw() {
-
             if (!this.visible) return
 
             Screen.outlineBoundsXfrm(
