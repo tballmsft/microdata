@@ -27,7 +27,6 @@ namespace microcode {
      */
     //% shim=TD_NOOP
     function report(msg: AnalyticsEvent) {
-        const buf = Buffer.fromUTF8(JSON.stringify(msg))
-        control.simmessages.send("analytics", buf)
+
     }
 }

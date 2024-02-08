@@ -3,9 +3,10 @@
     "version": "2.5.30",
     "description": "Physical computing library for micro:bit V2",
     "dependencies": {
-        "core": "file:../core",
-        "game---light": "file:../game---light",
-        "settings": "file:../settings"
+        "core": "*",
+        "radio": "*",
+        "microphone": "*",
+        "arcadeshield": "github:microsoft/pxt-arcadeshield"
     },
     "files": [
         "protocol.ts",
@@ -44,6 +45,10 @@
         "jacs.ts"
     ],
     "testFiles": [],
+    "targetVersions": {
+        "target": "6.0.22",
+        "targetId": "microbit"
+    },
     "supportedTargets": [
         "microbit"
     ],

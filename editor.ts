@@ -5,7 +5,7 @@ namespace microcode {
     //% shim=TD_NOOP
     function connectJacdac() {
         const buf = Buffer.fromUTF8(JSON.stringify({ type: "connect" }))
-        control.simmessages.send("usb", buf)
+
     }
 
     //% shim=TD_NOOP
@@ -210,7 +210,7 @@ namespace microcode {
 
         /* override */ startup() {
             const makeOnEvent = (id: number, dir: CursorDir) => {
-                control.onEvent(ControllerButtonEvent.Pressed, id, () =>
+                scene.onEvent(ControllerButtonEvent.Pressed, id, () =>
                     this.scrollAndMove(dir)
                 )
             }
@@ -221,7 +221,7 @@ namespace microcode {
             makeOnEvent(controller.up.id, CursorDir.Up)
             makeOnEvent(controller.down.id, CursorDir.Down)
             if (!Options.menuProfiling)
-                control.onEvent(
+                scene.onEvent(
                     ControllerButtonEvent.Pressed,
                     controller.menu.id,
                     () => {
@@ -284,17 +284,17 @@ namespace microcode {
                 this.cursor.click()
                 this.dirty = true
             }
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 forward
             )
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id + keymap.PLAYER_OFFSET,
                 forward
             )
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => this.back()
@@ -323,23 +323,23 @@ namespace microcode {
             const nextPage = () => this.nextPage()
             const prevPage = () => this.prevPage()
             // page up, page down
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Up + keymap.PLAYER_OFFSET,
                 nextPage
             )
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Down + keymap.PLAYER_OFFSET,
                 prevPage
             )
             // next, prev page
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Left + keymap.PLAYER_OFFSET,
                 prevPage
             )
-            control.onEvent(
+            scene.onEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Right + keymap.PLAYER_OFFSET,
                 nextPage
@@ -623,7 +623,6 @@ namespace microcode {
         }
 
         draw() {
-            control.enablePerfCounter()
             this.ruleEditors.forEach(rule => rule.draw())
         }
     }
