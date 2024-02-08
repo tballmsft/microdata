@@ -28,7 +28,7 @@ namespace microcode {
 
         /* abstract */ startup() {
             if (Options.menuProfiling) {
-                scene.onEvent(
+                context.onEvent(
                     ControllerButtonEvent.Pressed,
                     controller.menu.id,
                     () => {
@@ -74,29 +74,29 @@ namespace microcode {
         }
 
         __init() {
-            scene.eventContext().registerFrameHandler(INPUT_PRIORITY, () => {
+            context.eventContext().registerFrameHandler(INPUT_PRIORITY, () => {
                 control.enablePerfCounter()
-                const dtms = (scene.eventContext().deltaTime * 1000) | 0
+                const dtms = (context.eventContext().deltaTime * 1000) | 0
                 controller.left.__update(dtms)
                 controller.right.__update(dtms)
                 controller.up.__update(dtms)
                 controller.down.__update(dtms)
             })
             // Setup frame callbacks.
-            scene.eventContext().registerFrameHandler(UPDATE_PRIORITY, () => {
+            context.eventContext().registerFrameHandler(UPDATE_PRIORITY, () => {
                 control.enablePerfCounter()
                 this.update()
             })
-            scene.eventContext().registerFrameHandler(RENDER_PRIORITY, () => {
+            context.eventContext().registerFrameHandler(RENDER_PRIORITY, () => {
                 control.enablePerfCounter()
                 // perf: render directly on the background image buffer
                 this.draw()
                 if (Options.fps)
-                    Screen.image.print(scene.EventContext.lastStats, 1, 1, 15)
+                    Screen.image.print(context.EventContext.lastStats, 1, 1, 15)
                 if (screen !== Screen.image)
                     screen.drawImage(Screen.image, 0, 0)
             })
-            scene.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {
+            context.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {
                 control.enablePerfCounter()
                 control.__screen.update()
             })
@@ -115,7 +115,7 @@ namespace microcode {
             if (currScene) {
                 currScene.deactivate()
             }
-            scene.pushEventContext()
+            context.pushEventContext()
             this.scenes.push(scene)
             scene.startup()
             scene.activate()
@@ -127,7 +127,7 @@ namespace microcode {
             if (prevScene) {
                 prevScene.deactivate()
                 prevScene.shutdown()
-                scene.popEventContext()
+                context.popEventContext()
             }
             const currScene = this.currScene()
             if (currScene) {

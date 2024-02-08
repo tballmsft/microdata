@@ -54,31 +54,31 @@ namespace keymap {
         )
 
         Up2.onEvent(ControllerButtonEvent.Pressed, () => {
-            scene.raiseEvent(
+            control.raiseEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Up + PLAYER_OFFSET
             )
         })
         Down2.onEvent(ControllerButtonEvent.Pressed, () => {
-            scene.raiseEvent(
+            control.raiseEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Down + PLAYER_OFFSET
             )
         })
         Left2.onEvent(ControllerButtonEvent.Pressed, () => {
-            scene.raiseEvent(
+            control.raiseEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Left + PLAYER_OFFSET
             )
         })
         Right2.onEvent(ControllerButtonEvent.Pressed, () => {
-            scene.raiseEvent(
+            control.raiseEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.Right + PLAYER_OFFSET
             )
         })
         A2.onEvent(ControllerButtonEvent.Pressed, () => {
-            scene.raiseEvent(
+            control.raiseEvent(
                 ControllerButtonEvent.Pressed,
                 ControllerButton.A + PLAYER_OFFSET
             )
