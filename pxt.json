@@ -6,7 +6,7 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield"
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1"
     },
     "files": [
         "protocol.ts",
