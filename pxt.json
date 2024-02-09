@@ -46,7 +46,7 @@
     ],
     "testFiles": [],
     "targetVersions": {
-        "target": "6.1.8",
+        "target": "6.1.10",
         "targetId": "microbit"
     },
     "supportedTargets": [
