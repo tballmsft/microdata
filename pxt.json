@@ -53,10 +53,5 @@
         "microbit"
     ],
     "preferredEditor": "tsprj",
-    "disableTargetTemplateFiles": true,
-    "yotta": {
-        "config": {
-            "DEVICE_BLE": 0
-        }
-    }
+    "disableTargetTemplateFiles": true
 }
