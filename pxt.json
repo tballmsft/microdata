@@ -54,5 +54,9 @@
     ],
     "preferredEditor": "tsprj",
     "disableTargetTemplateFiles": true,
-    "binaryonly": true
+    "yotta": {
+        "config": {
+            "DEVICE_BLE": 0
+        }
+    }
 }
