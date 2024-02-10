@@ -147,7 +147,16 @@ namespace microcode {
         else if (id === "F23B") res = "both";
         else if (id === "F23N") res = "none";
         else if (id === "F23NL") res = "lost left";
-        else if (id === "F23NR") res = "lost right";        
+        else if (id === "F23NR") res = "lost right";   
+
+        else if (id === "linear_graph") res = "Live"
+        else if (id == "led_light_sensor") res = "Light Sensor"
+        else if (id == "thermometer") res = "Thermometer"
+        else if (id == "accelerometer") res = "Accelerometer"
+
+        // icons do not yet exist:
+        else if (id == "Record") res = "Record"
+        else if (id == "View") res = "View"
         return res
     }
 }
