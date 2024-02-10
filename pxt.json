@@ -6,7 +6,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1"
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
+        "datalogger": "*"
     },
     "files": [
         "protocol.ts",
@@ -42,7 +43,12 @@
         "pointerevents.ts",
         "tooltips.ts",
         "utils.ts",
-        "jacs.ts"
+        "jacs.ts",
+        "liveDataViewer.ts",
+        "dataRecorder.ts",
+        "recordedDataViewer.ts",
+        "sensorSelect.ts",
+        "measurementFrequencySelect.ts"
     ],
     "testFiles": [],
     "targetVersions": {

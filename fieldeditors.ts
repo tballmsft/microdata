@@ -181,7 +181,25 @@ namespace microcode {
             melodyEditor(field, picker, onHide, onDelete)
         }
         toImage(field: any) {
-            return icondb.melodyToImage(field)
+            // Original code:
+            // return icondb.melodyToImage(field)
+            
+            const note4x3 = img`
+            . f f .
+            f c c .
+            f c c .
+            `
+            const ret = simage.create(16, 16)
+            ret.fill(1)
+            for (let col = 0; col < microcode.MELODY_LENGTH; col++) {
+                if (field.notes[col] === ".") continue
+                const row = microcode.NUM_NOTES - 1 - parseInt(field.notes[col])
+                const color = 15
+                const ncol = col << 2,
+                    nrow = row * 3 + 1
+                ret.drawTransparentImage(note4x3, ncol, nrow)
+            }
+            return ret
         }
         toBuffer(melody: Melody) {
             const buf = Buffer.create(3)
