@@ -26,10 +26,11 @@ namespace microcode {
                     const opts = {
                         sensorFn: function () {return input.lightLevel() / 255}, 
                         sensorName: "Light Level", 
-                        noOfMeasurements: 5, 
-                        frequencyMs: 1000
+                        // noOfMeasurements: 5, 
+                        // frequencyMs: 1000
                     }
-                    this.app.pushScene(new DataRecorder(this.app, opts)) 
+                    this.app.pushScene(new FrequencySelect(this.app, opts))
+                    // this.app.pushScene(new DataRecorder(this.app, opts)) 
                 },
             })
 
@@ -46,10 +47,11 @@ namespace microcode {
                     const opts = {
                         sensorFn: function () {return input.temperature()}, 
                         sensorName: "Temperature C", 
-                        noOfMeasurements: 5, 
-                        frequencyMs: 1000
+                        // noOfMeasurements: 5, 
+                        // frequencyMs: 1000
                     }
-                    this.app.pushScene(new DataRecorder(this.app, opts)) 
+                    this.app.pushScene(new FrequencySelect(this.app, opts))
+                    // this.app.pushScene(new DataRecorder(this.app, opts)) 
                 },
             })
 
@@ -66,10 +68,11 @@ namespace microcode {
                     const opts = {
                         sensorFn: function () {return input.acceleration(Dimension.X)}, 
                         sensorName: "Accelerometer", 
-                        noOfMeasurements: 5, 
-                        frequencyMs: 1000
+                        // noOfMeasurements: 5, 
+                        // frequencyMs: 1000
                     }
-                    this.app.pushScene(new DataRecorder(this.app, opts)) 
+                    this.app.pushScene(new FrequencySelect(this.app, opts))
+                    // this.app.pushScene(new DataRecorder(this.app, opts)) 
                 },
             })
 

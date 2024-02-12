@@ -1,22 +1,21 @@
 namespace microcode {
     export class DataRecorder extends Scene {
-        private selectedSensor: () => number
-        private sensorName: string
-        private numberOfMeasurements: number
-        private measurementFrequencyMs: number
-
-        constructor(app: App, opts: {
+        private userOpts: {
             sensorFn: () => number, 
             sensorName: string,
-            noOfMeasurements: number, 
-            frequencyMs: number
+            measurements: number, 
+            frequency: number
+        }
+
+        constructor(app: App, userOpts: {
+            sensorFn: () => number, 
+            sensorName: string,
+            measurements: number, 
+            frequency: number
         }) {
             super(app, "dataRecorder")
 
-            this.selectedSensor = opts.sensorFn
-            this.sensorName = opts.sensorName
-            this.numberOfMeasurements = opts.noOfMeasurements
-            this.measurementFrequencyMs = opts.frequencyMs
+            this.userOpts = userOpts
 
             datalogger.deleteLog()
 
@@ -40,21 +39,21 @@ namespace microcode {
                 0xc
             )
 
-            if (this.numberOfMeasurements === 0) {
+            if (this.userOpts.measurements === 0) {
                 screen.printCenter("Data Logging Complete.", screen.height / 2);
                 screen.printCenter("Press B to back out.", (screen.height / 2) + 10);
                 return;
             }
 
             else {
-                const secondsLeft: number = (this.measurementFrequencyMs * this.numberOfMeasurements) / 1000
+                const secondsLeft: number = (this.userOpts.measurements * this.userOpts.frequency) / 1000
                 screen.printCenter("Recording data...", 10);
                 screen.printCenter(secondsLeft.toString() + " seconds left", screen.height / 2);
 
-                datalogger.log(datalogger.createCV(this.sensorName, this.selectedSensor()))
+                datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
 
-                this.numberOfMeasurements -= 1
-                basic.pause(this.measurementFrequencyMs)
+                this.userOpts.measurements -= 1
+                basic.pause(this.userOpts.frequency)
             }
         }
     }

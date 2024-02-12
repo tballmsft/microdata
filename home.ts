@@ -46,7 +46,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new LiveDataViewer(this.app))
+                    this.app.pushScene(new RecordedDataViewer(this.app))
                 },
             })
 
