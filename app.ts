@@ -15,7 +15,9 @@ namespace microcode {
             basic.pause(1)
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
+
             const home = new Home(this)
+            // const home = new SensorSelect(this)
             this.pushScene(home)
         }
 

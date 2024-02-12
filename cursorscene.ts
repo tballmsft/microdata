@@ -4,9 +4,10 @@ namespace microcode {
         public cursor: Cursor
         public picker: Picker
 
-        constructor(app: App) {
+        constructor(app: App, navigator?: INavigator) {
             super(app, "scene")
             this.color = 11
+            this.navigator = navigator
         }
 
         protected moveCursor(dir: CursorDir) {
@@ -130,6 +131,65 @@ namespace microcode {
         /* override */ draw() {
             this.picker.draw()
             this.cursor.draw()
+        }
+    }
+
+    
+    export class CursorSceneWithPriorPage extends CursorScene {
+        private goBack1PageFn: () => void;
+
+        constructor(app: App, goBack1PageFn: () => void) {
+            super(app)
+            this.color = 11
+
+            this.goBack1PageFn = goBack1PageFn
+        }
+
+        /* override */ startup() {
+            super.startup()
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.right.id,
+                () => this.moveCursor(CursorDir.Right)
+            )
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => this.moveCursor(CursorDir.Up)
+            )
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => this.moveCursor(CursorDir.Down)
+            )
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.left.id,
+                () => this.moveCursor(CursorDir.Left)
+            )
+
+            // click
+            const click = () => this.cursor.click()
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                click
+            )
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id + keymap.PLAYER_OFFSET,
+                click
+            )
+            context.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => this.goBack1PageFn()
+            )
+
+            this.cursor = new Cursor()
+            this.picker = new Picker(this.cursor)
+            this.navigator = new RowNavigator()
+            this.cursor.navigator = this.navigator
         }
     }
 }

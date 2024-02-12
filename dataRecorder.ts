@@ -1,20 +1,22 @@
 namespace microcode {
-    const TOOLBAR_HEIGHT = 17
-    const TOOLBAR_MARGIN = 2
-
     export class DataRecorder extends Scene {
         private selectedSensor: () => number
         private sensorName: string
         private numberOfMeasurements: number
         private measurementFrequencyMs: number
 
-        constructor(app: App, selectedSensor: () => number, sensorName: string, noOfMeasurements: number, frequencyMs: number) {
+        constructor(app: App, opts: {
+            sensorFn: () => number, 
+            sensorName: string,
+            noOfMeasurements: number, 
+            frequencyMs: number
+        }) {
             super(app, "dataRecorder")
 
-            this.selectedSensor = selectedSensor
-            this.sensorName = sensorName
-            this.numberOfMeasurements = noOfMeasurements
-            this.measurementFrequencyMs = frequencyMs
+            this.selectedSensor = opts.sensorFn
+            this.sensorName = opts.sensorName
+            this.numberOfMeasurements = opts.noOfMeasurements
+            this.measurementFrequencyMs = opts.frequencyMs
 
             datalogger.deleteLog()
 

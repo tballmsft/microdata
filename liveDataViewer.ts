@@ -2,12 +2,6 @@ namespace microcode {
     const WIDTH_BUFFER = 16;
     const HEIGHT_BUFFER = 12;
 
-    //% shim=TD_NOOP
-    function connectJacdac() {
-        const buf = Buffer.fromUTF8(JSON.stringify({ type: "connect" }))
-        control.simmessages.send("usb", buf)
-    }
-
     export class LiveDataViewer extends Scene {
         public rendering = false
         private dataBuffer: number[] = [];
@@ -30,7 +24,7 @@ namespace microcode {
         }
 
         update() {
-            // Pre-process and convet lightlevel into a y value; relative to screen-height
+            // Pre-process and convert lightlevel into a y value; relative to screen-height
             let light_level = input.lightLevel() / 255;
             let y = Math.round(screen.height - (light_level * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
 
