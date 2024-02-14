@@ -147,39 +147,7 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.right.id,
-                () => this.moveCursor(CursorDir.Right)
-            )
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.up.id,
-                () => this.moveCursor(CursorDir.Up)
-            )
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.down.id,
-                () => this.moveCursor(CursorDir.Down)
-            )
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.left.id,
-                () => this.moveCursor(CursorDir.Left)
-            )
-
-            // click
-            const click = () => this.cursor.click()
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.A.id,
-                click
-            )
-            context.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.A.id + keymap.PLAYER_OFFSET,
-                click
-            )
+        
             context.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,

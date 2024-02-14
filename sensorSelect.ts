@@ -40,14 +40,14 @@ namespace microcode {
                 // "disk3": {ariaID: "disk3", x: 50, y: -25, name: "disk3", fn: function () {return input.magneticForce(Dimension.X)}},
 
                 "led_light_sensor": {ariaID: "Light Level", x: -50, y: 0, name: "Light\nLevel", fn: function () {return input.lightLevel()}},
-                "thermometer": {ariaID: "Thermometer", x: 0, y: 0, name: "Temperature", fn: function () {return input.temperature()}},
+                // "thermometer": {ariaID: "Thermometer", x: 0, y: 0, name: "Temperature", fn: function () {return input.temperature()}},
                 "accelerometer": {ariaID: "Accelerometer", x: 50, y: 0, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}},
 
                 // "a": {ariaID: "a", x: -50, y: 25, name: "Light\nLevel", fn: function() {return pinPressFunction(TouchPin.P0)}},
                 // "b": {ariaID: "b", x: 0, y: 25, name: "Temperature", fn: function () {return pinPressFunction(TouchPin.P1)}},
                 // "c": {ariaID: "c", x: 50, y: 25, name: "Accelerometer", fn: function () {return pinPressFunction(TouchPin.P2)}},
 
-                // "moveTiltUp": {ariaID: "d", x: -50, y: 50, name: "Pitch", fn: function () {return input.rotation(Rotation.Pitch)}},
+                "moveTiltUp": {ariaID: "d", x: -50, y: 50, name: "Pitch", fn: function () {return input.rotation(Rotation.Pitch)}},
                 // "moveTiltLeft": {ariaID: "e", x: 0, y: 50, name: "Roll", fn: function () {return Rotation.Roll}},
                 // "finger_press": {ariaID: "f", x: 50, y: 50, name: "Pin Press", fn: function () {if(input.logoIsPressed()) {return 255} return 0}}
             }

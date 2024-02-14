@@ -23,8 +23,6 @@ namespace microcode {
 
             this.loggingStartTime = input.runningTime()
 
-            // datalogger.deleteLog()
-
             // Go Back:
             control.onEvent(
                 ControllerButtonEvent.Pressed,

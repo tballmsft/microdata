@@ -1,8 +1,8 @@
 namespace microcode {
     export class Home extends CursorScene {
-        recordDataBtn: Button
-        liveDataBtn: Button
-        viewBtn: Button
+        private recordDataBtn: Button
+        private liveDataBtn: Button
+        private viewBtn: Button
 
         constructor(app: App) {
             super(app)
@@ -55,11 +55,6 @@ namespace microcode {
             this.navigator.addButtons(btns)
         }
 
-        /* override */ activate() {
-            super.activate()
-            this.color = 15
-        }
-
         private drawVersion() {
             const font = simage.font5
             Screen.print(
@@ -85,17 +80,18 @@ namespace microcode {
             const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0
             const margin = 2
             const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
-            const y = Screen.TOP_EDGE + OFFSET + dy
+            const y = Screen.TOP_EDGE + OFFSET //+ dy
             Screen.drawTransparentImage(
                 wordLogo,
-                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1) + dy,
+                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
+                ,
                 y + this.yOffset
             )
             Screen.drawTransparentImage(
                 microbitLogo,
                 Screen.LEFT_EDGE +
-                    ((Screen.WIDTH - microbitLogo.width) >> 1) +
-                    dy,
+                    ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
+                    ,
                 y - wordLogo.height + this.yOffset + margin
             )
             if (!this.yOffset) {
@@ -103,8 +99,9 @@ namespace microcode {
                 Screen.print(
                     tagline,
                     Screen.LEFT_EDGE +
-                        ((Screen.WIDTH + wordLogo.width) >> 1) +
-                        dy -
+                        ((Screen.WIDTH + wordLogo.width) >> 1) 
+                        + dy
+                        -
                         microcode.font.charWidth * tagline.length,
                     Screen.TOP_EDGE +
                         OFFSET +

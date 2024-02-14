@@ -15,7 +15,7 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     app.popScene()
-                    app.pushScene(new Home(app))
+                    app.pushScene(new Home(this.app))
                 }
             )
 
@@ -72,7 +72,6 @@ namespace microcode {
                 0xC
             )
             
-            FauxDataLogger.numberOfRows = 5
             this.draw_grid()
 
             for (let i = 0; i < FauxDataLogger.headers.length; i++) {
@@ -86,6 +85,7 @@ namespace microcode {
                 )
             }
 
+            FauxDataLogger.numberOfRows = 5
             // interface IDictionary {[index: string]: number;}
             // const data: IDictionary = {"1" : 1, "2" : 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7}
 
