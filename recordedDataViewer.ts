@@ -3,9 +3,12 @@ namespace microcode {
     const MAX_ROWS = 10
 
     export class RecordedDataViewer extends Scene {
+        private scrollOffset: number;
 
         constructor(app: App) {
             super(app, "dataViewer")
+
+            this.scrollOffset = 0
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -13,6 +16,26 @@ namespace microcode {
                 () => {
                     app.popScene()
                     app.pushScene(new Home(app))
+                }
+            )
+            
+            const rowOffsetDelta = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => {
+                    this.scrollOffset -= (Screen.HEIGHT / MAX_ROWS) * 2
+                    this.scrollOffset = Math.max(this.scrollOffset, 0)
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => {
+                    this.scrollOffset += (Screen.HEIGHT / MAX_ROWS) * 2
+                    this.scrollOffset = Math.min(this.scrollOffset, Screen.HEIGHT - ((Screen.HEIGHT / MAX_ROWS) * 4))
                 }
             )
         }
@@ -66,27 +89,27 @@ namespace microcode {
             }
 
             interface IDictionary {[index: string]: number;}
-            const data: IDictionary = {"1" : 1, "2" : 2, "3": 3, "4": 4, "5": 5}
+            const data: IDictionary = {"1" : 1, "2" : 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7}
 
             const colBufferSize = Screen.WIDTH / FauxDataLogger.headers.length
             const rowOffsetDelta = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
             let rowOffset = 0
 
-            Object.keys(FauxDataLogger.data).forEach(
+            Object.keys(data).forEach(
                 key => {
                     Screen.print(
                         key,
                         Screen.LEFT_EDGE + (colBufferSize / 2) - ((font.charWidth * key.length) / 2),
-                        Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowOffsetDelta / 2) - 4,
+                        Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowOffsetDelta / 2) - 4 + this.scrollOffset,
                         0xb,
                         simage.font8
                     )
 
-                    const sensorData = FauxDataLogger.data[key].toString().slice(0, 4)
+                    const sensorData = data[key].toString().slice(0, 4)
                     Screen.print(
                         sensorData,
                         Screen.LEFT_EDGE + colBufferSize + (colBufferSize / 2) - ((font.charWidth *sensorData.length) / 2),
-                        Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowOffsetDelta / 2) - 4,
+                        Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowOffsetDelta / 2) - 4 + this.scrollOffset,
                         0xb,
                         simage.font8
                     )
