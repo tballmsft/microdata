@@ -50,7 +50,7 @@ namespace microcode {
             screen.printCenter("Light Level", 10)
             this.draw_axes();
 
-            const start = WIDTH_BUFFER;
+            const start = WIDTH_BUFFER + 2;
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
                 screen.drawLine(start + i, this.dataBuffer[i], start + i - 1, this.dataBuffer[i + 1], 9);
             }
@@ -58,8 +58,10 @@ namespace microcode {
 
         // Display helper:
         draw_axes() {
-            screen.drawLine(WIDTH_BUFFER, screen.height - HEIGHT_BUFFER, screen.width - WIDTH_BUFFER, screen.height - HEIGHT_BUFFER, 5);
-            screen.drawLine(WIDTH_BUFFER, HEIGHT_BUFFER, WIDTH_BUFFER, screen.height - HEIGHT_BUFFER, 5);
+            for (let i = 0; i < 2; i++) {
+                screen.drawLine(WIDTH_BUFFER, screen.height - HEIGHT_BUFFER + i, screen.width - WIDTH_BUFFER, screen.height - HEIGHT_BUFFER + i, 5);
+                screen.drawLine(WIDTH_BUFFER + i, HEIGHT_BUFFER, WIDTH_BUFFER + i, screen.height - HEIGHT_BUFFER, 5);
+            }
         }
     }
 }
