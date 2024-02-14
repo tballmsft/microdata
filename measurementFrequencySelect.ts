@@ -1,8 +1,8 @@
 namespace microcode {
     interface IDictionary {
         [index: string]: number;
-   }
-   const MAXIMUMS = {measurements: 1000, frequency: 10000} as IDictionary;
+    }
+    const MAXIMUMS = {measurements: 1000, frequency: 10000} as IDictionary;
 
     export class FrequencySelect extends Scene {
         // Passed to DataRecorder:
@@ -24,13 +24,12 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            const mode: string = this.mode
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[mode] + 1) % MAXIMUMS[mode]
+                    this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] + 1) % MAXIMUMS[this.mode]
                 }
             )
 
@@ -39,10 +38,10 @@ namespace microcode {
                 controller.down.id,
                 
                 () => {
-                    if (this.frequencySelectOptions[mode] == 0) {
-                        this.frequencySelectOptions[mode] = 1000
+                    if (this.frequencySelectOptions[this.mode] == 0) {
+                        this.frequencySelectOptions[this.mode] = 1000
                     } else {
-                        this.frequencySelectOptions[mode] = (this.frequencySelectOptions[mode] - 1) % MAXIMUMS[mode]
+                        this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] - 1) % MAXIMUMS[this.mode]
                     }
                 }
             )
@@ -51,7 +50,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    this.frequencySelectOptions[mode] = (this.frequencySelectOptions[mode] + 10) % MAXIMUMS[this.mode]
+                    this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] + (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
                 }
             )
 
@@ -59,10 +58,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    if (this.frequencySelectOptions[mode] - 10 <= 0) {
-                        this.frequencySelectOptions[mode] = 1000
+                    if (this.frequencySelectOptions[this.mode] - 10 <= 0) {
+                        this.frequencySelectOptions[this.mode] = 1000
                     } else {
-                        this.frequencySelectOptions[mode] = (this.frequencySelectOptions[mode] - 10) % MAXIMUMS[this.mode]
+                        this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] - (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
                     }
                 }
             )
@@ -87,7 +86,10 @@ namespace microcode {
                             measurements: this.frequencySelectOptions.measurements,
                             frequency: this.frequencySelectOptions.frequency
                         }
-                        this.app.pushScene(new DataRecorder(this.app, userOpts))
+
+                        const dataRecorder = new DataRecorder(this.app, userOpts)
+                        this.app.popScene()
+                        this.app.pushScene(dataRecorder)   
                     }
 
                     else {
@@ -110,27 +112,24 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-
-            let valueAsString = "";
             
             if (this.mode === "frequency") {
-                valueAsString = "" + this.frequencySelectOptions[this.mode]
-                screen.printCenter("Measurement frequency", 10)
+                screen.printCenter("Measurement frequency", 20)
             }
 
             else if (this.mode === "measurements") {
-                valueAsString = "" + this.frequencySelectOptions[this.mode]
-                screen.printCenter("Number of measurements", 10)
+                screen.printCenter("Number of measurements", 20)
             }
 
-            const textOffset = (screen.width - (font.charWidth * valueAsString.length)) / 2
+            let value = "" + this.frequencySelectOptions[this.mode];
+            const textOffset = (screen.width - (font.charWidth * value.length)) / 2
 
             Screen.print(
-                valueAsString,
+                value,
                 Screen.LEFT_EDGE + textOffset,
                 Screen.TOP_EDGE + (screen.height / 2),
                 0xb,
-                simage.font12
+                simage.font8
             )
             
             super.draw()

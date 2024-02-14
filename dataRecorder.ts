@@ -1,5 +1,8 @@
 namespace microcode {
     export class DataRecorder extends Scene {
+        private fauxDatalogger: FauxDataLogger
+        private loggingStartTime: number
+
         private userOpts: {
             sensorFn: () => number, 
             sensorName: string,
@@ -10,14 +13,17 @@ namespace microcode {
         constructor(app: App, userOpts: {
             sensorFn: () => number, 
             sensorName: string,
-            measurements: number, 
+            measurements: number,
             frequency: number
         }) {
             super(app, "dataRecorder")
 
             this.userOpts = userOpts
+            this.fauxDatalogger = new FauxDataLogger(["Milli-\nseconds", userOpts.sensorName])
 
-            datalogger.deleteLog()
+            this.loggingStartTime = input.runningTime()
+
+            // datalogger.deleteLog()
 
             // Go Back:
             control.onEvent(
@@ -42,7 +48,6 @@ namespace microcode {
             if (this.userOpts.measurements === 0) {
                 screen.printCenter("Data Logging Complete.", screen.height / 2);
                 screen.printCenter("Press B to back out.", (screen.height / 2) + 10);
-                return;
             }
 
             else {
@@ -50,7 +55,10 @@ namespace microcode {
                 screen.printCenter("Recording data...", 10);
                 screen.printCenter(secondsLeft.toString() + " seconds left", screen.height / 2);
 
-                datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
+                // datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
+                // this.fauxDatalogger.log(input.runningTime().toString(), this.userOpts.sensorFn())
+
+                FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.userOpts.sensorFn())
 
                 this.userOpts.measurements -= 1
                 basic.pause(this.userOpts.frequency)
