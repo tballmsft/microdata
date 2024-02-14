@@ -154,6 +154,11 @@ namespace microcode {
         else if (id == "thermometer") res = "Thermometer"
         else if (id == "accelerometer") res = "Accelerometer"
 
+        else if (id == "Roll") res = "Roll"
+        else if (id == "Pitch") res = "Pitch"
+        else if (id == "Logo Press") res = "Logo Press"
+        else if (id == "Pin Press") res = "Pin Press"
+
         // icons do not yet exist:
         else if (id == "Record") res = "Record"
         else if (id == "View") res = "View"

@@ -56,6 +56,11 @@ namespace microcode {
             if (name == "led_light_sensor") return icondb.led_light_sensor
             if (name == "thermometer") return icondb.thermometer
             if (name == "accelerometer") return icondb.accelerometer
+            if (name == "moveTiltUp") return icondb.moveTiltUp
+            if (name == "moveTiltLeft") return icondb.moveTiltLeft
+            if (name == "moveTiltRight") return icondb.moveTiltRight
+            if (name == "moveTiltDown") return icondb.moveTiltDown
+            if (name == "finger_press") return icondb.finger_press
             
             extraImage = null
             extraSamples(name) // only for web app
