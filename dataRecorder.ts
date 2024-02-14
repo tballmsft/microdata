@@ -56,8 +56,6 @@ namespace microcode {
                 screen.printCenter(secondsLeft.toString() + " seconds left", screen.height / 2);
 
                 // datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
-                // this.fauxDatalogger.log(input.runningTime().toString(), this.userOpts.sensorFn())
-
                 FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.userOpts.sensorFn())
 
                 this.userOpts.measurements -= 1
