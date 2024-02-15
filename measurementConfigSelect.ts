@@ -2,23 +2,23 @@ namespace microcode {
     interface IDictionary {
         [index: string]: number;
     }
-    const MAXIMUMS = {measurements: 1000, frequency: 10000} as IDictionary;
+    const MAXIMUMS = {measurements: 1000, period: 10000} as IDictionary;
 
     export class MeasurementConfigSelect extends Scene {
         // Passed to DataRecorder:
         private userOpts: {sensorFn: () => number, sensorName: string}
-        private frequencySelectOptions: IDictionary
+        private measurementOpts: IDictionary
         private mode: string = "measurements"
         
         constructor(app: App, userOpts: {sensorFn: () => number, sensorName: string}) {
-            super(app, "frequencySelect")
+            super(app, "measurementConfigSelect")
 
             this.userOpts = userOpts;
 
             // Defaults:
-            this.frequencySelectOptions = {
+            this.measurementOpts = {
                 measurements: 20, 
-                frequency: 1000
+                period: 1000
             }
         }
 
@@ -29,7 +29,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] + 1) % MAXIMUMS[this.mode]
+                    this.measurementOpts[this.mode] = (this.measurementOpts[this.mode] + 1) % MAXIMUMS[this.mode]
                 }
             )
 
@@ -38,10 +38,10 @@ namespace microcode {
                 controller.down.id,
                 
                 () => {
-                    if (this.frequencySelectOptions[this.mode] == 0) {
-                        this.frequencySelectOptions[this.mode] = 1000
+                    if (this.measurementOpts[this.mode] == 0) {
+                        this.measurementOpts[this.mode] = 1000
                     } else {
-                        this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] - 1) % MAXIMUMS[this.mode]
+                        this.measurementOpts[this.mode] = (this.measurementOpts[this.mode] - 1) % MAXIMUMS[this.mode]
                     }
                 }
             )
@@ -50,7 +50,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] + (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
+                    this.measurementOpts[this.mode] = (this.measurementOpts[this.mode] + (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
                 }
             )
 
@@ -58,10 +58,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    if (this.frequencySelectOptions[this.mode] - 10 <= 0) {
-                        this.frequencySelectOptions[this.mode] = 1000
+                    if (this.measurementOpts[this.mode] - 10 <= 0) {
+                        this.measurementOpts[this.mode] = 1000
                     } else {
-                        this.frequencySelectOptions[this.mode] = (this.frequencySelectOptions[this.mode] - (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
+                        this.measurementOpts[this.mode] = (this.measurementOpts[this.mode] - (MAXIMUMS[this.mode] / 100)) % MAXIMUMS[this.mode]
                     }
                 }
             )
@@ -79,12 +79,12 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 () => {
-                    if (this.mode === "frequency") {
+                    if (this.mode === "period") {
                         const userOpts = {
                             sensorFn: this.userOpts.sensorFn, 
                             sensorName: this.userOpts.sensorName,
-                            measurements: this.frequencySelectOptions.measurements,
-                            frequency: this.frequencySelectOptions.frequency
+                            measurements: this.measurementOpts.measurements,
+                            period: this.measurementOpts.period
                         }
 
                         const dataRecorder = new DataRecorder(this.app, userOpts)
@@ -93,7 +93,7 @@ namespace microcode {
                     }
 
                     else {
-                        this.mode = "frequency"
+                        this.mode = "period"
                     }
                 }
             )
@@ -113,15 +113,15 @@ namespace microcode {
                 0xc
             )
             
-            if (this.mode === "frequency") {
-                screen.printCenter("Measurement frequency", 20)
+            if (this.mode === "period") {
+                screen.printCenter("Measurement period", 20)
             }
 
             else if (this.mode === "measurements") {
                 screen.printCenter("Number of measurements", 20)
             }
 
-            let value = "" + this.frequencySelectOptions[this.mode];
+            let value = "" + this.measurementOpts[this.mode];
             const textOffset = (screen.width - (font.charWidth * value.length)) / 2
 
             Screen.print(

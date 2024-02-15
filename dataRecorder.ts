@@ -7,14 +7,14 @@ namespace microcode {
             sensorFn: () => number, 
             sensorName: string,
             measurements: number, 
-            frequency: number
+            period: number
         }
 
         constructor(app: App, userOpts: {
             sensorFn: () => number, 
             sensorName: string,
             measurements: number,
-            frequency: number
+            period: number
         }) {
             super(app, "dataRecorder")
 
@@ -49,7 +49,7 @@ namespace microcode {
             }
 
             else {
-                const secondsLeft: number = (this.userOpts.measurements * this.userOpts.frequency) / 1000
+                const secondsLeft: number = (this.userOpts.measurements * this.userOpts.period) / 1000
                 screen.printCenter("Recording data...", 10);
                 screen.printCenter(secondsLeft.toString() + " seconds left", screen.height / 2);
 
@@ -57,7 +57,7 @@ namespace microcode {
                 FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.userOpts.sensorFn())
 
                 this.userOpts.measurements -= 1
-                basic.pause(this.userOpts.frequency)
+                basic.pause(this.userOpts.period)
             }
         }
     }
