@@ -1,12 +1,12 @@
 namespace microcode {
     export class SensorSelect extends CursorSceneWithPriorPage {
-        private selectedSensor: () => number
         private btns: Button[]
+        private nextSceneEnum: CursorSceneEnum
 
-        constructor(app: App) {
+        constructor(app: App, nextSceneEnum: CursorSceneEnum) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
-            // super(app)
             this.btns = []
+            this.nextSceneEnum = nextSceneEnum
         }
 
         /* override */ startup() {
@@ -34,20 +34,24 @@ namespace microcode {
                 return res
             }
 
+
+            /**
+             * Issue with consistently being able to load this app when there are > 3 buttons
+             */
             const sensorBtnData: {[id: string]: btnData;} = {
-                "disk1": {ariaID: "disk1", x: -50, y: -25, name: "disk1", fn: function () {return input.compassHeading()}},
+                // "disk1": {ariaID: "disk1", x: -50, y: -25, name: "disk1", fn: function () {return input.compassHeading()}},
                 // "disk2": {ariaID: "disk2", x: 0, y: -25, name: "disk2", fn: function () {return input.soundLevel()}},
                 // "disk3": {ariaID: "disk3", x: 50, y: -25, name: "disk3", fn: function () {return input.magneticForce(Dimension.X)}},
 
-                "led_light_sensor": {ariaID: "Light Level", x: -50, y: 0, name: "Light\nLevel", fn: function () {return input.lightLevel()}},
-                // "thermometer": {ariaID: "Thermometer", x: 0, y: 0, name: "Temperature", fn: function () {return input.temperature()}},
-                "accelerometer": {ariaID: "Accelerometer", x: 50, y: 0, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}},
+                "led_light_sensor": {ariaID: "Light Level", x: -50, y: 0, name: "Light Level", fn: function () {return input.lightLevel()}},
+                "thermometer": {ariaID: "Thermometer", x: 0, y: 0, name: "Temperature", fn: function () {return input.temperature()}},
+                "accelerometer": {ariaID: "Accelerometer", x: 50, y: 0, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}}
 
                 // "a": {ariaID: "a", x: -50, y: 25, name: "Light\nLevel", fn: function() {return pinPressFunction(TouchPin.P0)}},
                 // "b": {ariaID: "b", x: 0, y: 25, name: "Temperature", fn: function () {return pinPressFunction(TouchPin.P1)}},
                 // "c": {ariaID: "c", x: 50, y: 25, name: "Accelerometer", fn: function () {return pinPressFunction(TouchPin.P2)}},
 
-                "moveTiltUp": {ariaID: "d", x: -50, y: 50, name: "Pitch", fn: function () {return input.rotation(Rotation.Pitch)}},
+                // "moveTiltUp": {ariaID: "d", x: -50, y: 50, name: "Pitch", fn: function () {return input.rotation(Rotation.Pitch)}},
                 // "moveTiltLeft": {ariaID: "e", x: 0, y: 50, name: "Roll", fn: function () {return Rotation.Roll}},
                 // "finger_press": {ariaID: "f", x: 50, y: 50, name: "Pin Press", fn: function () {if(input.logoIsPressed()) {return 255} return 0}}
             }
@@ -64,7 +68,7 @@ namespace microcode {
                         y: sensorBtnData[key].y,
                         onClick: () => {
                             this.app.popScene()
-                            this.app.pushScene(new FrequencySelect(this.app, {
+                            this.app.pushScene(generateScene(this.nextSceneEnum, this.app, {
                                 sensorFn: sensorBtnData[key].fn, 
                                 sensorName: sensorBtnData[key].name, 
                             }))

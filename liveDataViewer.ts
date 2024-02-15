@@ -3,13 +3,16 @@ namespace microcode {
     const HEIGHT_BUFFER = 12;
 
     export class LiveDataViewer extends Scene {
-        public rendering = false
         private dataBuffer: number[] = [];
         private bufferLimit = screen.width - (2 * WIDTH_BUFFER);
+        private sensorFn: () => number
+        private sensorName: string
 
-        constructor(app: App) {
+        constructor(app: App, userOpts: {sensorFn: () => number, sensorName: string}) {
             super(app, "liveDataViewer")
             this.color = 0
+            this.sensorFn = userOpts.sensorFn
+            this.sensorName = userOpts.sensorName
 
             const goBack = function() {
                 app.popScene()
@@ -25,7 +28,7 @@ namespace microcode {
 
         update() {
             // Pre-process and convert lightlevel into a y value; relative to screen-height
-            let light_level = input.lightLevel() / 255;
+            let light_level = this.sensorFn() / 255;
             let y = Math.round(screen.height - (light_level * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
 
             // Buffer management:
@@ -47,7 +50,7 @@ namespace microcode {
          * Bound to Microbit button A
          */
         private plot() {
-            screen.printCenter("Light Level", 10)
+            screen.printCenter(this.sensorName, 10)
             this.draw_axes();
 
             const start = WIDTH_BUFFER + 2;

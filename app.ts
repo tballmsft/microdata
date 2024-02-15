@@ -15,8 +15,8 @@ namespace microcode {
             basic.pause(5)
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
-            // this.pushScene(new Home(this))
-            this.pushScene(new SensorSelect(this))
+            this.pushScene(new Home(this))
+            // this.pushScene(new SensorSelect(this))
         }
 
         public saveBuffer(slot: string, buf: Buffer) {

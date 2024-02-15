@@ -43,8 +43,9 @@
         "dataRecorder.ts",
         "recordedDataViewer.ts",
         "sensorSelect.ts",
-        "measurementFrequencySelect.ts",
-        "fauxDatalogger.ts"
+        "measurementConfigSelect.ts",
+        "fauxDatalogger.ts",
+        "sceneFactory.ts"
     ],
     "testFiles": [],
     "targetVersions": {
