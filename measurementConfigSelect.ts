@@ -4,7 +4,7 @@ namespace microcode {
     }
     const MAXIMUMS = {measurements: 1000, frequency: 10000} as IDictionary;
 
-    export class FrequencySelect extends Scene {
+    export class MeasurementConfigSelect extends Scene {
         // Passed to DataRecorder:
         private userOpts: {sensorFn: () => number, sensorName: string}
         private frequencySelectOptions: IDictionary
