@@ -134,14 +134,31 @@ namespace microcode {
                         )
                     }
 
-                    const metadata = [
-                        {col1: "Save", col2: "1"}, 
-                        {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
-                        {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
-                        {col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
-                        {col1: "Sensor", col2: FauxDataLogger.measurementOptions.sensorName}, 
-                        {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
-                    ]
+
+                    let metadata = []
+
+                    if (FauxDataLogger.headers.length == 2) {
+                        metadata = [
+                            {col1: "Save", col2: "1"}, 
+                            {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
+                            {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+                            {col1: "Columns", col2: FauxDataLogger.headers.length.toString()},
+                            {col1: "Col1: Time", col2: FauxDataLogger.headers[0]}, 
+                            {col1: "Col2: Sensor", col2: FauxDataLogger.headers[1]}, 
+                            {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
+                        ]
+                    } else {
+                        metadata = [
+                            {col1: "Save", col2: "1"}, 
+                            {col2: "Taken", col2: FauxDataLogger.dateStamp}, 
+                            {col3: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+                            {col4: "Columns", col2: FauxDataLogger.headers.length.toString()},
+                            {col5: "Col1: Time", col2: FauxDataLogger.headers[0]}, 
+                            {col6: "Col2: Sensor", col2: FauxDataLogger.headers[1]}, 
+                            {col7: "Col3: Sensor", col2: FauxDataLogger.headers[2]}, 
+                            {col8: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
+                        ]
+                    }
 
                     for (let i = this.scrollOffset; i < metadata.length; i++) {
                         Screen.print(
@@ -182,25 +199,37 @@ namespace microcode {
 
                     const colSizeBuffer = Screen.WIDTH / FauxDataLogger.headers.length
                     const rowDeltaBuffer = Screen.HEIGHT / FauxDataLogger.numberOfRows
-
-                    const data = FauxDataLogger.data
-    
+                    let colOffset = 0
+        
                     for (let i = this.scrollOffset; i < FauxDataLogger.numberOfRows; i++) {
+                        const data = FauxDataLogger.values[i].data;
+
                         Screen.print(
-                            data[i].col1,
-                            Screen.LEFT_EDGE + (colSizeBuffer / 2) - ((font.charWidth * data[i].col1.length) / 2),
+                            data[0],
+                            Screen.LEFT_EDGE + (colSizeBuffer / 2) - ((font.charWidth * data[0].length) / 2),
                             Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
                             0xb,
                             simage.font8
                         )
 
                         Screen.print(
-                            data[i].col2,
-                            Screen.LEFT_EDGE + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[i].col2.length) / 2),
+                            data[1],
+                            Screen.LEFT_EDGE + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[1].length) / 2),
                             Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
                             0xb,
                             simage.font8
                         )
+
+
+                        if (FauxDataLogger.headers.length > 2) {
+                            Screen.print(
+                                data[2],
+                                Screen.LEFT_EDGE + colSizeBuffer + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[2].length) / 2),
+                                Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
+                                0xb,
+                                simage.font8
+                            )
+                        }
                         rowOffset += rowDeltaBuffer
                     }
                     break;

@@ -1,12 +1,15 @@
 namespace microcode {
     export class SensorSelect extends CursorSceneWithPriorPage {
         private btns: Button[]
+        private selectedSensors: Sensor[]
         private nextSceneEnum: CursorSceneEnum
 
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
+            this.selectedSensors = []
             this.nextSceneEnum = nextSceneEnum
+
         }
 
         /* override */ startup() {
@@ -18,6 +21,7 @@ namespace microcode {
                 y: number, 
                 name: string, 
                 fn: () => number
+                sensor: Sensor,
             }
 
             /**
@@ -43,9 +47,21 @@ namespace microcode {
                 // "disk2": {ariaID: "disk2", x: 0, y: -25, name: "disk2", fn: function () {return input.soundLevel()}},
                 // "disk3": {ariaID: "disk3", x: 50, y: -25, name: "disk3", fn: function () {return input.magneticForce(Dimension.X)}},
 
-                "led_light_sensor": {ariaID: "led_light_sensor", x: -50, y: 30, name: "Light Level", fn: function () {return input.lightLevel()}},
-                "thermometer": {ariaID: "thermometer", x: 0, y: 30, name: "Temperature", fn: function () {return input.temperature()}},
-                "accelerometer": {ariaID: "accelerometer", x: 50, y: 30, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}}
+                "led_light_sensor": {ariaID: "led_light_sensor", x: -50, y: 30, 
+                    name: "Light Level", 
+                    fn: function () {return input.lightLevel()}, 
+                    sensor: new LightSensor()
+                },
+                "thermometer": {ariaID: "thermometer", x: 0, y: 30, 
+                    name: "Temperature", 
+                    fn: function () {return input.temperature()}, 
+                    sensor: new TemperatureSensor()
+                },
+                "touch pins": {ariaID: "accelerometer", x: 50, y: 30, 
+                    name: "Pin", 
+                    fn: function () {return pinPressFunction(TouchPin.P0)}, 
+                    sensor: new Pins(TouchPin.P0)
+                }
 
                 // "a": {ariaID: "a", x: -50, y: 25, name: "Light\nLevel", fn: function() {return pinPressFunction(TouchPin.P0)}},
                 // "b": {ariaID: "b", x: 0, y: 25, name: "Temperature", fn: function () {return pinPressFunction(TouchPin.P1)}},
@@ -56,32 +72,91 @@ namespace microcode {
                 // "finger_press": {ariaID: "f", x: 50, y: 50, name: "Pin Press", fn: function () {if(input.logoIsPressed()) {return 255} return 0}}
             }
 
-            Object.keys(sensorBtnData).forEach(
-                key => {
-                    this.btns.push(new Button({
-                        parent: null,
-                        style: ButtonStyles.FlatWhite,
-                        icon: key,
-                        ariaId: sensorBtnData[key].ariaID,
-                        x: sensorBtnData[key].x,
-                        y: sensorBtnData[key].y,
-                        onClick: () => {
-                            const sOpts: SensorOpts = {
-                                sensorFn: sensorBtnData[key].fn, 
-                                sensorName: sensorBtnData[key].name,
-                            }
+            // Object.keys(sensorBtnData).forEach(
+            //     key => {
+            //         this.btns.push(new Button({
+            //             parent: null,
+            //             style: ButtonStyles.FlatWhite,
+            //             icon: key,
+            //             ariaId: sensorBtnData[key].ariaID,
+            //             x: sensorBtnData[key].x,
+            //             y: sensorBtnData[key].y,
+            //             onClick: () => {
+            //                this.selectedSensors.push(sensorBtnData[key].sensor)
+            //             },          
+            //         }))
+            //     }
+            // )
 
-                            this.app.popScene()
-                            if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                                this.app.pushScene(new LiveDataViewer(app, [new LightSensor, new TemperatureSensor]))
-                            }
-                            else {
-                                this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
-                            }
-                        },          
-                    }))
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.FlatWhite,
+                icon: "led_light_sensor",
+                ariaId: "led_light_sensor",
+                x: -50,
+                y: 30,
+                onClick: () => {
+                    this.selectedSensors.push(new LightSensor())
                 }
-            )
+            }))
+            
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.FlatWhite,
+                icon: "thermometer",
+                ariaId: "thermometer",
+                x: 0,
+                y: 30,
+                onClick: () => {
+                    this.selectedSensors.push(new TemperatureSensor())
+                }
+            }))
+
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "moveTiltLeft",
+            //     ariaId: "Pins",
+            //     x: 0,
+            //     y: 30,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new Pins(TouchPin.P0))
+            //     }
+            // }))
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.FlatWhite,
+                icon: "disk1",
+                ariaId: "Done",
+                x: 50,
+                y: 30,
+                onClick: () => {
+                    if (this.selectedSensors.length === 0) {
+                        return
+                    }
+
+                    // const sOpts: SensorOpts = {
+                    //     sensorFn: this.selectedSensors[0].getFn(), 
+                    //     sensorName: this.selectedSensors[0].getName(),
+                    // }
+
+                    const sOpts: SensorOpts = {
+                        sensorFn: this.selectedSensors[0].getFn(), 
+                        sensorName: this.selectedSensors[0].getName(),
+                    }
+
+                    this.app.popScene()
+
+                    if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
+                        this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
+                    }
+
+                    else {
+                        this.app.pushScene(new MeasurementConfigSelect(app, sOpts, this.selectedSensors))
+                    }
+                }
+            }))
 
             this.navigator.addButtons(this.btns)
         }

@@ -20,7 +20,7 @@ namespace microcode {
             //     return new MeasurementConfigSelect(app, sOpts)
 
             case CursorSceneEnum.RecordData:
-                return new DataRecorder(app, mOpts)
+                return new DataRecorder(app, mOpts, [new LightSensor, new TemperatureSensor])
     
             default:
                 return new LiveDataViewer(app, [new LightSensor, new TemperatureSensor]);

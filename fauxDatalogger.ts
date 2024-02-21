@@ -1,29 +1,27 @@
 namespace microcode {
     interface MetaData {
         id: number, 
-        col1: string, 
-        col2: string
+        data: string[]
     }
 
     export class FauxDataLogger {
-        static headers: string[] = ["DEFAULT", "DEFAULT"]
+        static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
         static dateStamp = "21/02/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
-        static data: MetaData[]
+        static values: MetaData[]
         static numberOfRows: number
         static measurementOptions: MeasurementOpts
 
         constructor(headers: string[], mOpts: MeasurementOpts) {
             FauxDataLogger.headers = headers
-            FauxDataLogger.data = []
+            FauxDataLogger.values = []
             FauxDataLogger.numberOfRows = 0
             FauxDataLogger.measurementOptions = mOpts
         }
 
-        public static log(key: string, value: number) {
-            FauxDataLogger.data.push({
-                id: this.data.length, 
-                col1: key, 
-                col2: value.toString()
+        public static log(data: string[]) {
+            FauxDataLogger.values.push({
+                id: this.values.length, 
+                data
             })
             FauxDataLogger.numberOfRows += 1
         }

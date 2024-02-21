@@ -162,6 +162,9 @@ namespace microcode {
         // icons do not yet exist:
         else if (id == "Record") res = "Record"
         else if (id == "View") res = "View"
+        else if (id == "Done") res = "Done"
+        else if (id == "Pins") res = "Pins"
+
         return res
     }
 }
