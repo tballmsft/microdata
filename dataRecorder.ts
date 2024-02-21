@@ -2,13 +2,13 @@ namespace microcode {
     export class DataRecorder extends Scene {
         private fauxDatalogger: FauxDataLogger
         private loggingStartTime: number
-        private userOpts: MeasurementOpts
+        private measurementOpts: MeasurementOpts
 
-        constructor(app: App, userOpts: MeasurementOpts) {
+        constructor(app: App, measurementOpts: MeasurementOpts) {
             super(app, "dataRecorder")
 
-            this.userOpts = userOpts
-            this.fauxDatalogger = new FauxDataLogger(["Milli-\nseconds", userOpts.sensorName])
+            this.measurementOpts = measurementOpts
+            this.fauxDatalogger = new FauxDataLogger(["Milli-\nseconds", measurementOpts.sensorName], measurementOpts)
 
             this.loggingStartTime = input.runningTime()
 
@@ -32,24 +32,24 @@ namespace microcode {
                 0xc
             )
 
-            if (this.userOpts.measurements === 0) {
-                screen.printCenter("Data Logging Complete.", screen.height / 2);
-                screen.printCenter("Press B to back out.", (screen.height / 2) + 10);
+            if (this.measurementOpts.measurements === 0) {
+                screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);
+                screen.printCenter("Press B to back out.", screen.height / 2);
             }
 
             else {
-                const secondsLeft: number = (this.userOpts.measurements * this.userOpts.period) / 1000
+                const secondsLeft: number = (this.measurementOpts.measurements * this.measurementOpts.period) / 1000
                 screen.printCenter("Recording data...", 10);
 
-                screen.printCenter(this.userOpts.period + " measurement interval", 40)
-                screen.printCenter(this.userOpts.measurements.toString() + " measurements left", 60);
-                screen.printCenter(secondsLeft.toString() + " seconds left", 80);
+                screen.printCenter(this.measurementOpts.period / 1000 + " second period", 45)
+                screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
+                screen.printCenter(secondsLeft.toString() + " seconds left", 85);
 
-                // datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
-                FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.userOpts.sensorFn())
+                // datalogger.log(datalogger.createCV(this.measurementOpts.sensorName, this.measurementOpts.sensorFn()))
+                FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.measurementOpts.sensorFn())
 
-                this.userOpts.measurements -= 1
-                basic.pause(this.userOpts.period)
+                this.measurementOpts.measurements -= 1
+                basic.pause(this.measurementOpts.period)
             }
         }
     }

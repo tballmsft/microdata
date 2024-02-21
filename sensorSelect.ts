@@ -73,12 +73,12 @@ namespace microcode {
                             }
 
                             this.app.popScene()
-                            // if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                            //     this.app.pushScene(new LiveDataViewer(app, sOpts))
-                            // }
-                            // else {
+                            if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
+                                this.app.pushScene(new LiveDataViewer(app, sOpts))
+                            }
+                            else {
                                 this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
-                            // }
+                            }
                         },          
                     }))
                 }

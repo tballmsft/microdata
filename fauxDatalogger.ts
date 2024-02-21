@@ -10,11 +10,13 @@ namespace microcode {
         static dateStamp = "21/02/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
         static data: MetaData[]
         static numberOfRows: number
+        static measurementOptions: MeasurementOpts
 
-        constructor(headers: string[]) {
+        constructor(headers: string[], mOpts: MeasurementOpts) {
             FauxDataLogger.headers = headers
             FauxDataLogger.data = []
             FauxDataLogger.numberOfRows = 0
+            FauxDataLogger.measurementOptions = mOpts
         }
 
         public static log(key: string, value: number) {

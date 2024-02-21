@@ -64,8 +64,8 @@ namespace microcode {
         }
 
         draw_grid() {
-            const colBufferSize = Screen.WIDTH / 2 //FauxDataLogger.headers.length
-            const rowBufferSize = Screen.HEIGHT / 4 // Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
+            const colBufferSize = Screen.WIDTH / FauxDataLogger.headers.length
+            const rowBufferSize = Screen.HEIGHT /  Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
 
             for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
                 Screen.drawLine(
@@ -135,13 +135,15 @@ namespace microcode {
                     }
 
                     const metadata = [
-                        {id: 1, col1: "Save", col2: "1"}, 
-                        {id: 2, col1: "Taken", col2: FauxDataLogger.dateStamp}, 
-                        {id: 3, col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
-                        {id: 4, col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+                        {col1: "Save", col2: "1"}, 
+                        {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
+                        {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+                        {col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
+                        {col1: "Sensor", col2: FauxDataLogger.measurementOptions.sensorName}, 
+                        {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
                     ]
 
-                    for (let i = this.scrollOffset; i < 4; i++) {
+                    for (let i = this.scrollOffset; i < metadata.length; i++) {
                         Screen.print(
                             metadata[i].col1,
                             Screen.LEFT_EDGE + (colSize / 2) - ((font.charWidth * metadata[i].col1.length) / 2),
@@ -167,9 +169,6 @@ namespace microcode {
 
                 case DISPLAY_MODE.DATA_VIEW:
                     this.draw_grid()
-    
-                    const colSizeBuffer = Screen.WIDTH / 2
-                    const rowDeltaBuffer = Screen.HEIGHT / 4
 
                     // const data = [
                     //     {id: 1, col1: "1", col2: "1"}, 
@@ -177,10 +176,14 @@ namespace microcode {
                     //     {id: 3, col1: "3", col2: "3"}, 
                     //     {id: 4, col1: "4", col2: "4"}, 
                     // ]
+                    // const colSizeBuffer = Screen.WIDTH / 2
+                    // const rowDeltaBuffer = Screen.HEIGHT / 4
 
+
+                    const colSizeBuffer = Screen.WIDTH / FauxDataLogger.headers.length
+                    const rowDeltaBuffer = Screen.HEIGHT / FauxDataLogger.numberOfRows
 
                     const data = FauxDataLogger.data
-                    // FauxDataLogger.numberOfRows = 4
     
                     for (let i = this.scrollOffset; i < FauxDataLogger.numberOfRows; i++) {
                         Screen.print(
