@@ -20,8 +20,9 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    this.app.pushScene(new LiveDataViewer(app, [new LightSensor(), new TemperatureSensor()]))
+                    
                     // const mOpts: MeasurementOpts = {
                     //     sensorFn: function () {return input.lightLevel()}, 
                     //     sensorName: "Light Level",

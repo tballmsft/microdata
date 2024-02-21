@@ -5,11 +5,6 @@ namespace microcode {
         measurements: number,
         period: number
     };
-    
-    export type SensorOpts = {
-        sensorFn: () => number, 
-        sensorName: string,
-    };
 
     // "files": [
     //     "protocol.ts",

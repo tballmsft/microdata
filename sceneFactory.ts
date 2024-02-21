@@ -11,7 +11,7 @@ namespace microcode {
     export function generateScene(sceneEnum: CursorSceneEnum, app: App, mOpts?: MeasurementOpts, sOpts?: SensorOpts, nextScene?: CursorSceneEnum) {
         switch (sceneEnum) {
             case CursorSceneEnum.LiveDataViewer:
-                return new LiveDataViewer(app, sOpts)
+                return new LiveDataViewer(app, [new LightSensor, new TemperatureSensor])
 
             case CursorSceneEnum.SensorSelect:
                 return new SensorSelect(app, nextScene)
@@ -23,7 +23,7 @@ namespace microcode {
                 return new DataRecorder(app, mOpts)
     
             default:
-                return new LiveDataViewer(app, sOpts);
+                return new LiveDataViewer(app, [new LightSensor, new TemperatureSensor]);
         }
     }   
 }

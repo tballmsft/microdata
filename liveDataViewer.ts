@@ -2,17 +2,28 @@ namespace microcode {
     const WIDTH_BUFFER = 16;
     const HEIGHT_BUFFER = 12;
 
-    export class LiveDataViewer extends Scene {
-        private dataBuffer: number[] = [];
-        private bufferLimit = screen.width - (2 * WIDTH_BUFFER);
-        private sensorFn: () => number
-        private sensorName: string
+    enum GUI_STATE {
+        PLOTTING,
+        SENSOR_INFORMATION
+    }
 
-        constructor(app: App, userOpts: SensorOpts) {
+    export class LiveDataViewer extends Scene {
+        private dataBuffers: number[][];
+        private bufferLimit = screen.width - (2 * WIDTH_BUFFER);
+        private guiState: GUI_STATE
+
+        private sensors: Sensor[]
+
+        constructor(app: App, sensors: Sensor[]) {
             super(app, "liveDataViewer")
             this.color = 0
-            this.sensorFn = userOpts.sensorFn
-            this.sensorName = userOpts.sensorName
+            this.guiState = GUI_STATE.PLOTTING
+
+            this.sensors = sensors
+            this.dataBuffers = []
+            for (let i = 0; i < this.sensors.length; i++) {
+                this.dataBuffers.push([])
+            }
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -22,39 +33,86 @@ namespace microcode {
                     app.pushScene(new Home(app))
                 }
             )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => {
+                    if (this.guiState === GUI_STATE.PLOTTING) {
+                        this.guiState = GUI_STATE.SENSOR_INFORMATION
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => {
+                    if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
+                        this.guiState = GUI_STATE.PLOTTING
+                    }
+                }
+            )
         }
 
         update() {
-            // Pre-process and convert lightlevel into a y value; relative to screen-height
-            let light_level = this.sensorFn() / 255;
-            let y = Math.round(screen.height - (light_level * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
-
-            // Buffer management:
-            if (this.dataBuffer.length >= this.bufferLimit) {
-                this.dataBuffer.shift();
-            }
-            this.dataBuffer.push(y);
-
-            // Draw:
             screen.fill(this.color);
-            this.plot()
 
-            basic.pause(100);
+            if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
+                screen.printCenter("Press DOWN for plot", 110)
+
+                let colour = 8;
+
+                for (let i = 0; i < this.sensors.length; i++) {
+                    screen.print(this.sensors[i].getName() + " as", 10, 25 + (i * 20))
+                    screen.fillRect(
+                        130,
+                        25 + (i * 20),
+                        10,
+                        10,
+                        colour
+                    )
+                    colour = (colour + 1) % 15
+                }
+            }
+
+            else {
+                for (let i = 0; i < this.sensors.length; i++) {
+                    let normalisedOutput = this.sensors[i].normalise();
+                    let y = Math.round(screen.height - (normalisedOutput * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
+
+                    // Buffer management:
+                    if (this.dataBuffers[i].length >= this.bufferLimit) {
+                        this.dataBuffers[i].shift();
+                    }
+                    this.dataBuffers[i].push(y);
+                }
+
+                // Draw:
+                this.plot()
+
+                basic.pause(100);
+            }
         }
 
         /**
          * Display mode for plotting all incoming data on y axis
-         * Presumes pre-processed this.dataBuffer; y values relative to screen.height
+         * Presumes pre-processed this.dataBuffers; y values relative to screen.height
          * Bound to Microbit button A
          */
         private plot() {
-            screen.printCenter(this.sensorName, 10)
+            screen.printCenter("Press UP for info", 5)
             this.draw_axes();
 
             const start = WIDTH_BUFFER + 2;
-            for (let i = 0; i < this.dataBuffer.length - 1; i++) {
-                screen.drawLine(start + i, this.dataBuffer[i], start + i - 1, this.dataBuffer[i + 1], 9);
-            }
+            let colour = 8;
+
+            this.dataBuffers.forEach(function(dataBuffer) {
+                for (let i = 0; i < dataBuffer.length - 1; i++) {
+                    screen.drawLine(start + i, dataBuffer[i], start + i - 1, dataBuffer[i + 1], colour);
+                }
+                colour = (colour + 1) % 15
+            })
         }
 
         // Display helper:

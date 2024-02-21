@@ -56,7 +56,6 @@ namespace microcode {
                 // "finger_press": {ariaID: "f", x: 50, y: 50, name: "Pin Press", fn: function () {if(input.logoIsPressed()) {return 255} return 0}}
             }
 
-
             Object.keys(sensorBtnData).forEach(
                 key => {
                     this.btns.push(new Button({
@@ -74,7 +73,7 @@ namespace microcode {
 
                             this.app.popScene()
                             if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                                this.app.pushScene(new LiveDataViewer(app, sOpts))
+                                this.app.pushScene(new LiveDataViewer(app, [new LightSensor, new TemperatureSensor]))
                             }
                             else {
                                 this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
