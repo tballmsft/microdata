@@ -2,25 +2,28 @@ namespace microcode {
     export enum CursorSceneEnum {
         LiveDataViewer,
         SensorSelect,
-        MeasurementConfigSelect
+        MeasurementConfigSelect,
+        RecordData,
     }
 
-    export function generateScene(sceneEnum: CursorSceneEnum, app: App, 
-        userOpts?: {sensorFn: () => number, sensorName: string}, 
-        nextScene?: CursorSceneEnum
-    ){
+    export function generateScene(sceneEnum: CursorSceneEnum, app: App, opts: MeasurementOpts): any;
+    export function generateScene(sceneEnum: CursorSceneEnum, app: App, opts: SensorOpts): any;
+    export function generateScene(sceneEnum: CursorSceneEnum, app: App, mOpts?: MeasurementOpts, sOpts?: SensorOpts, nextScene?: CursorSceneEnum) {
         switch (sceneEnum) {
             case CursorSceneEnum.LiveDataViewer:
-                return new LiveDataViewer(app, userOpts)
+                return new LiveDataViewer(app, sOpts)
 
             case CursorSceneEnum.SensorSelect:
                 return new SensorSelect(app, nextScene)
 
-            case CursorSceneEnum.MeasurementConfigSelect:
-                return new MeasurementConfigSelect(app, userOpts)
+            // case CursorSceneEnum.MeasurementConfigSelect:
+            //     return new MeasurementConfigSelect(app, sOpts)
+
+            case CursorSceneEnum.RecordData:
+                return new DataRecorder(app, mOpts)
     
             default:
-                return new LiveDataViewer(app, userOpts);
+                return new LiveDataViewer(app, sOpts);
         }
     }   
 }

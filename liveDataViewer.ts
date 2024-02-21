@@ -8,7 +8,7 @@ namespace microcode {
         private sensorFn: () => number
         private sensorName: string
 
-        constructor(app: App, userOpts: {sensorFn: () => number, sensorName: string}) {
+        constructor(app: App, userOpts: SensorOpts) {
             super(app, "liveDataViewer")
             this.color = 0
             this.sensorFn = userOpts.sensorFn

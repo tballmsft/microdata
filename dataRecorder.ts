@@ -2,20 +2,9 @@ namespace microcode {
     export class DataRecorder extends Scene {
         private fauxDatalogger: FauxDataLogger
         private loggingStartTime: number
+        private userOpts: MeasurementOpts
 
-        private userOpts: {
-            sensorFn: () => number, 
-            sensorName: string,
-            measurements: number, 
-            period: number
-        }
-
-        constructor(app: App, userOpts: {
-            sensorFn: () => number, 
-            sensorName: string,
-            measurements: number,
-            period: number
-        }) {
+        constructor(app: App, userOpts: MeasurementOpts) {
             super(app, "dataRecorder")
 
             this.userOpts = userOpts

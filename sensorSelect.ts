@@ -43,9 +43,9 @@ namespace microcode {
                 // "disk2": {ariaID: "disk2", x: 0, y: -25, name: "disk2", fn: function () {return input.soundLevel()}},
                 // "disk3": {ariaID: "disk3", x: 50, y: -25, name: "disk3", fn: function () {return input.magneticForce(Dimension.X)}},
 
-                "led_light_sensor": {ariaID: "Light Level", x: -50, y: 0, name: "Light Level", fn: function () {return input.lightLevel()}},
-                "thermometer": {ariaID: "Thermometer", x: 0, y: 0, name: "Temperature", fn: function () {return input.temperature()}},
-                "accelerometer": {ariaID: "Accelerometer", x: 50, y: 0, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}}
+                "led_light_sensor": {ariaID: "led_light_sensor", x: -50, y: 30, name: "Light Level", fn: function () {return input.lightLevel()}},
+                "thermometer": {ariaID: "thermometer", x: 0, y: 30, name: "Temperature", fn: function () {return input.temperature()}},
+                "accelerometer": {ariaID: "accelerometer", x: 50, y: 30, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}}
 
                 // "a": {ariaID: "a", x: -50, y: 25, name: "Light\nLevel", fn: function() {return pinPressFunction(TouchPin.P0)}},
                 // "b": {ariaID: "b", x: 0, y: 25, name: "Temperature", fn: function () {return pinPressFunction(TouchPin.P1)}},
@@ -67,11 +67,18 @@ namespace microcode {
                         x: sensorBtnData[key].x,
                         y: sensorBtnData[key].y,
                         onClick: () => {
-                            this.app.popScene()
-                            this.app.pushScene(generateScene(this.nextSceneEnum, this.app, {
+                            const sOpts: SensorOpts = {
                                 sensorFn: sensorBtnData[key].fn, 
-                                sensorName: sensorBtnData[key].name, 
-                            }))
+                                sensorName: sensorBtnData[key].name,
+                            }
+
+                            this.app.popScene()
+                            // if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
+                            //     this.app.pushScene(new LiveDataViewer(app, sOpts))
+                            // }
+                            // else {
+                                // this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
+                            // }
                         },          
                     }))
                 }
