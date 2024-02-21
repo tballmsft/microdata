@@ -77,7 +77,7 @@ namespace microcode {
                             //     this.app.pushScene(new LiveDataViewer(app, sOpts))
                             // }
                             // else {
-                                // this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
+                                this.app.pushScene(new MeasurementConfigSelect(app, sOpts))
                             // }
                         },          
                     }))

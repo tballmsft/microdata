@@ -14,15 +14,13 @@ namespace microcode {
             this.sensorFn = userOpts.sensorFn
             this.sensorName = userOpts.sensorName
 
-            const goBack = function() {
-                app.popScene()
-                app.pushScene(new Home(app))
-            };
-
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
-                () => goBack()
+                () => {
+                    app.popScene()
+                    app.pushScene(new Home(app))
+                }
             )
         }
 

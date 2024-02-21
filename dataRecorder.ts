@@ -40,7 +40,10 @@ namespace microcode {
             else {
                 const secondsLeft: number = (this.userOpts.measurements * this.userOpts.period) / 1000
                 screen.printCenter("Recording data...", 10);
-                screen.printCenter(secondsLeft.toString() + " seconds left", screen.height / 2);
+
+                screen.printCenter(this.userOpts.period + " measurement interval", 40)
+                screen.printCenter(this.userOpts.measurements.toString() + " measurements left", 60);
+                screen.printCenter(secondsLeft.toString() + " seconds left", 80);
 
                 // datalogger.log(datalogger.createCV(this.userOpts.sensorName, this.userOpts.sensorFn()))
                 FauxDataLogger.log((input.runningTime() - this.loggingStartTime).toString(), this.userOpts.sensorFn())

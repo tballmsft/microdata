@@ -1,125 +1,183 @@
 namespace microcode {
-    // interface IDictionary {
-    //     [index: string]: number;
-    // }
-    // const MAXIMUMS = {measurements: 1000, period: 10000} as IDictionary;
+    // How the use
+    const CONFIG_DELTAS = [
+        [1, 10], // Quantity
+        [1, 10], // Milli-seconds
+        [1, 5],  // Seconds
+        [1, 5],  // Minutes
+        [1, 5],  // Hours
+        [1, 5]   // Days
+    ]
 
-    export class MeasurementConfigSelect extends CursorSceneWithPriorPage {
-        // Passed to DataRecorder:
-        // private sOpts: SensorOpts
-        // private measurementOpts: IDictionary
-        // private mode: string = "measurements"
-        // private btns: Button[]
-        
-        // constructor(app: App, sOpts: SensorOpts) {
-        //     super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
+    const enum GUI_STATE {
+        WRITING,
+        DEFAULT,
+        DONE
+    }
 
-        //     this.sOpts = sOpts;
+    export class MeasurementConfigSelect extends Scene {
+        private guiState: GUI_STATE
+        private guiRows: string[]
+        private currentColumn: number
+        private sensorOpts: SensorOpts
 
-        //     // Defaults:
-        //     this.measurementOpts = {
-        //         measurements: 20, 
-        //         period: 1000
-        //     }
-        // }
+        // Quantity, Milli-seconds, Seconds, Minutes, Hours, Days:
+        private userSelection = [10, 0, 1, 0, 0, 0]
 
-            private dataBuffer: number[] = [];
-            private sensorFn: () => number
-            private sensorName: string
-    
-            constructor(app: App, userOpts: SensorOpts) {
-                super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
-                this.color = 0
-                this.sensorFn = userOpts.sensorFn
-                this.sensorName = userOpts.sensorName
-    
-                const goBack = function() {
-                    app.popScene()
-                    app.pushScene(new Home(app))
-                };
-    
-                control.onEvent(
-                    ControllerButtonEvent.Pressed,
-                    controller.B.id,
-                    () => goBack()
-                )
+        constructor(app: App, sensorOpts: SensorOpts) {
+            super(app, "dataViewer")
+
+            this.guiState = GUI_STATE.DEFAULT
+            this.guiRows = ["Quantity: ", "Ms: ", "Seconds: ", "Minutes: ", "Hours: ", "Days: "]
+            this.currentColumn = 0
+
+            this.sensorOpts = sensorOpts
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                () => {
+                    if (this.guiState === GUI_STATE.DEFAULT) {
+                        this.guiState = GUI_STATE.WRITING
+                    }
+
+                    else {
+                        this.guiState = GUI_STATE.DEFAULT
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => {
+                    if (this.guiState === GUI_STATE.DEFAULT) {
+                        this.app.popScene()
+                        // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                        this.app.pushScene(new Home(app))
+                    }
+
+                    else {
+                        this.guiState = GUI_STATE.DEFAULT
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => {
+                    if (this.guiState === GUI_STATE.WRITING) {
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + CONFIG_DELTAS[this.currentColumn][0], 0)
+                    }
+
+                    else {
+                        // Non-negative modulo:
+                        this.currentColumn = (((this.currentColumn - 1) % this.userSelection.length) + this.userSelection.length) % this.userSelection.length
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => {
+                    if (this.guiState === GUI_STATE.WRITING) {
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - CONFIG_DELTAS[this.currentColumn][0], 0)
+                    }
+
+                    else {
+                        // Non-negative modulo:
+                        this.currentColumn = (((this.currentColumn + 1) % this.userSelection.length) + this.userSelection.length) % this.userSelection.length
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.left.id,
+                () => {
+                    if (this.guiState === GUI_STATE.WRITING) {
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - CONFIG_DELTAS[this.currentColumn][1], 0)
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.right.id,
+                () => {
+                    if (this.guiState === GUI_STATE.WRITING) {
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + CONFIG_DELTAS[this.currentColumn][1], 0)
+                    }
+
+                    else if (this.guiState === GUI_STATE.DEFAULT) {
+                        // this.guiState = GUI_STATE.DONE
+
+                        this.app.popScene()
+                        this.app.pushScene(new DataRecorder(this.app, this.generateUserOptions()))
+                    }
+                }
+            )
+        }
+
+
+        /**
+         * Convert the .userSelection data into a single milli-second value, 
+         * turn that into a MeasurementOpts obj
+         * @returns MeasurementOptions including the sensor information that gained from sensorSelect
+         */
+        private generateUserOptions(): MeasurementOpts {
+            const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
+
+            let period: number = 0
+            for (let i = 1; i < this.userSelection.length; i++) {
+                period += this.userSelection[i] * timeConversionTableMs[i - 1]
             }
 
-        // /* override */ startup() {
-        //     super.startup()
-        // }
+            return {
+                sensorFn: this.sensorOpts.sensorFn, 
+                sensorName: this.sensorOpts.sensorName,
+                measurements: this.userSelection[0],
+                period,
+            }
+        }
 
-        //     interface btnData {
-        //         ariaID: string, 
-        //         x: number, 
-        //         y: number, 
-        //         name: string, 
-        //         fn: () => number
-        //     }
 
-        //     const sensorBtnData: {[id: string]: btnData;} = {
-        //         "led_light_sensor": {ariaID: "led_light_sensor", x: -50, y: 50, name: "Light Level", fn: function () {return input.lightLevel()}},
-        //         "thermometer": {ariaID: "thermometer", x: 0, y: 50, name: "Temperature", fn: function () {return input.temperature()}},
-        //         "accelerometer": {ariaID: "accelerometer", x: 50, y: 50, name: "Accelerometer", fn: function () {return input.acceleration(Dimension.X)}}
-        //     }
-
-        //     Object.keys(sensorBtnData).forEach(
-        //         key => {
-        //             this.btns.push(new Button({
-        //                 parent: null,
-        //                 style: ButtonStyles.FlatWhite,
-        //                 icon: key,
-        //                 ariaId: sensorBtnData[key].ariaID,
-        //                 x: sensorBtnData[key].x,
-        //                 y: sensorBtnData[key].y,
-        //                 onClick: () => {
-        //                     this.app.popScene()
-        //                     this.app.pushScene(new DataRecorder(this.app, {
-        //                         sensorFn: sensorBtnData[key].fn, 
-        //                         sensorName: sensorBtnData[key].name, 
-        //                         measurements: this.measurementOpts.measurements, 
-        //                         period: this.measurementOpts.period
-        //                     }))
-        //                 },          
-        //             }))
-        //         }
-        //     )
-        // }
-
-        // /* override */ activate() {
-        //     super.activate()
-        //     this.color = 15
-        // }
-
-        draw() {
+        update() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
                 Screen.TOP_EDGE,
                 Screen.WIDTH,
                 Screen.HEIGHT,
-                0xc
+                0xC
             )
+
+            screen.printCenter("Measurement Settings", 4)
             
-            // if (this.mode === "period") {
-            //     screen.printCenter("Measurement period", 20)
-            // }
+            const rowSize = Screen.HEIGHT / (this.userSelection.length + 1)
+            let timeAsString;
+            let rowOffset = 0;
 
-            // else if (this.mode === "measurements") {
-            //     screen.printCenter("Number of measurements", 20)
-            // }
+            for (let i = 0; i < 6; i++) {
+                screen.print(this.guiRows[i],
+                    35 - (font.charWidth * this.guiRows[i].length) / 2,
+                    22 + rowOffset
+                )
 
-            // let value = "" + this.measurementOpts[this.mode];
-            // const textOffset = (screen.width - (font.charWidth * value.length)) / 2
+                timeAsString = this.userSelection[i].toString()
+                screen.print(timeAsString,
+                    70 - (font.charWidth * timeAsString[i].length) / 2,
+                    22 + rowOffset
+                )
+                rowOffset += rowSize
+            }
 
-            // Screen.print(
-            //     value,
-            //     Screen.LEFT_EDGE + textOffset,
-            //     Screen.TOP_EDGE + (screen.height / 2),
-            //     0xb,
-            //     simage.font8
-            // )
-            
-            super.draw()
+            // Cursor arrow
+            screen.print("<--",
+                100 - (font.charWidth * "<--".length) / 2,
+                22 + (rowSize * this.currentColumn)
+            )
         }
     }
 }

@@ -19,14 +19,18 @@ namespace microcode {
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
 
-                    const sOpts: SensorOpts = {
-                        sensorFn: function () {return input.lightLevel()},
+                    const mOpts: MeasurementOpts = {
+                        sensorFn: function () {return input.lightLevel()}, 
                         sensorName: "Light Level",
+                        measurements: 10,
+                        period: 1000
                     }
-                    // app.pushScene(new MeasurementConfigSelect(app, sOpts))
+
+                    app.pushScene(new DataRecorder(app, mOpts))
+
                     // app.pushScene(new LiveDataViewer(app, sOpts))
                 },
             })
@@ -40,8 +44,14 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                     // this.app.pushScene(new Editor(this.app))
+                    const sOpts: SensorOpts = {
+                        sensorFn: function () {return input.lightLevel()}, 
+                        sensorName: "Light",
+                    }
+
+                    app.pushScene(new MeasurementConfigSelect(app, sOpts))
                 },
             })
 

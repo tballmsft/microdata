@@ -136,7 +136,7 @@ namespace microcode {
 
                     const metadata = [
                         {id: 1, col1: "Save", col2: "1"}, 
-                        {id: 2, col1: "Taken", col2: "21/02/2024"}, 
+                        {id: 2, col1: "Taken", col2: FauxDataLogger.dateStamp}, 
                         {id: 3, col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
                         {id: 4, col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
                     ]
