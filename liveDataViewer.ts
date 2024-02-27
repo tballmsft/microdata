@@ -64,7 +64,7 @@ namespace microcode {
                 let colour = 8;
 
                 for (let i = 0; i < this.sensors.length; i++) {
-                    screen.print(this.sensors[i].getName() + " as", 10, 25 + (i * 20))
+                    screen.print(this.sensors[i].name + " as", 10, 25 + (i * 20))
                     screen.fillRect(
                         130,
                         25 + (i * 20),
@@ -78,7 +78,7 @@ namespace microcode {
 
             else {
                 for (let i = 0; i < this.sensors.length; i++) {
-                    let normalisedOutput = this.sensors[i].normalise();
+                    let normalisedOutput = this.sensors[i].getNormalisedReading();
                     let y = Math.round(screen.height - (normalisedOutput * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
 
                     // Buffer management:

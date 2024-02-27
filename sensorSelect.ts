@@ -9,7 +9,6 @@ namespace microcode {
             this.btns = []
             this.selectedSensors = []
             this.nextSceneEnum = nextSceneEnum
-
         }
 
         /* override */ startup() {
@@ -19,144 +18,80 @@ namespace microcode {
                 ariaID: string, 
                 x: number, 
                 y: number, 
-                name: string, 
-                fn: () => number
                 sensor: Sensor,
             }
 
             /**
-             * Generalisation for touch pin events
-             * Necessary since the inner function of input.onPinPressed(pin fn(){}) is () => void; where () => number is required
-             * @param pin TouchPin.P0, TouchPin.P1, TouchPin.P2
-             * @returns 
-             */
-            const pinPressFunction = function(pin: TouchPin): number {
-                let res: number = 0
-                input.onPinPressed(TouchPin.P0, function () {
-                    res = 1
-                })
-                return res
-            }
-
-
-            /**
              * Issue with consistently being able to load this app when there are > 3 buttons
              */
-            const sensorBtnData: {[id: string]: btnData;} = {
-                // "disk1": {ariaID: "disk1", x: -50, y: -25, name: "disk1", fn: function () {return input.compassHeading()}},
-                // "disk2": {ariaID: "disk2", x: 0, y: -25, name: "disk2", fn: function () {return input.soundLevel()}},
-                // "disk3": {ariaID: "disk3", x: 50, y: -25, name: "disk3", fn: function () {return input.magneticForce(Dimension.X)}},
+            const sensorBtnData: btnData[] = [
+                // {ariaID: "disk1", x: -50, y: -25, fn: function () {return input.compassHeading()}},
+                // {ariaID: "disk2", x: 0, y: -25, fn: function () {return input.soundLevel()}},
+                // {ariaID: "disk3", x: 50, y: -25, fn: function () {return input.magneticForce(Dimension.X)}},
 
-                "led_light_sensor": {ariaID: "led_light_sensor", x: -50, y: 30, 
-                    name: "Light Level", 
-                    fn: function () {return input.lightLevel()}, 
-                    sensor: new LightSensor()
-                },
-                "thermometer": {ariaID: "thermometer", x: 0, y: 30, 
-                    name: "Temperature", 
-                    fn: function () {return input.temperature()}, 
-                    sensor: new TemperatureSensor()
-                },
-                "touch pins": {ariaID: "accelerometer", x: 50, y: 30, 
-                    name: "Pin", 
-                    fn: function () {return pinPressFunction(TouchPin.P0)}, 
-                    sensor: new Pins(TouchPin.P0)
-                }
+                {ariaID: "led_light_sensor", x: -50, y: 30, sensor: new LightSensor()}//,
+                // {ariaID: "thermometer", x: 0, y: 30, sensor: new TemperatureSensor()},
+                // {ariaID: "accelerometer", x: 50, y: 30, sensor: new AccelerometerSensor(Dimension.X)},
 
-                // "a": {ariaID: "a", x: -50, y: 25, name: "Light\nLevel", fn: function() {return pinPressFunction(TouchPin.P0)}},
-                // "b": {ariaID: "b", x: 0, y: 25, name: "Temperature", fn: function () {return pinPressFunction(TouchPin.P1)}},
-                // "c": {ariaID: "c", x: 50, y: 25, name: "Accelerometer", fn: function () {return pinPressFunction(TouchPin.P2)}},
+                // {ariaID: "Pin 0", x: -50, y: 25, sensor: new PinSensor(TouchPin.P0)},
+                // {ariaID: "Pin 1", x: 0, y: 25, sensor: new PinSensor(TouchPin.P1)},
+                // {ariaID: "Pin 2", x: 50, y: 25, sensor: new PinSensor(TouchPin.P2)},
 
-                // "moveTiltUp": {ariaID: "d", x: -50, y: 50, name: "Pitch", fn: function () {return input.rotation(Rotation.Pitch)}},
-                // "moveTiltLeft": {ariaID: "e", x: 0, y: 50, name: "Roll", fn: function () {return Rotation.Roll}},
-                // "finger_press": {ariaID: "f", x: 50, y: 50, name: "Pin Press", fn: function () {if(input.logoIsPressed()) {return 255} return 0}}
-            }
+                // {ariaID: "Pitch", x: -50, y: 50, sensor: new RotationSensor(Rotation.Pitch)},
+                // {ariaID: "Roll", x: 0, y: 50, sensor: new RotationSensor(Rotation.Roll)},
+                // {ariaID: "Logo Pressed", x: 50, y: 50, sensor: new LogoPressSensor()}
+            ]
 
-            // Object.keys(sensorBtnData).forEach(
-            //     key => {
-            //         this.btns.push(new Button({
-            //             parent: null,
-            //             style: ButtonStyles.FlatWhite,
-            //             icon: key,
-            //             ariaId: sensorBtnData[key].ariaID,
-            //             x: sensorBtnData[key].x,
-            //             y: sensorBtnData[key].y,
-            //             onClick: () => {
-            //                this.selectedSensors.push(sensorBtnData[key].sensor)
-            //             },          
-            //         }))
-            //     }
-            // )
+            const btnData = {ariaID: "led_light_sensor", x: -50, y: 30, sensor: new LightSensor()}
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.FlatWhite,
-                icon: "led_light_sensor",
-                ariaId: "led_light_sensor",
-                x: -50,
-                y: 30,
-                onClick: () => {
-                    this.selectedSensors.push(new LightSensor())
-                }
-            }))
-            
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.FlatWhite,
-                icon: "thermometer",
-                ariaId: "thermometer",
-                x: 0,
-                y: 30,
-                onClick: () => {
-                    this.selectedSensors.push(new TemperatureSensor())
-                }
-            }))
+            // sensorBtnData.forEach(function (btnData) {
+                this.btns.push(new Button({
+                    parent: null,
+                    style: ButtonStyles.FlatWhite,
+                    icon: btnData.ariaID,
+                    ariaId: btnData.ariaID,
+                    x: btnData.x,
+                    y: btnData.y,
+                    onClick: () => {
+                        this.selectedSensors.push(btnData.sensor)
+                    },          
+                }))
+            // }) 
+
 
             // this.btns.push(new Button({
             //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "moveTiltLeft",
-            //     ariaId: "Pins",
-            //     x: 0,
+            //     style: ButtonStyles.FlatWhite,
+            //     icon: "disk1",
+            //     ariaId: "Done",
+            //     x: 50,
             //     y: 30,
             //     onClick: () => {
-            //         this.selectedSensors.push(new Pins(TouchPin.P0))
+            //         if (this.selectedSensors.length === 0) {
+            //             return
+            //         }
+
+            //         // const sOpts: SensorOpts = {
+            //         //     sensorFn: this.selectedSensors[0].getFn(), 
+            //         //     sensorName: this.selectedSensors[0].getName(),
+            //         // }
+
+            //         // const sOpts: SensorOpts = {
+            //         //     sensorFn: this.selectedSensors[0].getFn(), 
+            //         //     sensorName: this.selectedSensors[0].getName(),
+            //         // }
+
+            //         this.app.popScene()
+
+            //         if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
+            //             this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
+            //         }
+
+            //         else {
+            //             this.app.pushScene(new MeasurementConfigSelect(app, this.selectedSensors))
+            //         }
             //     }
             // }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.FlatWhite,
-                icon: "disk1",
-                ariaId: "Done",
-                x: 50,
-                y: 30,
-                onClick: () => {
-                    if (this.selectedSensors.length === 0) {
-                        return
-                    }
-
-                    // const sOpts: SensorOpts = {
-                    //     sensorFn: this.selectedSensors[0].getFn(), 
-                    //     sensorName: this.selectedSensors[0].getName(),
-                    // }
-
-                    const sOpts: SensorOpts = {
-                        sensorFn: this.selectedSensors[0].getFn(), 
-                        sensorName: this.selectedSensors[0].getName(),
-                    }
-
-                    this.app.popScene()
-
-                    if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
-                    }
-
-                    else {
-                        this.app.pushScene(new MeasurementConfigSelect(app, sOpts, this.selectedSensors))
-                    }
-                }
-            }))
 
             this.navigator.addButtons(this.btns)
         }
@@ -172,9 +107,9 @@ namespace microcode {
             
             screen.printCenter("Select a sensor to log", 5)
 
-            this.btns.forEach((btn) => {
-                btn.draw()
-            })
+            // this.btns.forEach((btn) => {
+            //     btn.draw()
+            // })
             super.draw()
         }
     }

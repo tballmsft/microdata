@@ -19,21 +19,19 @@ namespace microcode {
         private guiState: GUI_STATE
         private guiRows: string[]
         private currentColumn: number
-        private sensorOpts: SensorOpts
-        private sensors: Sensor[]
+        private selectedSensors: Sensor[]
 
         // Quantity, Milli-seconds, Seconds, Minutes, Hours, Days:
         private userSelection = [10, 0, 1, 0, 0, 0]
 
-        constructor(app: App, sensorOpts: SensorOpts, sensors: Sensor[]) {
+        constructor(app: App, selectedSensors: Sensor[]) {
             super(app, "dataViewer")
 
             this.guiState = GUI_STATE.DEFAULT
             this.guiRows = ["Quantity: ", "Ms: ", "Seconds: ", "Minutes: ", "Hours: ", "Days: "]
             this.currentColumn = 0
 
-            this.sensors = sensors
-            this.sensorOpts = sensorOpts
+            this.selectedSensors = selectedSensors
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -117,7 +115,7 @@ namespace microcode {
                         // this.guiState = GUI_STATE.DONE
 
                         this.app.popScene()
-                        this.app.pushScene(new DataRecorder(this.app, this.generateUserOptions(), sensors))
+                        this.app.pushScene(new DataRecorder(this.app, this.generateUserOptions(), this.selectedSensors))
                     }
                 }
             )
@@ -138,8 +136,7 @@ namespace microcode {
             }
 
             return {
-                sensorFn: this.sensorOpts.sensorFn, 
-                sensorName: this.sensorOpts.sensorName,
+                sensor: this.selectedSensors[0], // Does not grant multiple sensors
                 measurements: this.userSelection[0],
                 period,
             }

@@ -1,84 +1,135 @@
-
 namespace microcode {
     export type SensorOpts = {
         sensorFn: () => number, 
         sensorName: string,
     };  
     
-    export interface Sensor {
-        read(): number;
-        normalise(): number;
-        getName(): string;
-        getFn(): () => number
-    }
+    export abstract class Sensor {
+        private static BUFFER_LIMIT = 100;
 
-    export class LightSensor implements Sensor {
         sensorFn: () => number
         name: string
 
-        constructor() {
-            this.sensorFn = function () {return input.lightLevel()}
-            this.name = "Light"
+        sensorMinReading: number
+        sensorMaxReading: number
+
+        private numberOfDisplayModes: number;
+        private currentDisplayMode: number;
+
+        private dataBuffer: number[]
+
+
+        constructor(sensorFn: () => number, 
+            name: string,
+            sensorMinReading: number,
+            sensorMaxReading: number,
+            numberOfDisplayModes: number
+        ) {
+            this.sensorFn = sensorFn
+            this.name = name
+            this.sensorMinReading = sensorMinReading
+            this.sensorMaxReading = sensorMaxReading
+            this.numberOfDisplayModes = numberOfDisplayModes
+            this.dataBuffer = []
         }
 
-        read(): number {
+        cycleDisplayMode() {
+            this.currentDisplayMode = (this.currentDisplayMode + 1) % this.numberOfDisplayModes
+        }
+
+        getReading(): number {
             return this.sensorFn()
         }
 
-        normalise(): number {
-            return this.sensorFn() / 255
+        getNormalisedReading(): number{
+            return this.sensorFn() / this.sensorMaxReading
         }
 
-        getName() {return this.name}
-        getFn() {return this.sensorFn}
-    }
-
-    export class TemperatureSensor implements Sensor {
-        sensorFn: () => number
-        name: string
-
-        constructor() {
-            this.sensorFn = function () {return input.temperature()}
-            this.name = "Temperature"
-        }
-
-        read(): number {
-            return this.sensorFn()
-        }
-
-        normalise(): number {
-            return this.sensorFn() / 100
-        }
-
-        getName() {return this.name}
-        getFn() {return this.sensorFn}
-    }
-
-
-    export class Pins implements Sensor {
-        sensorFn: () => number
-        name: string
-
-        constructor(pin: TouchPin) {
-            this.sensorFn = function () {
-                let res: number = 0
-                input.onPinPressed(pin, function () {
-                    res = 1
-                })
-                return res
+        readIntoBuffer(): void {
+            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
+                this.dataBuffer.shift();
             }
-            this.name = "pin"
+            this.dataBuffer.push(this.getReading());
         }
 
-        read(): number {
-            return this.sensorFn()
+        readNormalisedIntoBuffer(): void {
+            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
+                this.dataBuffer.shift();
+            }
+            this.dataBuffer.push(this.getNormalisedReading());
         }
 
-        normalise(): number {
-            return this.sensorFn()
+        draw(fromX: number, fromY: number, color: number): void {
+            for (let i = 0; i < this.dataBuffer.length - 1; i++) {
+                screen.drawLine(fromX + i, this.dataBuffer[i], fromY + i - 1, this.dataBuffer[i + 1], color);
+            }
         }
+    }
 
-        getName() {return this.name}
-        getFn() {return this.sensorFn}
+    export class LightSensor extends Sensor {
+        constructor() {
+            super(function () {return input.lightLevel()}, "Light", 0, 255, 1)
+        }
+    }
+
+    export class TemperatureSensor extends Sensor {
+        constructor() {
+            super(function () {return input.temperature()}, "Temperature", 0, 100, 1)
+        }
+    }
+
+
+    /**
+     * sensorMinReading not implemented
+     * sensorMaxReading not implemented
+     */
+    export class AccelerometerSensor extends Sensor {
+        constructor(dim: Dimension) {
+            super(function () {return input.acceleration(dim)}, "Accelerometer", 0, 100, 1)
+        }
+    }
+
+    export class PinSensor extends Sensor {
+        constructor(pin: TouchPin) {
+            super(function () {
+                    let res: number = 0
+                    input.onPinPressed(pin, function () {
+                        res = 1
+                    })
+                    return res
+                },
+                "pin",
+                0,
+                1,
+                1
+            )
+        }
+    }
+
+
+    /**
+     * sensorMinReading not implemented
+     * sensorMaxReading not implemented
+     */
+    export class RotationSensor extends Sensor {
+        constructor(rot: Rotation) {
+            let name: string = "Pitch"
+
+            if (rot === Rotation.Roll) {
+                name = "Roll"
+            }
+
+            super(function () {return input.rotation(rot)}, name, 0, 100, 1)
+        }
+    }
+
+    /**
+     * sensorMinReading may change in future
+     * sensorMaxReading may change in future
+     */
+    export class LogoPressSensor extends Sensor {
+        constructor() {
+            super(function () {if(input.logoIsPressed()) {return 1} return 0}, "Logo Pressed", 0, 1, 1)
+        }
     }
 }

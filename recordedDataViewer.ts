@@ -150,13 +150,13 @@ namespace microcode {
                     } else {
                         metadata = [
                             {col1: "Save", col2: "1"}, 
-                            {col2: "Taken", col2: FauxDataLogger.dateStamp}, 
-                            {col3: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
-                            {col4: "Columns", col2: FauxDataLogger.headers.length.toString()},
-                            {col5: "Col1: Time", col2: FauxDataLogger.headers[0]}, 
-                            {col6: "Col2: Sensor", col2: FauxDataLogger.headers[1]}, 
-                            {col7: "Col3: Sensor", col2: FauxDataLogger.headers[2]}, 
-                            {col8: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
+                            {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
+                            {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+                            {col1: "Columns", col2: FauxDataLogger.headers.length.toString()},
+                            {col1: "Col1: Time", col2: FauxDataLogger.headers[0]}, 
+                            {col1: "Col2: Sensor", col2: FauxDataLogger.headers[1]}, 
+                            {col1: "Col3: Sensor", col2: FauxDataLogger.headers[2]}, 
+                            {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}, 
                         ]
                     }
 

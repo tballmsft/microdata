@@ -39,14 +39,21 @@
         "tooltips.ts",
         "utils.ts",
         "jacs.ts",
+        "ruleEditor.ts",
+        "editor.ts",
+        "samples.ts",
+
         "liveDataViewer.ts",
         "dataRecorder.ts",
         "recordedDataViewer.ts",
         "sensorSelect.ts",
         "measurementConfigSelect.ts",
         "fauxDatalogger.ts",
-        "sceneFactory.ts"
+        "sceneFactory.ts",
+        "userOptions.ts",
+        "sensors.ts"
     ],
+
     "testFiles": [],
     "targetVersions": {
         "target": "6.1.10",

@@ -68,7 +68,7 @@ namespace microcode {
 
             let headers: string[] = ["Ms"]
             sensors.forEach(function(sensor) {
-                headers.push(sensor.getName())
+                headers.push(sensor.name)
             })
 
             this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts)
@@ -106,15 +106,17 @@ namespace microcode {
                 const secondsLeft: number = (this.measurementOpts.measurements * this.measurementOpts.period) / 1000
                 screen.printCenter("Recording data...", 10);
 
-                screen.printCenter(this.measurementOpts.period / 1000 + " second period", 45)
+                screen.printCenter(this.measurementOpts.period / 1000 + " second period", 45)   
                 screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
                 screen.printCenter(secondsLeft.toString() + " seconds left", 85);
 
+
                 // datalogger.log(datalogger.createCV(this.measurementOpts.sensorName, this.measurementOpts.sensorFn()))
 
-                let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()]
+                // Collect the data to log:
+                let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()] // Log time
                 for (let i = 0; i < this.sensors.length; i++) {
-                    data.push(this.sensors[i].read().toString())
+                    data.push(this.sensors[i].getReading().toString())
                 }
 
                 FauxDataLogger.log(data)
