@@ -107,9 +107,9 @@ namespace microcode {
             
             screen.printCenter("Select a sensor to log", 5)
 
-            // this.btns.forEach((btn) => {
-            //     btn.draw()
-            // })
+            this.btns.forEach((btn) => {
+                btn.draw()
+            })
             super.draw()
         }
     }

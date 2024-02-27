@@ -7,22 +7,22 @@ namespace microcode {
     }
 
 
-    export function generateScene(sceneEnum: CursorSceneEnum, app: App, mOpts?: MeasurementOpts, nextScene?: CursorSceneEnum) {
+    export function generateScene(sceneEnum: CursorSceneEnum, app: App, sensors: Sensor[], mOpts?: MeasurementOpts, nextScene?: CursorSceneEnum) {
         switch (sceneEnum) {
             case CursorSceneEnum.LiveDataViewer:
-                return new LiveDataViewer(app, [new LightSensor, new TemperatureSensor])
+                return new LiveDataViewer(app, sensors)
 
             case CursorSceneEnum.SensorSelect:
                 return new SensorSelect(app, nextScene)
 
-            // case CursorSceneEnum.MeasurementConfigSelect:
-            //     return new MeasurementConfigSelect(app, sOpts)
+            case CursorSceneEnum.MeasurementConfigSelect:
+                return new MeasurementConfigSelect(app, sensors)
 
             case CursorSceneEnum.RecordData:
-                return new DataRecorder(app, mOpts, [new LightSensor, new TemperatureSensor])
+                return new DataRecorder(app, mOpts, sensors)
     
             default:
-                return new LiveDataViewer(app, [new LightSensor, new TemperatureSensor]);
+                return new LiveDataViewer(app, sensors);
         }
     }   
 }

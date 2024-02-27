@@ -11,8 +11,7 @@ namespace microcode {
 
     const enum GUI_STATE {
         WRITING,
-        DEFAULT,
-        DONE
+        DEFAULT
     }
 
     export class MeasurementConfigSelect extends Scene {
@@ -21,7 +20,7 @@ namespace microcode {
         private currentColumn: number
         private selectedSensors: Sensor[]
 
-        // Quantity, Milli-seconds, Seconds, Minutes, Hours, Days:
+        // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days]:
         private userSelection = [10, 0, 1, 0, 0, 0]
 
         constructor(app: App, selectedSensors: Sensor[]) {
@@ -53,8 +52,8 @@ namespace microcode {
                 () => {
                     if (this.guiState === GUI_STATE.DEFAULT) {
                         this.app.popScene()
-                        // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
-                        this.app.pushScene(new Home(app))
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                        // this.app.pushScene(new Home(app))
                     }
 
                     else {
@@ -112,8 +111,6 @@ namespace microcode {
                     }
 
                     else if (this.guiState === GUI_STATE.DEFAULT) {
-                        // this.guiState = GUI_STATE.DONE
-
                         this.app.popScene()
                         this.app.pushScene(new DataRecorder(this.app, this.generateUserOptions(), this.selectedSensors))
                     }

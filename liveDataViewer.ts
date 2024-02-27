@@ -7,7 +7,15 @@ namespace microcode {
         SENSOR_INFORMATION
     }
 
+
+    /**
+     * One of the 3 main functionalities of MicroData
+     * Allows for the live feed of a sensor to be plotted,
+     *      Multiple sensors may be plotted at once
+     *      Display modes may be toggled per sensor
+     */
     export class LiveDataViewer extends Scene {
+
         private dataBuffers: number[][];
         private bufferLimit = screen.width - (2 * WIDTH_BUFFER);
         private guiState: GUI_STATE
@@ -18,8 +26,8 @@ namespace microcode {
             super(app, "liveDataViewer")
             this.color = 0
             this.guiState = GUI_STATE.PLOTTING
-
             this.sensors = sensors
+
             this.dataBuffers = []
             for (let i = 0; i < this.sensors.length; i++) {
                 this.dataBuffers.push([])
@@ -77,16 +85,9 @@ namespace microcode {
             }
 
             else {
-                for (let i = 0; i < this.sensors.length; i++) {
-                    let normalisedOutput = this.sensors[i].getNormalisedReading();
-                    let y = Math.round(screen.height - (normalisedOutput * (screen.height - HEIGHT_BUFFER))) - HEIGHT_BUFFER
-
-                    // Buffer management:
-                    if (this.dataBuffers[i].length >= this.bufferLimit) {
-                        this.dataBuffers[i].shift();
-                    }
-                    this.dataBuffers[i].push(y);
-                }
+                this.sensors.forEach(function(sensor) {
+                    sensor.readIntoBuffer()
+                })
 
                 // Draw:
                 this.plot()
@@ -104,15 +105,19 @@ namespace microcode {
             screen.printCenter("Press UP for info", 5)
             this.draw_axes();
 
-            const start = WIDTH_BUFFER + 2;
             let colour = 8;
 
-            this.dataBuffers.forEach(function(dataBuffer) {
-                for (let i = 0; i < dataBuffer.length - 1; i++) {
-                    screen.drawLine(start + i, dataBuffer[i], start + i - 1, dataBuffer[i + 1], colour);
-                }
+            this.sensors.forEach(function(sensor) {
+                sensor.draw(WIDTH_BUFFER + 2, HEIGHT_BUFFER, colour)
                 colour = (colour + 1) % 15
             })
+
+            // this.dataBuffers.forEach(function(dataBuffer) {
+            //     for (let i = 0; i < dataBuffer.length - 1; i++) {
+            //         screen.drawLine(start + i, dataBuffer[i], start + i - 1, dataBuffer[i + 1], colour);
+            //     }
+            //     colour = (colour + 1) % 15
+            // })
         }
 
         // Display helper:

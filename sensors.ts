@@ -2,7 +2,7 @@ namespace microcode {
     export type SensorOpts = {
         sensorFn: () => number, 
         sensorName: string,
-    };  
+    };
     
     export abstract class Sensor {
         private static BUFFER_LIMIT = 100;
@@ -51,17 +51,23 @@ namespace microcode {
             }
             this.dataBuffer.push(this.getReading());
         }
+        
 
-        readNormalisedIntoBuffer(): void {
-            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
-                this.dataBuffer.shift();
-            }
-            this.dataBuffer.push(this.getNormalisedReading());
-        }
-
+        /**
+         * Default draw mode: may be overriden to accommodate multiple draw modes
+         * Each value in the data buffer is normalised and scaled to screen size per frame.
+         *      This is inefficient since only one value is added per frame
+         * 
+         * @param fromX starting x coordinate
+         * @param fromY starting y coordinate
+         * @param color
+         */
         draw(fromX: number, fromY: number, color: number): void {
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
-                screen.drawLine(fromX + i, this.dataBuffer[i], fromY + i - 1, this.dataBuffer[i + 1], color);
+                const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
+                const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
+
+                screen.drawLine(fromX + i, y1, fromX + i - 1, y2, color);
             }
         }
     }
