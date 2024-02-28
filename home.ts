@@ -117,6 +117,7 @@ namespace microcode {
             this.recordDataBtn.draw()
             this.liveDataBtn.draw()
             this.viewBtn.draw()
+
             this.drawVersion()
             super.draw()
         }

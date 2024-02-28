@@ -27,11 +27,14 @@ namespace microcode {
         size: Bounds
         visible = true
 
+        private cursorOutlineColour: number
+
         constructor() {
             this.xfrm = new Affine()
             this.cancelHandlerStack = []
             this.moveDest = new Vec2()
             this.setSize()
+            this.cursorOutlineColour = 9
         }
 
         public moveTo(pos: Vec2, ariaId: string, sizeHint: Bounds) {
@@ -61,6 +64,10 @@ namespace microcode {
                 size || new Bounds({ left: 0, top: 0, width: 16, height: 16 })
             if (this.size) this.size.copyFrom(size)
             else this.size = size.clone()
+        }
+
+        public setOutlineColour(colour: number) {
+            this.cursorOutlineColour = colour
         }
 
         public saveState(): CursorState {
@@ -113,13 +120,13 @@ namespace microcode {
                 this.xfrm,
                 this.size,
                 1,
-                6
+                this.cursorOutlineColour
             )
             Screen.outlineBoundsXfrm(
                 this.xfrm,
                 this.size,
                 2,
-                9
+                this.cursorOutlineColour
             )
 
             const text = accessibility.ariaToTooltip(this.ariaId)
