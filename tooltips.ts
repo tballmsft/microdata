@@ -169,6 +169,8 @@ namespace microcode {
         else if (id == "Pin 2") res = "Pin 2"
         else if (id == "Volume") res = "Volume"
         else if (id == "Compass") res = "Compass"
+        else if (id == "Oscilloscope") res = "Oscilloscope"
+        
         return res
     }
 }

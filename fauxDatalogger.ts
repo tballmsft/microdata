@@ -6,7 +6,7 @@ namespace microcode {
 
     export class FauxDataLogger {
         static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
-        static dateStamp = "21/02/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
+        static dateStamp = "29/02/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
         static values: MetaData[]
         static numberOfRows: number
         static measurementOptions: MeasurementOpts

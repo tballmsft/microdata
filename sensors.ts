@@ -17,6 +17,7 @@ namespace microcode {
         private currentDisplayMode: number;
 
         private dataBuffer: number[]
+        private peakDataPoint: number[]
 
         constructor(sensorFn: () => number, 
             name: string,
@@ -30,6 +31,7 @@ namespace microcode {
             this.sensorMaxReading = sensorMaxReading
             this.numberOfDisplayModes = numberOfDisplayModes
             this.dataBuffer = []
+            this.peakDataPoint = [0, screen.height]
         }
 
         cycleDisplayMode() {
@@ -47,6 +49,7 @@ namespace microcode {
         readIntoBuffer(): void {
             if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
                 this.dataBuffer.shift();
+                this.peakDataPoint[0] -= 1
             }
             this.dataBuffer.push(this.getReading());
         }
@@ -62,9 +65,22 @@ namespace microcode {
          * @param color
          */
         draw(fromX: number, fromY: number, color: number): void {
+            if (this.peakDataPoint[0] > 0) {
+                screen.fillCircle(
+                    fromX + this.peakDataPoint[0],
+                    this.peakDataPoint[1],
+                    5,
+                    6
+                )
+            }
+
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
                 const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
                 const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
+
+                if (y1 < this.peakDataPoint[1]) {
+                    this.peakDataPoint = [i, y1]
+                }
 
                 screen.drawLine(fromX + i, y1, fromX + i - 1, y2, color);
             }

@@ -53,7 +53,6 @@ namespace microcode {
                     if (this.guiState === GUI_STATE.DEFAULT) {
                         this.app.popScene()
                         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
-                        // this.app.pushScene(new Home(app))
                     }
 
                     else {
