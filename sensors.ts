@@ -3,6 +3,8 @@ namespace microcode {
         sensorFn: () => number, 
         sensorName: string,
     };
+
+    const PLOT_SMOOTHING_CONSTANT = 8
     
     export abstract class Sensor {
         private static BUFFER_LIMIT = 100;
@@ -10,14 +12,14 @@ namespace microcode {
         sensorFn: () => number
         name: string
 
-        sensorMinReading: number
-        sensorMaxReading: number
+        minReading: number
+        maxReading: number
+        peakDataPoint: number[]
 
         private numberOfDisplayModes: number;
         private currentDisplayMode: number;
 
         private dataBuffer: number[]
-        private peakDataPoint: number[]
 
         constructor(sensorFn: () => number, 
             name: string,
@@ -27,11 +29,11 @@ namespace microcode {
         ) {
             this.sensorFn = sensorFn
             this.name = name
-            this.sensorMinReading = sensorMinReading
-            this.sensorMaxReading = sensorMaxReading
+            this.minReading = sensorMinReading
+            this.maxReading = sensorMaxReading
             this.numberOfDisplayModes = numberOfDisplayModes
             this.dataBuffer = []
-            this.peakDataPoint = [0, screen.height]
+            this.peakDataPoint = [0, this.minReading]
         }
 
         cycleDisplayMode() {
@@ -43,7 +45,7 @@ namespace microcode {
         }
 
         getNormalisedReading(): number{
-            return this.sensorFn() / this.sensorMaxReading
+            return this.sensorFn() / this.maxReading
         }
 
         readIntoBuffer(): void {
@@ -68,18 +70,23 @@ namespace microcode {
             if (this.peakDataPoint[0] > 0) {
                 screen.fillCircle(
                     fromX + this.peakDataPoint[0],
-                    this.peakDataPoint[1],
-                    5,
-                    6
+                    Math.round(screen.height - ((this.peakDataPoint[1] / this.maxReading) * (screen.height - fromY))) - fromY,
+                    3,
+                    3
                 )
             }
 
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
-                const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
-                const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.sensorMaxReading) * (screen.height - fromY))) - fromY
+                const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.maxReading) * (screen.height - fromY))) - fromY
+                const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.maxReading) * (screen.height - fromY))) - fromY
 
-                if (y1 < this.peakDataPoint[1]) {
-                    this.peakDataPoint = [i, y1]
+                if (this.dataBuffer[i] > this.peakDataPoint[1]) {
+                    this.peakDataPoint = [i, this.dataBuffer[i]]
+                }
+
+                // Minimal data smoothing:
+                if (Math.abs(y1 - y2) <= PLOT_SMOOTHING_CONSTANT) {
+                    screen.drawLine(fromX + i, y1, fromX + i - 1, y1, color);
                 }
 
                 screen.drawLine(fromX + i, y1, fromX + i - 1, y2, color);
@@ -95,7 +102,7 @@ namespace microcode {
 
     export class TemperatureSensor extends Sensor {
         constructor() {
-            super(function () {return input.temperature()}, "Temperature", 0, 100, 1)
+            super(function () {return input.temperature()}, "Temp.", 0, 100, 1)
         }
     }
 
