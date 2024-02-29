@@ -18,7 +18,6 @@ namespace microcode {
 
         private dataBuffer: number[]
 
-
         constructor(sensorFn: () => number, 
             name: string,
             sensorMinReading: number,
@@ -104,7 +103,19 @@ namespace microcode {
                     })
                     return res
                 },
-                "pin",
+                "Pin " + pin.toString(),
+                0,
+                1,
+                1
+            )
+        }
+    }
+
+
+    export class MagnetSensor extends Sensor {
+        constructor(dim: Dimension) {
+            super(function() {return input.magneticForce(dim)},
+                "Magnet " + dim.toString(),
                 0,
                 1,
                 1
@@ -125,7 +136,7 @@ namespace microcode {
                 name = "Roll"
             }
 
-            super(function () {return input.rotation(rot)}, name, 0, 100, 1)
+            super(function () {return input.rotation(rot)}, name, 0, 100, 1)    
         }
     }
 
@@ -136,6 +147,27 @@ namespace microcode {
     export class LogoPressSensor extends Sensor {
         constructor() {
             super(function () {if(input.logoIsPressed()) {return 1} return 0}, "Logo Pressed", 0, 1, 1)
+        }
+    }
+
+    export class CompassHeadingSensor extends Sensor {
+        constructor() {
+            super(function () {return input.compassHeading()}, "Compass", 0, 360, 1)
+        }
+    }    
+
+    export class VolumeSensor extends Sensor {
+        constructor() {
+            super(function () {return input.soundLevel()}, "Volume", 0, 255, 1)
+        }
+    }
+
+    /**
+     * No access to the Microbit Buttons A & B; only the controller buttons A & B; it seems
+     */
+    export class ButtonPressSensor extends Sensor {
+        constructor() {
+            super(function () {return 1}, "Button Press", 0, 1, 1)
         }
     }
 }

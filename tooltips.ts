@@ -23,7 +23,7 @@ namespace microcode {
         else if (id === "S9A") res = "variable X set";
         else if (id === "S9B") res = "variable Y set";
         else if (id === "S9C") res = "variable Z set";
-        else if (id === "S10") res = "magnet";
+        else if (id === "S10") res = "Magnet";
         else if (id === "S11") res = "slider";
         else if (id === "S12") res = "dial";
         else if (id === "rule") res = "rule";
@@ -164,7 +164,11 @@ namespace microcode {
         else if (id == "View") res = "View"
         else if (id == "Done") res = "Done"
         else if (id == "Pins") res = "Pins"
-
+        else if (id == "Pin 0") res = "Pin 0"
+        else if (id == "Pin 1") res = "Pin 1"
+        else if (id == "Pin 2") res = "Pin 2"
+        else if (id == "Volume") res = "Volume"
+        else if (id == "Compass") res = "Compass"
         return res
     }
 }
