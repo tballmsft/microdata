@@ -1,4 +1,5 @@
 namespace microcode {
+
     export class CursorScene extends Scene {
         navigator: INavigator
         public cursor: Cursor

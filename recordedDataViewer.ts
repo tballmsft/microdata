@@ -96,6 +96,10 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xC
             )
+
+            if (FauxDataLogger.isEmpty) {
+                return;
+            }
             
             let rowOffset = 0
 

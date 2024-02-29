@@ -15,10 +15,12 @@ namespace microcode {
      *      Display modes may be toggled per sensor
      */
     export class LiveDataViewer extends Scene {
-
         private dataBuffers: number[][];
-        private bufferLimit = screen.width - (2 * WIDTH_BUFFER);
         private guiState: GUI_STATE
+
+        // For axis:
+        private xUnit: number
+        private yUnit: number
 
         private sensors: Sensor[]
 
@@ -27,6 +29,9 @@ namespace microcode {
             this.color = 0
             this.guiState = GUI_STATE.PLOTTING
             this.sensors = sensors
+
+            this.xUnit = 10
+            this.yUnit = 10
 
             this.dataBuffers = []
             for (let i = 0; i < this.sensors.length; i++) {
@@ -96,6 +101,30 @@ namespace microcode {
             }
         }
 
+
+        draw_grid() {
+            for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=this.yUnit) {
+                Screen.drawLine(
+                    Screen.LEFT_EDGE + colOffset,
+                    Screen.TOP_EDGE,
+                    Screen.LEFT_EDGE + colOffset,
+                    Screen.HEIGHT,
+                    0x0
+                )
+            }
+
+            for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=this.xUnit) {
+                Screen.drawLine(
+                    Screen.LEFT_EDGE,
+                    Screen.TOP_EDGE + rowOffset,
+                    Screen.WIDTH,
+                    Screen.TOP_EDGE + rowOffset,
+                    0x0
+                )
+            }
+        }
+
+
         /**
          * Display mode for plotting all incoming data on y axis
          * Presumes pre-processed this.dataBuffers; y values relative to screen.height
@@ -111,13 +140,6 @@ namespace microcode {
                 sensor.draw(WIDTH_BUFFER + 2, HEIGHT_BUFFER, colour)
                 colour = (colour + 1) % 15
             })
-
-            // this.dataBuffers.forEach(function(dataBuffer) {
-            //     for (let i = 0; i < dataBuffer.length - 1; i++) {
-            //         screen.drawLine(start + i, dataBuffer[i], start + i - 1, dataBuffer[i + 1], colour);
-            //     }
-            //     colour = (colour + 1) % 15
-            // })
         }
 
         // Display helper:

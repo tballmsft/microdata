@@ -94,6 +94,7 @@ namespace microcode {
         public click(): boolean {
             let target = this.navigator.getCurrent() //.sort((a, b) => a.z - b.z);
             if (target) {
+                target.toggleSelected()
                 target.click()
                 profile()
                 return true
@@ -116,18 +117,14 @@ namespace microcode {
         draw() {
             if (!this.visible) return
 
-            Screen.outlineBoundsXfrm(
-                this.xfrm,
-                this.size,
-                1,
-                this.cursorOutlineColour
-            )
-            Screen.outlineBoundsXfrm(
-                this.xfrm,
-                this.size,
-                2,
-                this.cursorOutlineColour
-            )
+            for (let dist = 1; dist <= 3; dist++) {
+                Screen.outlineBoundsXfrm(
+                    this.xfrm,
+                    this.size,
+                    dist,
+                    this.cursorOutlineColour
+                )
+            }
 
             const text = accessibility.ariaToTooltip(this.ariaId)
             if (text) {

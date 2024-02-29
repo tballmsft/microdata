@@ -14,41 +14,44 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // this.btns.push(new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "accelerometer",
-            //     ariaId: "accelerometer",
-            //     x: -60,
-            //     y: -34,
-            //     onClick: () => {
-            //         this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
-            //     },          
-            // }))
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "accelerometer",
+                ariaId: "accelerometer",
+                x: -60,
+                y: -34,
+                onClick: () => {
+                    this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
+                },          
+                dynamicBoundaryColorsOn: true,
+            }))
 
-            // this.btns.push(new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "pin_0",
-            //     ariaId: "Pin 0",
-            //     x: -30,
-            //     y: -34,
-            //     onClick: () => {
-            //         this.selectedSensors.push(new PinSensor(TouchPin.P0))
-            //     },          
-            // }))
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "pin_0",
+                ariaId: "Pin 0",
+                x: -30,
+                y: -34,
+                onClick: () => {
+                    this.selectedSensors.push(new PinSensor(TouchPin.P0))
+                },          
+                dynamicBoundaryColorsOn: true,
+            }))
 
-            // this.btns.push(new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "magnet",
-            //     ariaId: "S10",
-            //     x: 0,
-            //     y: -34,
-            //     onClick: () => {
-            //         this.selectedSensors.push(new MagnetSensor(Dimension.X))
-            //     },          
-            // }))
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "magnet",
+                ariaId: "S10",
+                x: 0,
+                y: -34,
+                onClick: () => {
+                    this.selectedSensors.push(new MagnetSensor(Dimension.X))
+                },          
+                dynamicBoundaryColorsOn: true,
+            }))
 
             // this.btns.push(new Button({
             //     parent: null,
@@ -140,29 +143,29 @@ namespace microcode {
 
             //-----------
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "right_spin",
-                ariaId: "Compass",
-                x: -60,
-                y: 26,
-                onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
-                },          
-            }))
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "right_spin",
+            //     ariaId: "Compass",
+            //     x: -60,
+            //     y: 26,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new CompassHeadingSensor())
+            //     },          
+            // }))
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "tile_button_a",
-                ariaId: "F3",
-                x: -30,
-                y: 26,
-                onClick: () => {
-                    this.selectedSensors.push(new ButtonPressSensor())
-                },          
-            }))
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "tile_button_a",  
+            //     ariaId: "F3",
+            //     x: -30,
+            //     y: 26,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new ButtonPressSensor())
+            //     },          
+            // }))
 
             // this.btns.push(new Button({
             //     parent: null,
@@ -212,8 +215,7 @@ namespace microcode {
                 0xc
             )
             
-            screen.printCenter("Select a sensor to log", 5)
-
+            screen.printCenter("Select Sensors to log", 5)
 
             // Following 3 lines may be tabbed - results in same error regardless:
 
