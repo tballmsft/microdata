@@ -217,28 +217,28 @@ namespace microcode {
             let colour = 8;
 
             // Axis scale:
-            screen.fillCircle(
-                WIDTH_BUFFER + this.oscXOffset,
-                HEIGHT_BUFFER + 8 + this.oscYOffset,
-                3,
-                3
-            )
+            // screen.fillCircle(
+            //     WIDTH_BUFFER + this.oscXOffset,
+            //     HEIGHT_BUFFER + 8 + this.oscYOffset,
+            //     3,
+            //     3
+            // )
 
-            for (let i = 0; i < this.sensors.length; i++) {
-                let text = this.sensors[i].sensorMaxReading.toString();
+            // for (let i = 0; i < this.sensors.length; i++) {
+            //     let text = this.sensors[i].sensorMaxReading.toString();
 
-                if (i == this.sensors.length) {
-                    text += " &"
-                }
-                screen.print(
-                    text,
-                    WIDTH_BUFFER - 20 + this.oscXOffset,
-                    HEIGHT_BUFFER + 8 + (i * 8) + this.oscYOffset,
-                    colour,
-                    simage.font5,
-                )
-                colour = (colour + 1) % 15
-            }
+            //     if (i == this.sensors.length) {
+            //         text += " &"
+            //     }
+            //     screen.print(
+            //         text,
+            //         WIDTH_BUFFER - 20 + this.oscXOffset,
+            //         HEIGHT_BUFFER + 8 + (i * 8) + this.oscYOffset,
+            //         colour,
+            //         simage.font5,
+            //     )
+            //     colour = (colour + 1) % 15
+            // }
             
             this.draw_grid()
             this.draw_axes();
