@@ -59,7 +59,7 @@ namespace microcode {
             const font = simage.font5
             Screen.print(
                 "Prototype 3",
-                Screen.RIGHT_EDGE - font.charWidth * "Prototype 3".length,
+                Screen.RIGHT_EDGE - font.charWidth * "Prototype 6".length,
                 Screen.BOTTOM_EDGE - font.charHeight - 1,
                 0xb,
                 font
