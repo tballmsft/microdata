@@ -1,16 +1,6 @@
 namespace microcode {
-    const WIDTH_BUFFER = 18;
-    const TOP_EDGE_BUFFER = 5;
-    const BOT_EDGE_BUFFER = 20;
-    const MAX_ZOOM_DEPTH = 5;
+    /** No information beyond this Y coordinate */
     const MAX_Y_SCOLL = -75
-
-    enum GUI_STATE {
-        PLOTTING,
-        OSCILLOSCOPE_MODE,
-        SENSOR_INFORMATION
-    }
-
 
     /**
      * One of the 3 main functionalities of MicroData
@@ -19,9 +9,6 @@ namespace microcode {
      *      Display modes may be toggled per sensor
      */
     export class LiveDataViewer extends Scene {
-        private dataBuffers: number[][];
-        private guiState: GUI_STATE
-
         private windowWidth: number
         private windowHeight: number
 
@@ -32,14 +19,15 @@ namespace microcode {
         private xScrollOffset: number
         private yScrollOffset: number
 
+        /* X coordinate that the user wants to zoom in on; adjust offsets to make this point centred, whilst zoomed */
         private selectedXCoordinate: number
 
+        /* To plot */
         private sensors: Sensor[]
 
         constructor(app: App, sensors: Sensor[]) {
             super(app, "yo")
             this.color = 0
-            this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
             this.sensors = sensors
 
             this.windowWidth = Screen.WIDTH
@@ -54,19 +42,16 @@ namespace microcode {
 
             this.selectedXCoordinate = (Screen.WIDTH / 2)
 
-            this.dataBuffers = []
-            for (let i = 0; i < this.sensors.length; i++) {
-                this.dataBuffers.push([])
-            }
 
+            //--------------------------------
+            // Oscilloscope Movement Controls:
+            //--------------------------------
+
+            // Zoom in:
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 () => {
-                    // if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
-                    //     this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
-                    // }
-
                     this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
                     this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
 
@@ -77,6 +62,7 @@ namespace microcode {
                 }
             )
 
+            // Zoom out, if at default zoom (none), then go back to home
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
@@ -101,12 +87,8 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    // if (this.guiState === GUI_STATE.PLOTTING) {
-                    //     this.guiState = GUI_STATE.SENSOR_INFORMATION    
-                    // }
-
                     this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
-                    this.update()
+                    this.update() // For fast response to the above change
                 }
             )
 
@@ -114,12 +96,8 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    // if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
-                    //     this.guiState = GUI_STATE.PLOTTING
-                    // }
-
                     this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
-                    this.update()
+                    this.update() // For fast response to the above change
                 }
             )
 
@@ -127,11 +105,8 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
                     this.xScrollOffset = Math.min(this.xScrollOffset + 10, this.windowWidth)
-
-                    this.update()
-                    // }
+                    this.update() // For fast response to the above change
                 }
             )
 
@@ -139,21 +114,17 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
                     this.xScrollOffset = Math.max(this.xScrollOffset - 10, -this.windowWidth)
-                    
-
-                    this.update()
-                    // }
+                    this.update() // For fast response to the above change
                 }
             )
         }
 
 
-        /* override */ startup() {
-            super.startup()
-        }
-
+        /**
+         * Request each sensor updates its buffers,
+         * Then draw to screen
+         */
         update() {
             screen.fill(this.color);
 
@@ -168,13 +139,15 @@ namespace microcode {
 
         /**
          * Display mode for plotting all incoming data on y axis
-         * Presumes pre-processed this.dataBuffers; y values relative to screen.height
          */
         private plot() {            
             let color = 8;
 
-            // Sensor information, displayed below the plot:
+            this.draw_axes();
+
+            // Write Sensor information, displayed below the plot:
             for (let i = 0; i < this.sensors.length; i++) {
+                // Colour used to represent this sensor, same colour as plotted & ticker:
                 screen.fillRect(
                     2,
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + 15 + (i * 12),
@@ -183,6 +156,7 @@ namespace microcode {
                     color
                 )
                 
+                // Name, reading / maximum, peak
                 screen.print(this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maxReading +
                     " Peak " + this.sensors[i].peakDataPoint[1], 
                     14,
@@ -193,16 +167,15 @@ namespace microcode {
                 color = (color + 1) % 15
             }
 
-            this.draw_axes();
 
-            // Draw data
+            // Draw data lines:
             color = 8;
             this.sensors.forEach(function(sensor) {
                 sensor.draw(this.windowWidthBuffer + 2 + this.xScrollOffset, this.windowBotBuffer - this.yScrollOffset, color)
                 color = (color + 1) % 15
             })
 
-
+            // Draw circle in the screen centre for better testing:
             screen.fillCircle(
                 (Screen.WIDTH / 2),// + this.windowWidth - this.windowWidth,
                 (Screen.HEIGHT / 2),// + this.windowTopBuffer - this.windowBotBuffer,
@@ -229,7 +202,9 @@ namespace microcode {
             })
         }
 
-        // Display helper:
+        /**
+         * 2 Axis of Double-thickness each, in yellow
+         */
         draw_axes() {
             for (let i = 0; i < 2; i++) {
                 screen.drawLine(
