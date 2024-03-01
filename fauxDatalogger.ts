@@ -10,14 +10,13 @@ namespace microcode {
         static values: MetaData[]
         static numberOfRows: number
         static measurementOptions: MeasurementOpts
-        static isEmpty: boolean
+        static isEmpty: boolean = true
 
         constructor(headers: string[], mOpts: MeasurementOpts) {
             FauxDataLogger.headers = headers
             FauxDataLogger.values = []
             FauxDataLogger.numberOfRows = 0
             FauxDataLogger.measurementOptions = mOpts
-            FauxDataLogger.isEmpty = true
         }
 
         public static log(data: string[]) {

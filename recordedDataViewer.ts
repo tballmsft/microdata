@@ -3,65 +3,69 @@ namespace microcode {
     const MAX_ROWS = 10
 
     const enum DISPLAY_MODE {
+        META_DATA_VIEW,
         DATA_VIEW,
-        GRAPH_GENERATION,
-        METADATA_MODE,
+        GRAPH_VIEW,
+        SELECT_SCREEN,
     }
-
-    export class RecordedDataViewer extends Scene {
+    
+    export class RecordedDataViewer extends CursorSceneWithPriorPage {
         private scrollOffset: number;
-        private current_mode: DISPLAY_MODE;
+        private guiState: DISPLAY_MODE;
         private saveSlot: number
 
+        private metaDataBtn: Button
+        private dataViewBtn: Button
+        private graphViewBtn: Button
+
         constructor(app: App, saveSlot: number) {
-            super(app, "dataViewer")
-
-            this.scrollOffset = 0
-            this.current_mode = DISPLAY_MODE.METADATA_MODE
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
+            this.guiState = DISPLAY_MODE.SELECT_SCREEN
             this.saveSlot = saveSlot
-
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.B.id,
-                () => {
-                    switch (this.current_mode) {
-                        case DISPLAY_MODE.DATA_VIEW:
-                            this.current_mode = DISPLAY_MODE.METADATA_MODE
-                            break;
-
-                        case DISPLAY_MODE.GRAPH_GENERATION:
-                            this.current_mode = DISPLAY_MODE.DATA_VIEW
-                            break;
-
-                        case DISPLAY_MODE.METADATA_MODE:
-                            app.popScene()
-                            app.pushScene(new Home(this.app))
-                            break;
-                    
-                        default:
-                            app.popScene()
-                            app.pushScene(new Home(this.app))
-                            break;
-                    }
-                }
-            )
-
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.down.id,
-                () => {
-                    this.scrollOffset = Math.min(this.scrollOffset + 1, MAX_ROWS)
-                }
-            )
-
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.up.id,
-                () => {
-                    this.scrollOffset = Math.max(this.scrollOffset - 1, 0)
-                }
-            )
         }
+
+        /* override */ startup() {
+            super.startup()
+
+            this.metaDataBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "linear_graph",
+                ariaId: "Meta Data",
+                x: -50,
+                y: 30,
+                onClick: () => {
+                    this.guiState = DISPLAY_MODE.META_DATA_VIEW
+                },
+            })
+
+            this.dataViewBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "edit_program",
+                ariaId: "View Data",
+                x: 0,
+                y: 30,
+                onClick: () => {
+                    this.guiState = DISPLAY_MODE.DATA_VIEW
+                },
+            })
+
+            this.graphViewBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "largeDisk",
+                ariaId: "View Graph",
+                x: 50,
+                y: 30,
+                onClick: () => {
+                    this.guiState = DISPLAY_MODE.GRAPH_VIEW
+                },
+            })
+
+            this.navigator.addButtons([this.metaDataBtn, this.dataViewBtn, this.graphViewBtn])
+        }
+
 
         draw_grid() {
             const colBufferSize = Screen.WIDTH / FauxDataLogger.headers.length
@@ -88,7 +92,7 @@ namespace microcode {
             }
         }
 
-        update() {
+        draw() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
                 Screen.TOP_EDGE,
@@ -98,20 +102,28 @@ namespace microcode {
             )
 
             if (FauxDataLogger.isEmpty) {
+                screen.printCenter("No data has been recorded", Screen.HALF_HEIGHT)
                 return;
             }
-            
+
             let rowOffset = 0
 
-            switch (this.current_mode) {
-                case DISPLAY_MODE.METADATA_MODE:
+            switch (this.guiState) {
+                case DISPLAY_MODE.SELECT_SCREEN:
+                    screen.printCenter("Recorded Data Options", 5)
+                    this.metaDataBtn.draw()
+                    this.dataViewBtn.draw()
+                    this.graphViewBtn.draw()
+                    break
+
+                case DISPLAY_MODE.META_DATA_VIEW:
                     screen.printCenter("MetaData for Save " + this.saveSlot, 2)
 
                     control.onEvent(
                         ControllerButtonEvent.Pressed,
                         controller.A.id,
                         () => {
-                            this.current_mode = DISPLAY_MODE.DATA_VIEW   
+                            this.guiState = DISPLAY_MODE.DATA_VIEW   
                         }
                     )
 
@@ -184,10 +196,6 @@ namespace microcode {
                     }
                     break;
 
-                case DISPLAY_MODE.GRAPH_GENERATION:
-
-                    break;
-
                 case DISPLAY_MODE.DATA_VIEW:
                     this.draw_grid()
 
@@ -237,10 +245,16 @@ namespace microcode {
                         rowOffset += rowDeltaBuffer
                     }
                     break;
+
+                case DISPLAY_MODE.DATA_VIEW:
+
+                    break
             
                 default:
                     break;
             }
+
+            super.draw()
         }
     }
 }

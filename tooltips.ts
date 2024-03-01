@@ -170,6 +170,11 @@ namespace microcode {
         else if (id == "Volume") res = "Volume"
         else if (id == "Compass") res = "Compass"
         else if (id == "Oscilloscope") res = "Oscilloscope"
+
+        else if (id == "Meta Data") res = "Meta Data"
+        else if (id == "View Data") res = "View Data"
+        else if (id == "View Graph") res = "View Graph"
+        
         
         return res
     }
