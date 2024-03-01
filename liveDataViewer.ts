@@ -22,16 +22,15 @@ namespace microcode {
         private dataBuffers: number[][];
         private guiState: GUI_STATE
 
-        // Oscilloscope offsets:
-        private oscXOffset: number
-        private oscYOffset: number
+        private windowWidth: number
+        private windowHeight: number
 
+        private windowWidthBuffer: number
+        private windowTopBuffer: number
+        private windowBotBuffer: number
+
+        private xScrollOffset: number
         private yScrollOffset: number
-
-        // For axis:
-        private xUnit: number
-        private yUnit: number
-        private zoomDepth: number
 
         private sensors: Sensor[]
 
@@ -41,13 +40,15 @@ namespace microcode {
             this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
             this.sensors = sensors
 
-            this.oscXOffset = 0
-            this.oscYOffset = 0
-            this.yScrollOffset = 0
+            this.windowWidth = Screen.WIDTH
+            this.windowHeight = Screen.HEIGHT
 
-            this.xUnit = 10
-            this.yUnit = 10
-            this.zoomDepth = 1
+            this.windowWidthBuffer = 18
+            this.windowTopBuffer = 5
+            this.windowBotBuffer = 20
+
+            this.xScrollOffset = 0
+            this.yScrollOffset = 0
 
             this.dataBuffers = []
             for (let i = 0; i < this.sensors.length; i++) {
@@ -58,15 +59,22 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 () => {
-                    if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
-                        this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
-                    }
+                    // if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
+                    //     this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
+                    // }
 
-                    if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
-                        if (this.zoomDepth < 5) {
-                            this.zoomDepth += 1
-                        }
-                    }
+                    this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.33)
+                    this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.60)
+
+                    this.windowWidthBuffer = this.windowWidthBuffer - (18 * 0.60)
+                    this.windowTopBuffer = this.windowTopBuffer - (5 * 0.33)
+                    this.windowBotBuffer = this.windowBotBuffer - (20 * 0.33)
+
+                    // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
+                    //     if (this.zoomDepth < 5) {
+                    //         this.zoomDepth += 1
+                    //     }
+                    // }
                 }
             )
 
@@ -74,17 +82,18 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => {
-                    if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE && this.zoomDepth === 1) {
-                        this.guiState = GUI_STATE.PLOTTING
-                    }
-
-                    if (this.zoomDepth > 1) {
-                        this.zoomDepth -= 1
+                    if (this.windowHeight <= Screen.HEIGHT && this.windowWidth <= Screen.WIDTH) {
+                        app.popScene()
+                        app.pushScene(new Home(app))
                     }
                     
                     else {
-                        app.popScene()
-                        app.pushScene(new Home(app))
+                        this.windowHeight = this.windowHeight - (Screen.HEIGHT * 0.33)
+                        this.windowWidth = this.windowWidth - (Screen.WIDTH * 0.60)
+    
+                        this.windowWidthBuffer = this.windowWidthBuffer + (18 * 0.60)
+                        this.windowTopBuffer = this.windowTopBuffer + (5 * 0.33)
+                        this.windowBotBuffer = this.windowBotBuffer + (20 * 0.33)                      
                     }
                 }
             )
@@ -93,9 +102,9 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    if (this.guiState === GUI_STATE.PLOTTING) {
-                        this.guiState = GUI_STATE.SENSOR_INFORMATION    
-                    }
+                    // if (this.guiState === GUI_STATE.PLOTTING) {
+                    //     this.guiState = GUI_STATE.SENSOR_INFORMATION    
+                    // }
 
                     this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
                 }
@@ -105,9 +114,9 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
-                        this.guiState = GUI_STATE.PLOTTING
-                    }
+                    // if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
+                    //     this.guiState = GUI_STATE.PLOTTING
+                    // }
 
                     this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
                 }
@@ -118,7 +127,7 @@ namespace microcode {
                 controller.left.id,
                 () => {
                     // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
-                    //     this.oscXOffset = Math.max(this.oscXOffset - 5, -WIDTH_BUFFER)
+                    this.xScrollOffset = Math.min(this.xScrollOffset + 10, this.windowWidth)
                     // }
                 }
             )
@@ -128,7 +137,8 @@ namespace microcode {
                 controller.right.id,
                 () => {
                     // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
-                    //     this.oscXOffset = Math.min(this.oscXOffset + 5, WIDTH_BUFFER)
+                    this.xScrollOffset = Math.max(this.xScrollOffset - 10, -this.windowWidth)
+                    
                     // }
                 }
             )
@@ -165,31 +175,7 @@ namespace microcode {
             else {
                 this.plot()
             }
-
             basic.pause(100);
-        }
-
-
-        draw_grid() {
-            for (let x = this.xUnit; x < Screen.HEIGHT - BOT_EDGE_BUFFER - this.yUnit; x += this.xUnit) {
-                screen.drawLine(
-                    WIDTH_BUFFER + this.oscXOffset,
-                    TOP_EDGE_BUFFER + x + this.oscYOffset,
-                    Screen.WIDTH - WIDTH_BUFFER + this.oscXOffset, 
-                    TOP_EDGE_BUFFER + x + this.oscYOffset,
-                    0x1
-                );
-            }
-
-            for (let y = this.yUnit; y < Screen.WIDTH - WIDTH_BUFFER - this.xUnit; y += this.yUnit) {
-                screen.drawLine(
-                    WIDTH_BUFFER + y + this.oscXOffset,
-                    TOP_EDGE_BUFFER + this.xUnit + this.oscYOffset,
-                    WIDTH_BUFFER + y + this.oscXOffset,
-                    screen.height - TOP_EDGE_BUFFER + this.oscYOffset,
-                    0x1
-                );
-            }
         }
 
         /**
@@ -202,20 +188,18 @@ namespace microcode {
 
             // Sensor information, displayed below the plot:
             for (let i = 0; i < this.sensors.length; i++) {
-                // (this.sensors[i].name.length * simage.font5.charWidth)
-
                 screen.fillRect(
                     2,
-                    screen.height - BOT_EDGE_BUFFER + this.yScrollOffset + 15 + (i * 12),
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + 15 + (i * 12),
                     7,
                     7,
                     color
                 )
                 
-                screen.print(this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maxReading
-                    + " Peak " + this.sensors[i].peakDataPoint[1], 
+                screen.print(this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maxReading +
+                    " Peak " + this.sensors[i].peakDataPoint[1], 
                     14,
-                    screen.height - BOT_EDGE_BUFFER + this.yScrollOffset + 15 + (i * 12),
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + 15 + (i * 12),
                     color
                 )
 
@@ -227,23 +211,22 @@ namespace microcode {
             // Draw data
             color = 8;
             this.sensors.forEach(function(sensor) {
-                sensor.draw(WIDTH_BUFFER + 2 + this.oscXOffset, BOT_EDGE_BUFFER + this.oscYOffset - this.yScrollOffset, color)
-                // sensor.draw(WIDTH_BUFFER + 2 + this.oscXOffset, BOT_EDGE_BUFFER - this.oscYOffset + 1, color)
+                sensor.draw(this.windowWidthBuffer + 2 + this.xScrollOffset, this.windowBotBuffer - this.yScrollOffset, color)
                 color = (color + 1) % 15
             })
             
 
-            // Value of the latest readings
-            const latestReadings = this.sensors.map(function(sensor) {return [sensor.getReading(), sensor.maxReading]})
-            
-            // Draw the latest reading on the right-hand side:
+            // Draw the latest reading on the right-hand side as a Ticker:
+
             color = 8;
+            const latestReadings = this.sensors.map(function(sensor) {return [sensor.getReading(), sensor.maxReading]})
+
             latestReadings.forEach(function(reading) {
-                const y = Math.round(screen.height - ((reading[0] / reading[1]) * (screen.height))) - TOP_EDGE_BUFFER - BOT_EDGE_BUFFER
+                const y = Math.round(Screen.HEIGHT - ((reading[0] / reading[1]) * (Screen.HEIGHT)))
                 screen.print(
                     reading[0].toString(),
-                    screen.width - WIDTH_BUFFER + 1,
-                    y + this.yScrollOffset,
+                    Screen.WIDTH + this.xScrollOffset - 18 + 1,
+                    y + this.yScrollOffset - this.windowBotBuffer - this.windowTopBuffer,
                     color,
                     simage.font5,
                 )
@@ -255,17 +238,17 @@ namespace microcode {
         draw_axes() {
             for (let i = 0; i < 2; i++) {
                 screen.drawLine(
-                    WIDTH_BUFFER + this.oscXOffset,
-                    screen.height - BOT_EDGE_BUFFER + i + this.oscYOffset + this.yScrollOffset, 
-                    screen.width - WIDTH_BUFFER + this.oscXOffset, 
-                    screen.height - BOT_EDGE_BUFFER + i + this.oscYOffset + this.yScrollOffset, 
+                    this.windowWidthBuffer + this.xScrollOffset,
+                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
+                    this.windowWidth - this.windowWidthBuffer + this.xScrollOffset, 
+                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
                 screen.drawLine(
-                    WIDTH_BUFFER + i + this.oscXOffset, 
-                    TOP_EDGE_BUFFER + this.oscYOffset + this.yScrollOffset, 
-                    WIDTH_BUFFER + i + this.oscXOffset, 
-                    screen.height - BOT_EDGE_BUFFER + this.oscYOffset + this.yScrollOffset, 
+                    this.windowWidthBuffer + i + this.xScrollOffset, 
+                    this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
+                    this.windowWidthBuffer + i + this.xScrollOffset, 
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
             }

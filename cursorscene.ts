@@ -37,22 +37,22 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => this.moveCursor(CursorDir.Right)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => this.moveCursor(CursorDir.Up)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => this.moveCursor(CursorDir.Down)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => this.moveCursor(CursorDir.Left)
@@ -60,17 +60,17 @@ namespace microcode {
 
             // click
             const click = () => this.cursor.click()
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 click
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id + keymap.PLAYER_OFFSET,
                 click
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => this.back()
@@ -149,7 +149,7 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
         
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => this.goBack1PageFn()
