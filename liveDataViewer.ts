@@ -32,6 +32,8 @@ namespace microcode {
         private xScrollOffset: number
         private yScrollOffset: number
 
+        private selectedXCoordinate: number
+
         private sensors: Sensor[]
 
         constructor(app: App, sensors: Sensor[]) {
@@ -50,6 +52,8 @@ namespace microcode {
             this.xScrollOffset = 0
             this.yScrollOffset = 0
 
+            this.selectedXCoordinate = (Screen.WIDTH / 2)
+
             this.dataBuffers = []
             for (let i = 0; i < this.sensors.length; i++) {
                 this.dataBuffers.push([])
@@ -63,18 +67,13 @@ namespace microcode {
                     //     this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
                     // }
 
-                    this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.33)
-                    this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.60)
+                    this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
+                    this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
 
-                    this.windowWidthBuffer = this.windowWidthBuffer - (18 * 0.60)
-                    this.windowTopBuffer = this.windowTopBuffer - (5 * 0.33)
-                    this.windowBotBuffer = this.windowBotBuffer - (20 * 0.33)
+                    this.windowWidthBuffer = this.windowWidthBuffer - (18 * 0.5)
+                    this.windowTopBuffer = this.windowTopBuffer - (5 * 0.5)
+                    this.windowBotBuffer = this.windowBotBuffer - (20 * 0.5)
 
-                    // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
-                    //     if (this.zoomDepth < 5) {
-                    //         this.zoomDepth += 1
-                    //     }
-                    // }
                 }
             )
 
@@ -88,12 +87,12 @@ namespace microcode {
                     }
                     
                     else {
-                        this.windowHeight = this.windowHeight - (Screen.HEIGHT * 0.33)
-                        this.windowWidth = this.windowWidth - (Screen.WIDTH * 0.60)
+                        this.windowHeight = this.windowHeight - (Screen.HEIGHT * 0.5)
+                        this.windowWidth = this.windowWidth - (Screen.WIDTH * 0.5)
     
-                        this.windowWidthBuffer = this.windowWidthBuffer + (18 * 0.60)
-                        this.windowTopBuffer = this.windowTopBuffer + (5 * 0.33)
-                        this.windowBotBuffer = this.windowBotBuffer + (20 * 0.33)                      
+                        this.windowWidthBuffer = this.windowWidthBuffer + (18 * 0.5)
+                        this.windowTopBuffer = this.windowTopBuffer + (5 * 0.5)
+                        this.windowBotBuffer = this.windowBotBuffer + (20 * 0.5)                      
                     }
                 }
             )
@@ -107,6 +106,7 @@ namespace microcode {
                     // }
 
                     this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
+                    this.update()
                 }
             )
 
@@ -119,6 +119,7 @@ namespace microcode {
                     // }
 
                     this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
+                    this.update()
                 }
             )
 
@@ -128,6 +129,8 @@ namespace microcode {
                 () => {
                     // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
                     this.xScrollOffset = Math.min(this.xScrollOffset + 10, this.windowWidth)
+
+                    this.update()
                     // }
                 }
             )
@@ -139,6 +142,8 @@ namespace microcode {
                     // if (this.guiState === GUI_STATE.OSCILLOSCOPE_MODE) {
                     this.xScrollOffset = Math.max(this.xScrollOffset - 10, -this.windowWidth)
                     
+
+                    this.update()
                     // }
                 }
             )
@@ -156,32 +161,14 @@ namespace microcode {
                 sensor.readIntoBuffer()
             })
 
-            if (this.guiState === GUI_STATE.SENSOR_INFORMATION) {
-                // const oscModeBtn = new Button({
-                //     parent: null,
-                //     style: ButtonStyles.Transparent,
-                //     icon: "green_tick",
-                //     ariaId: "Oscilloscope",
-                //     x: 60,
-                //     y: 30,
-                //     onClick: () => {
-                //         this.guiState = GUI_STATE.OSCILLOSCOPE_MODE
-                //     }
-                // })
+            this.plot()
 
-                // oscModeBtn.draw()
-            }
-
-            else {
-                this.plot()
-            }
             basic.pause(100);
         }
 
         /**
          * Display mode for plotting all incoming data on y axis
          * Presumes pre-processed this.dataBuffers; y values relative to screen.height
-         * Bound to Microbit button A
          */
         private plot() {            
             let color = 8;
@@ -214,6 +201,14 @@ namespace microcode {
                 sensor.draw(this.windowWidthBuffer + 2 + this.xScrollOffset, this.windowBotBuffer - this.yScrollOffset, color)
                 color = (color + 1) % 15
             })
+
+
+            screen.fillCircle(
+                (Screen.WIDTH / 2),// + this.windowWidth - this.windowWidth,
+                (Screen.HEIGHT / 2),// + this.windowTopBuffer - this.windowBotBuffer,
+                8,
+                4
+            )
             
 
             // Draw the latest reading on the right-hand side as a Ticker:
