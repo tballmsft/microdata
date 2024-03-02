@@ -44,7 +44,7 @@ namespace microcode {
                 screen.printCenter("Press B to back out.", screen.height / 2);
             }
 
-            if (this.measurementOpts.delay > 0) {
+            else if (this.measurementOpts.delay > 0) {
                 screen.printCenter("Data logger starting in", (screen.height / 2) - 10);
                 screen.printCenter(this.measurementOpts.delay + " seconds...", screen.height / 2)
                 this.measurementOpts.delay -= 1
