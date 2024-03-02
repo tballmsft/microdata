@@ -6,7 +6,8 @@ namespace microcode {
         [1, 5],  // Seconds
         [1, 5],  // Minutes
         [1, 5],  // Hours
-        [1, 5]   // Days
+        [1, 5],  // Days
+        [1, 5]   // Delay
     ]
 
     const enum GUI_STATE {
@@ -20,17 +21,27 @@ namespace microcode {
         private currentColumn: number
         private selectedSensors: Sensor[]
 
-        // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days]:
-        private userSelection = [10, 0, 1, 0, 0, 0]
+        // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
+        private userSelection: number[]
 
         constructor(app: App, selectedSensors: Sensor[]) {
             super(app, "dataViewer")
 
             this.guiState = GUI_STATE.DEFAULT
-            this.guiRows = ["Quantity: ", "Ms: ", "Seconds: ", "Minutes: ", "Hours: ", "Days: "]
-            this.currentColumn = 0
+            this.guiRows = ["Measurements: ", 
+                            "Milli-Seconds: ", 
+                            "Seconds: ", 
+                            "Minutes: ", 
+                            "Hours: ", 
+                            "Days: ", 
+                            "Start Delay: "
+                        ]
 
+            this.currentColumn = 0
             this.selectedSensors = selectedSensors
+
+            // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
+            this.userSelection = [10, 0, 1, 0, 0, 0, 0]
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -127,7 +138,7 @@ namespace microcode {
             const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
 
             let period: number = 0
-            for (let i = 1; i < this.userSelection.length; i++) {
+            for (let i = 1; i < this.userSelection.length - 1; i++) {
                 period += this.userSelection[i] * timeConversionTableMs[i - 1]
             }
 
@@ -135,6 +146,7 @@ namespace microcode {
                 sensor: this.selectedSensors[0], // Does not grant multiple sensors
                 measurements: this.userSelection[0],
                 period,
+                delay: this.userSelection[6]
             }
         }
 
@@ -148,30 +160,36 @@ namespace microcode {
                 0xC
             )
 
-            screen.printCenter("Measurement Settings", 4)
-            
-            const rowSize = Screen.HEIGHT / (this.userSelection.length + 1)
             let timeAsString;
             let rowOffset = 0;
 
-            for (let i = 0; i < 6; i++) {
-                screen.print(this.guiRows[i],
-                    35 - (font.charWidth * this.guiRows[i].length) / 2,
-                    22 + rowOffset
-                )
+            const headerX = 2
+            const optionX = (font.charWidth * this.guiRows[0].length) + 10
+            const pointerX = optionX + 20
+            const rowSize = Screen.HEIGHT / (this.userSelection.length + 1)
 
+
+            screen.printCenter("Measurement Settings", 2)
+
+            for (let i = 0; i < this.userSelection.length; i++) {
+                screen.print(this.guiRows[i],
+                    headerX,
+                    18 + rowOffset
+                )
+                
                 timeAsString = this.userSelection[i].toString()
                 screen.print(timeAsString,
-                    70 - (font.charWidth * timeAsString[i].length) / 2,
-                    22 + rowOffset
+                    optionX,
+                    18 + rowOffset
                 )
                 rowOffset += rowSize
             }
 
             // Cursor arrow
             screen.print("<--",
-                100 - (font.charWidth * "<--".length) / 2,
-                22 + (rowSize * this.currentColumn)
+                pointerX,
+                18 + (rowSize * this.currentColumn),
+                0
             )
         }
     }

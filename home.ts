@@ -58,9 +58,9 @@ namespace microcode {
         private drawVersion() {
             const font = simage.font5
             Screen.print(
-                "Prototype 3",
+                "Prototype 6",
                 Screen.RIGHT_EDGE - font.charWidth * "Prototype 6".length,
-                Screen.BOTTOM_EDGE - font.charHeight - 1,
+                Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
             )

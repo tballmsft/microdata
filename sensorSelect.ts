@@ -180,44 +180,44 @@ namespace microcode {
                 dynamicBoundaryColorsOn: true, 
             }))
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "compass",
-                ariaId: "Compass",
-                x: 0,
-                y: 15,
-                onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "compass",
+            //     ariaId: "Compass",
+            //     x: 0,
+            //     y: 15,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new CompassHeadingSensor())
+            //     },          
+            //     dynamicBoundaryColorsOn: true, 
+            // }))
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "compass",
-                ariaId: "Compass",
-                x: 30,
-                y: 15,
-                onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "compass",
+            //     ariaId: "Compass",
+            //     x: 30,
+            //     y: 15,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new CompassHeadingSensor())
+            //     },
+            //     dynamicBoundaryColorsOn: true, 
+            // }))
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "compass",
-                ariaId: "Compass",
-                x: 60,
-                y: 15,
-                onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "compass",
+            //     ariaId: "Compass",
+            //     x: 60,
+            //     y: 15,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new CompassHeadingSensor())
+            //     },          
+            //     dynamicBoundaryColorsOn: true, 
+            // }))
 
             //-----------
 

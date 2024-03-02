@@ -39,11 +39,20 @@ namespace microcode {
                     this.scrollOffset = Math.max(this.scrollOffset - 1, 0)
                 }
             )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => {
+                    app.popScene()
+                    app.pushScene(new DataViewSelect(this.app))
+                }
+            )
         }
 
         draw_grid() {
             const colBufferSize = Screen.WIDTH / FauxDataLogger.headers.length
-            const rowBufferSize = Screen.HEIGHT /  Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
+            const rowBufferSize = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
 
             for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
                 Screen.drawLine(

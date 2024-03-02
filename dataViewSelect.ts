@@ -11,6 +11,17 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            if (FauxDataLogger.isEmpty) {
+                control.onEvent(
+                    ControllerButtonEvent.Pressed,
+                    controller.A.id,
+                    () => {
+                        this.app.popScene()
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    }
+                )
+            }
+
             this.metaDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
@@ -63,7 +74,8 @@ namespace microcode {
             )
 
             if (FauxDataLogger.isEmpty) {
-                screen.printCenter("No data has been recorded", Screen.HALF_HEIGHT)
+                screen.printCenter("No data has been recorded", 5)
+                screen.printCenter("Press A to Record some!", Screen.HALF_HEIGHT)
                 return;
             }
 
