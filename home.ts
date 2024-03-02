@@ -14,7 +14,7 @@ namespace microcode {
             this.liveDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph",
+                icon: "linear_graph_1",
                 ariaId: "linear_graph",
                 x: -50,
                 y: 30,

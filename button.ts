@@ -200,6 +200,7 @@ namespace microcode {
         public onClick?: (button: Button) => void
         private selected: boolean
         private dynamicBoundaryColorsOn: boolean
+        private boundaryColor: number
 
         public get ariaId(): string {
             return (
@@ -230,6 +231,7 @@ namespace microcode {
             y: number
             onClick?: (button: Button) => void,
             dynamicBoundaryColorsOn?: boolean
+            boundaryColor?: number
         }) {
             super(
                 opts.x,
@@ -249,6 +251,12 @@ namespace microcode {
             }
             else {
                 this.dynamicBoundaryColorsOn = opts.dynamicBoundaryColorsOn
+                this.boundaryColor = 2
+            }
+
+            if (opts.boundaryColor != null) {
+                this.dynamicBoundaryColorsOn = true
+                this.boundaryColor = opts.boundaryColor
             }
         }
 
@@ -290,7 +298,7 @@ namespace microcode {
             super.draw()
 
             if (this.dynamicBoundaryColorsOn) {
-                let boundaryColour = 2 // Red
+                let boundaryColour = this.boundaryColor // Red
                 if (this.selected) {
                     boundaryColour = 7 // green
                 }

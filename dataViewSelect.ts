@@ -25,7 +25,7 @@ namespace microcode {
             this.metaDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph",
+                icon: "largeSettingsGear",
                 ariaId: "Meta Data",
                 x: -50,
                 y: 30,
@@ -33,12 +33,13 @@ namespace microcode {
                     app.popScene()
                     app.pushScene(new RecordedDataViewer(this.app, 1, DATA_VIEW_DISPLAY_MODE.META_DATA_VIEW))
                 },
+                boundaryColor: 7,
             })
 
             this.dataViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "edit_program",
+                icon: "largeDisk",
                 ariaId: "View Data",
                 x: 0,
                 y: 30,
@@ -46,12 +47,13 @@ namespace microcode {
                     app.popScene()
                     app.pushScene(new RecordedDataViewer(this.app, 1, DATA_VIEW_DISPLAY_MODE.DATA_VIEW))
                 },
+                boundaryColor: 7,
             })
 
             this.graphViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk",
+                icon: "linear_graph_2",
                 ariaId: "View Graph",
                 x: 50,
                 y: 30,
@@ -59,6 +61,7 @@ namespace microcode {
                     app.popScene()
                     app.pushScene(new RecordedDataViewer(this.app, 1, DATA_VIEW_DISPLAY_MODE.GRAPH_VIEW))
                 },
+                boundaryColor: 7,
             })
 
             this.navigator.addButtons([this.metaDataBtn, this.dataViewBtn, this.graphViewBtn])

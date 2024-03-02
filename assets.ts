@@ -41,6 +41,7 @@ namespace microcode {
             if (name == "disk3") return icondb.disk3
             if (name == "largeDisk") return icondb.largeDiskIcon
 
+
             // basic colors led editor
             if (name == "solid_red") return icondb.solid_red
             if (name == "solid_black") return icondb.solid_black
@@ -51,7 +52,9 @@ namespace microcode {
             if (name == "smiley_buttons") return icondb.sampleSmileyButtons
 
             // Newly added icons for MicroData Home menu:
-            if (name == "linear_graph") return icondb.linearGraph
+            if (name == "linear_graph_1") return icondb.linearGraph1
+            if (name == "linear_graph_2") return icondb.linearGraph2
+            
 
             if (name == "led_light_sensor") return icondb.led_light_sensor
             if (name == "thermometer") return icondb.thermometer
@@ -76,8 +79,8 @@ namespace microcode {
             if (name == "tile_button_a") return icondb.tile_button_a
             if (name == "compass") return icondb.compass
 
-            // if (name == "compass") return icondb.compass
-            // if (name == "compass") return icondb.compass
+            if (name == "settingsGear") return icondb.settingsGear
+            if (name == "largeSettingsGear") return icondb.largeSettingsGear
             // if (name == "compass") return icondb.compass
 
             extraImage = null
@@ -363,6 +366,42 @@ namespace icondb {
     6666b88111111111111111118f8b6666
     6666bb811111111111111111888b6666
     66666bbbbbbbbbbbbbbbbbbbbbbb6666
+    66666666666666666666666666666666
+    66666666666666666666666666666666
+    b666666666666666666666666666666b
+    .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+`
+
+export const largeMetaDataIcon = img`
+    .666666666666666666666666666666.
+    66666666666666666666666666666666
+    66666666666666666666666666666666
+    6666bbbbbbbbbbbbbbbbbbbbbb666666
+    666bb811111111111111111118b66666
+    666b88111111111111111111188b6666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    6666b88ccccc111111111cccccc88b66
+    6666bcccccddb111111cbbccccc88b66
+    6666bccccdbbbbbbbbbbcccc8888b666
+    6666b8cccccddbcccbdcccc88888b666
+    6666b888dbbcc11111cbddd88888b666
+    6666bddbbbcc111111cccbbb8888b666
+    66ddddbbb11111111111bbbcccc8b666
+    66ddddbbb11111111111bbbcccc8b666
+    6666bddbbbcc111111ccbbbc8888b666
+    6666b888cbbcc11111cbbcc88888b666
+    666b888ccccddbcccbdcccc88888b666
+    666b88cccdbbbbbbbbbbcccc8888b666
+    666bcccccddb1111111cbbccccc8b666
+    666b8ccccc1111111111ccccc888b666
+    666b8811111111111111111118f8b666
+    666bb81111111111111111111888b666
+    6666bbbbbbbbbbbbbbbbbbbbbbbbb666
     66666666666666666666666666666666
     66666666666666666666666666666666
     b666666666666666666666666666666b
@@ -2272,6 +2311,43 @@ f f f f f f f f f f f f f f f .
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
 `
 
+
+
+export const largeSettingsGear = img`
+66666666666666666666666666666666
+66666666666666666666666666666666
+666666666666666dd666666666666666
+66666666666666dddd66666666666666
+66666dddd666ddbbbbcc666dddd66666
+66666dddd666ddbbbbcc666dddd66666
+666dddbbbb66ddbbbbcc66dbbbccc666
+666dddbbbbccddbbbbccdddbbbccc666
+6666ddbbbbbbbbbbbbbbbbbbbbcc6666
+66666dbbbbbbbbbbbbbbbbbbbbc66666
+666666ccbbddbbccccbbddbbcc666666
+666666ccbbddbbc66cbbddbbcc666666
+66666dddbbbbcc6666ccbbbbdddd6666
+6666ddddbbbbc666666cbbbbdddd6666
+666dbbbbbbcc66666666ccbbbbbbc666
+6dddbbbbbbc6666666666cbbbbbbccc6
+6dddbbbbbbc6666666666cbbbbbbccc6
+6dddbbbbbbcc66666666ccbbbbbbccc6
+666cccccbbbbc6666666cbbbbcccc666
+6666ccccbbbbcc66666ccbbbbccc6666
+666666ddbbddbbc66cbbddbbcc666666
+666666ddbbddbbccccbbddbbcc666666
+66666dbbbbbbbbbbbbbbbbbbbbc66666
+6666ddbbbbbbbbbbbbbbbbbbbbcc6666
+6666ddbbbbccccbbbbccccbbbbcc6666
+6666ddbbbb66ccbbbbcc66bbbbcc6666
+66666cccc666ccbbbbcc666cccc66666
+66666cccc666ccbbbbcc666cccc66666
+66666666666666cccc66666666666666
+666666666666666cc666666666666666
+66666666666666666666666666666666
+66666666666666666666666666666666
+`
+
     export const largeNewProgramIcon = img`
     .11111111..............11111111.
     1bbbbbbbb..............bbbbbbbb1
@@ -2416,7 +2492,7 @@ f f f f f f f f f f f f f f f .
 `*/
 
 
-    export const linearGraph = img`
+export const linearGraph1 = img`
 .111111111111111111111111111111.
 11111111111111111111111111111111
 11ff1111111111111111111111111111
@@ -2444,6 +2520,42 @@ f f f f f f f f f f f f f f f .
 11ff1114411111111111111111111111
 11ff1144111111111111111111111111
 11ff1441111111111111111111111111
+11ff4411111111111111111111111111
+11ff4111111111111111111111111111
+11ffffffffffffffffffffffffffff11
+11ffffffffffffffffffffffffffff11
+1111111111111111111111111111111b
+.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+`
+
+export const linearGraph2 = img`
+.111111111111111111111111111111.
+11111111111111111111111111111111
+11ff1111111111111111111111111111
+11ff1111111111111111111111141111
+11ff1111111111111111111111441111
+11ff1111111111111111111114411888
+11ff1111111111111111111144188881
+11ff1111111111111111111448881111
+11ff1111111111111111114888111111
+11ff1111111111111111888111111111
+11ff1111111111111188441111111111
+11ff1111111111118884411111111111
+11ff1111111111188144111111111111
+11ff1111111118811441111111111111
+11ff1111111188114411111111111111
+11ff1111111881144111111111111111
+11ff1111118811441111111111111111
+11ff1111188114411111111111111111
+11ff1111881144111111111111111111
+11ff1118811441111111111111111111
+11ff1188114411111111111111111111
+11ff1881144111111111111111111111
+11ff1811441111111111111111111111
+11ff8814411111111111111111111111
+11ff8844111111111111111111111111
+11ff8441111111111111111111111111
+11ff8441111111111111111111111111
 11ff4411111111111111111111111111
 11ff4111111111111111111111111111
 11ffffffffffffffffffffffffffff11
