@@ -51,6 +51,7 @@
         "fauxDatalogger.ts",
         "sceneFactory.ts",
         "userOptions.ts",
+        "dataViewSelect.ts",
         "sensors.ts"
     ],
 
