@@ -13,7 +13,7 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-
+        
             // Issues with Crashing when too many buttons are visible persist:
 
             this.btns.push(new Button({
@@ -22,7 +22,7 @@ namespace microcode {
                 icon: "accelerometer",
                 ariaId: "accelerometer",
                 x: -60,
-                y: -34,
+                y: -40,
                 onClick: () => {
                     this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
                 },          
@@ -35,7 +35,7 @@ namespace microcode {
                 icon: "pin_0",
                 ariaId: "Pin 0",
                 x: -30,
-                y: -34,
+                y: -40,
                 onClick: () => {
                     this.selectedSensors.push(new PinSensor(TouchPin.P0))
                 },          
@@ -45,10 +45,38 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
+                icon: "pin_1",
+                ariaId: "Pin 1",
+                x: 0,
+                y: -40,
+                onClick: () => {
+                    this.selectedSensors.push(new PinSensor(TouchPin.P1))
+                },          
+                dynamicBoundaryColorsOn: true,
+            }))
+
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "pin_2",
+                ariaId: "Pin 2",
+                x: 30,
+                y: -40,
+                onClick: () => {
+                    this.selectedSensors.push(new PinSensor(TouchPin.P2))
+                },          
+                dynamicBoundaryColorsOn: true,
+            }))
+
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
                 icon: "magnet",
                 ariaId: "S10",
-                x: 0,
-                y: -34,
+                x: 60,
+                y: -40,
                 onClick: () => {
                     this.selectedSensors.push(new MagnetSensor(Dimension.X))
                 },          
@@ -58,23 +86,10 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "accelerometer",
-                ariaId: "accelerometer",
-                x: 30,
-                y: -34,
-                onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
                 icon: "right_turn",
                 ariaId: "Pitch",
-                x: 60,
-                y: -34,
+                x: -60,
+                y: -11,
                 onClick: () => {
                     this.selectedSensors.push(new RotationSensor(Rotation.Pitch))
                 }, 
@@ -88,8 +103,8 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "right_spin",
                 ariaId: "Roll",
-                x: -60,
-                y: -4,
+                x: -30,
+                y: -11,
                 onClick: () => {
                     this.selectedSensors.push(new RotationSensor(Rotation.Roll))
                 },          
@@ -102,8 +117,8 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "led_light_sensor",
                 ariaId: "led_light_sensor",
-                x: -30,
-                y: -4,
+                x: 0,
+                y: -11,
                 onClick: () => {
                     this.selectedSensors.push(new LightSensor())
                 },
@@ -115,8 +130,8 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "thermometer",
                 ariaId: "thermometer",
-                x: 0,
-                y: -4,
+                x: 30,
+                y: -11,
                 onClick: () => {
                     this.selectedSensors.push(new TemperatureSensor())
                 },
@@ -128,8 +143,8 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "finger_press",
                 ariaId: "Logo Press",
-                x: 30,
-                y: -4,
+                x: 60,
+                y: -11,
                 onClick: () => {
                     this.selectedSensors.push(new LogoPressSensor())
                 },          
@@ -141,8 +156,8 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "speaker",
                 ariaId: "Volume",
-                x: 60,
-                y: -4,
+                x: -60,
+                y: 15,
                 onClick: () => {
                     this.selectedSensors.push(new VolumeSensor())
                 },          
@@ -155,10 +170,10 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "right_spin",
+                icon: "compass",
                 ariaId: "Compass",
-                x: -60,
-                y: 26,
+                x: -30,
+                y: 15,
                 onClick: () => {
                     this.selectedSensors.push(new CompassHeadingSensor())
                 },          
@@ -168,15 +183,57 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "tile_button_a",  
-                ariaId: "F3",
-                x: -30,
-                y: 26,
+                icon: "compass",
+                ariaId: "Compass",
+                x: 0,
+                y: 15,
                 onClick: () => {
-                    this.selectedSensors.push(new ButtonPressSensor())
-                },      
-                dynamicBoundaryColorsOn: true,     
+                    this.selectedSensors.push(new CompassHeadingSensor())
+                },          
+                dynamicBoundaryColorsOn: true, 
             }))
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "compass",
+                ariaId: "Compass",
+                x: 30,
+                y: 15,
+                onClick: () => {
+                    this.selectedSensors.push(new CompassHeadingSensor())
+                },          
+                dynamicBoundaryColorsOn: true, 
+            }))
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "compass",
+                ariaId: "Compass",
+                x: 60,
+                y: 15,
+                onClick: () => {
+                    this.selectedSensors.push(new CompassHeadingSensor())
+                },          
+                dynamicBoundaryColorsOn: true, 
+            }))
+
+            //-----------
+
+            // this.btns.push(new Button({
+            //     parent: null,
+            //     style: ButtonStyles.Transparent,
+            //     icon: "tile_button_a",  
+            //     ariaId: "F3",
+            //     x: -60,
+            //     y: 56,
+            //     onClick: () => {
+            //         this.selectedSensors.push(new ButtonPressSensor())
+            //     },      
+            //     dynamicBoundaryColorsOn: true,     
+            // }))
+
 
             this.btns.push(new Button({
                 parent: null,
@@ -184,7 +241,7 @@ namespace microcode {
                 icon: "green_tick",
                 ariaId: "Done",
                 x: 60,
-                y: 40,
+                y: 41,
                 onClick: () => {
                     if (this.selectedSensors.length === 0) {
                         return
@@ -214,26 +271,11 @@ namespace microcode {
                 0xc
             )
             
-            screen.printCenter("Select Sensors to log", 5)
-
-            // Following 3 lines may be tabbed - results in same error regardless:
-
-            // this.btns.forEach((btn) => {
-            //     btn.draw()
-            // })
+            screen.printCenter("Sensor Selection", 2)
 
             for (let i = 0; i < this.btns.length; ++i) {
                 this.btns[i].draw()
             }
-
-            // Identical:
-
-            // this.btns[0].draw()
-            // this.btns[1].draw()
-            // this.btns[2].draw()
-            // this.btns[3].draw()
-            // this.btns[4].draw()
-            // this.btns[5].draw()
 
             super.draw()
         }
