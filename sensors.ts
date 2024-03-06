@@ -44,6 +44,14 @@ namespace microcode {
             return this.sensorFn()
         }
 
+        getNthReading(n: number): number {
+            return this.dataBuffer[n]
+        }
+
+        getDataBufferLength(): number {
+            return this.dataBuffer.length
+        }
+
         getNormalisedReading(): number{
             return this.sensorFn() / this.maxReading
         }
