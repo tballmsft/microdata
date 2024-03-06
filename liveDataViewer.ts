@@ -19,14 +19,15 @@ namespace microcode {
         private xScrollOffset: number
         private yScrollOffset: number
 
-        /* X coordinate that the user wants to zoom in on; adjust offsets to make this point centred, whilst zoomed */
-        private selectedXCoordinate: number
+        /* Coordinates that the user wants to zoom in on; adjust offsets to make this point centred, whilst zoomed */
+        private selectedXCoordinate: number = null
+        private selectedYCoordinate: number = null
 
         /* To plot */
         private sensors: Sensor[]
 
         constructor(app: App, sensors: Sensor[]) {
-            super(app, "yo")
+            super(app, "liveDataViewer")
             this.color = 0
             this.sensors = sensors
 
@@ -41,7 +42,7 @@ namespace microcode {
             this.yScrollOffset = 0
 
             this.selectedXCoordinate = (Screen.WIDTH / 2)
-
+            this.selectedYCoordinate = (Screen.HEIGHT / 2)
 
             //--------------------------------
             // Oscilloscope Movement Controls:
@@ -52,6 +53,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 () => {
+                    if (this.selectedXCoordinate == null || this.selectedYCoordinate == null) {
+                        this.selectedXCoordinate = Math.round(this.sensors[0].getDataBufferLength() / 2)
+                        this.selectedYCoordinate = this.sensors[0].getNthReading(this.selectedXCoordinate)
+                    }
+                    
                     this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
                     this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
 
@@ -150,7 +156,7 @@ namespace microcode {
                 // Colour used to represent this sensor, same colour as plotted & ticker:
                 screen.fillRect(
                     2,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + 15 + (i * 12),
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15 + (i * 12),
                     7,
                     7,
                     color
@@ -160,7 +166,7 @@ namespace microcode {
                 screen.print(this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maxReading +
                     " Peak " + this.sensors[i].peakDataPoint[1], 
                     14,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + 15 + (i * 12),
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15 + (i * 12),
                     color
                 )
 
@@ -171,17 +177,17 @@ namespace microcode {
             // Draw data lines:
             color = 8;
             this.sensors.forEach(function(sensor) {
-                sensor.draw(this.windowWidthBuffer + 2 + this.xScrollOffset, this.windowBotBuffer - this.yScrollOffset, color)
+                sensor.draw(this.windowWidthBuffer + 2 + this.xScrollOffset, this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset, color)
                 color = (color + 1) % 15
             })
 
-            // Draw circle in the screen centre for better testing:
-            screen.fillCircle(
-                (Screen.WIDTH / 2),// + this.windowWidth - this.windowWidth,
-                (Screen.HEIGHT / 2),// + this.windowTopBuffer - this.windowBotBuffer,
-                8,
-                4
-            )
+            // // Draw circle in the screen centre for better testing:
+            // screen.fillCircle(
+            //     (Screen.WIDTH / 2),// + this.windowWidth - this.windowWidth,
+            //     (Screen.HEIGHT / 2),// + this.windowTopBuffer - this.windowBotBuffer,
+            //     8,
+            //     4
+            // )
             
 
             // Draw the latest reading on the right-hand side as a Ticker:
@@ -190,11 +196,13 @@ namespace microcode {
             const latestReadings = this.sensors.map(function(sensor) {return [sensor.getReading(), sensor.maxReading]})
 
             latestReadings.forEach(function(reading) {
-                const y = Math.round(Screen.HEIGHT - ((reading[0] / reading[1]) * (Screen.HEIGHT)))
+                const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset
+                const y = Math.round(Screen.HEIGHT - ((reading[0] / reading[1]) * (Screen.HEIGHT - fromY))) - fromY
+
                 screen.print(
                     reading[0].toString(),
                     Screen.WIDTH + this.xScrollOffset - 18 + 1,
-                    y + this.yScrollOffset - this.windowBotBuffer - this.windowTopBuffer,
+                    y - 2,
                     color,
                     simage.font5,
                 )
