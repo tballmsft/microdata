@@ -23,8 +23,9 @@ namespace microcode {
         private selectedXCoordinate: number
         private selectedYCoordinate: number
 
-
         private currentZoomDepth: number
+
+        private selectedSensorIndex: number
 
         /* To plot */
         private sensors: Sensor[]
@@ -49,6 +50,8 @@ namespace microcode {
 
             this.currentZoomDepth = 0
 
+            this.selectedSensorIndex = 0
+
             //--------------------------------
             // Oscilloscope Movement Controls:
             //--------------------------------
@@ -59,8 +62,8 @@ namespace microcode {
                 controller.A.id,
                 () => {
                     if (this.selectedXCoordinate == null || this.selectedYCoordinate == null) {
-                        this.selectedXCoordinate = Math.round(this.sensors[0].getDataBufferLength() / 2)
-                        this.selectedYCoordinate = this.sensors[0].getNthReading(this.selectedXCoordinate)
+                        this.selectedXCoordinate = Math.round(this.sensors[this.selectedSensorIndex].getDataBufferLength() / 2)
+                        this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
                     }
 
                     this.xScrollOffset = Math.round(Screen.HALF_WIDTH - this.selectedXCoordinate)
@@ -105,7 +108,13 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
+                    if (this.currentZoomDepth > 0) {
+                        this.selectedSensorIndex = ((this.selectedSensorIndex + 1) % this.sensors.length)
+                        this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
+                    }
+                    else {
+                        this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
+                    }
                     this.update() // For fast response to the above change
                 }
             )
@@ -114,7 +123,13 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
+                    if (this.currentZoomDepth > 0) {
+                        this.selectedSensorIndex = Math.max(this.selectedSensorIndex - 1, 0)
+                        this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
+                    }
+                    else {
+                        this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
+                    }
                     this.update() // For fast response to the above change
                 }
             )
@@ -124,8 +139,8 @@ namespace microcode {
                 controller.left.id,
                 () => {
                     if (this.currentZoomDepth != 0) {
-                        if (this.selectedXCoordinate - (Math.abs(this.sensors[0].getDataBufferLength() - this.selectedXCoordinate) / 2) > 0) {
-                            this.selectedXCoordinate -= Math.round(Math.abs(this.sensors[0].getDataBufferLength() - this.selectedXCoordinate) / 2)
+                        if (this.selectedXCoordinate - (Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2) > 0) {
+                            this.selectedXCoordinate -= Math.round(Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2)
                             this.xScrollOffset = Screen.HALF_WIDTH - this.selectedXCoordinate
                         }
 
@@ -139,8 +154,8 @@ namespace microcode {
                 controller.right.id,
                 () => {
                     if (this.currentZoomDepth != 0) {
-                        if (this.selectedXCoordinate + (Math.abs(this.sensors[0].getDataBufferLength() - this.selectedXCoordinate) / 2) < this.sensors[0].getDataBufferLength()) {
-                            this.selectedXCoordinate +=  Math.round(Math.abs(this.sensors[0].getDataBufferLength() - this.selectedXCoordinate) / 2)
+                        if (this.selectedXCoordinate + (Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2) < this.sensors[this.selectedSensorIndex].getDataBufferLength()) {
+                            this.selectedXCoordinate +=  Math.round(Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2)
                             this.xScrollOffset = Screen.HALF_WIDTH - this.selectedXCoordinate
                         }
                         
@@ -200,7 +215,7 @@ namespace microcode {
             // Circle around selected data point:
             if (this.selectedXCoordinate != null && this.selectedYCoordinate != null) {
                 const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset
-                const y = Math.round(Screen.HEIGHT - ((this.selectedYCoordinate / this.sensors[0].maxReading) * (Screen.HEIGHT - fromY))) - fromY
+                const y = Math.round(Screen.HEIGHT - ((this.selectedYCoordinate / this.sensors[this.selectedSensorIndex].maxReading) * (Screen.HEIGHT - fromY))) - fromY
 
                 screen.drawCircle(
                     this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset,
@@ -209,7 +224,6 @@ namespace microcode {
                     1
                 )
             }
-
 
             // Draw the latest reading on the right-hand side as a Ticker if at no-zoom:
             color = 8;
@@ -233,25 +247,20 @@ namespace microcode {
 
             else {
                 const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset
-                const y = Math.round(Screen.HEIGHT - ((this.selectedYCoordinate / this.sensors[0].maxReading) * (Screen.HEIGHT - fromY))) - fromY
-
+                const y = Math.round(Screen.HEIGHT - ((this.selectedYCoordinate / this.sensors[this.selectedSensorIndex].maxReading) * (Screen.HEIGHT - fromY))) - fromY
 
                 screen.print(
                     "x =" + this.selectedXCoordinate.toString(),
                     this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y - 20,
-                    // this.windowWidth - 10,
-                    // 5,
                     color,
                     simage.font5,
                 )
 
                 screen.print(
-                    "y =" + this.sensors[0].getReading().toString(),
+                    "y =" + this.sensors[this.selectedSensorIndex].getReading().toString(),
                     this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y - 10,
-                    // this.windowWidth - 10,
-                    // 15,
                     color,
                     simage.font5,
                 )
