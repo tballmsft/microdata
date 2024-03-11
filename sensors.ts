@@ -7,13 +7,13 @@ namespace microcode {
     const PLOT_SMOOTHING_CONSTANT = 8
     
     export abstract class Sensor {
-        private static BUFFER_LIMIT = 100;
+        static BUFFER_LIMIT = 100;
 
         sensorFn: () => number
         name: string
 
-        minReading: number
-        maxReading: number
+        minimum: number
+        maximum: number
         peakDataPoint: number[]
 
         private numberOfDisplayModes: number;
@@ -29,15 +29,19 @@ namespace microcode {
         ) {
             this.sensorFn = sensorFn
             this.name = name
-            this.minReading = sensorMinReading
-            this.maxReading = sensorMaxReading
+            this.minimum = sensorMinReading
+            this.maximum = sensorMaxReading
             this.numberOfDisplayModes = numberOfDisplayModes
             this.dataBuffer = []
-            this.peakDataPoint = [0, this.minReading]
+            this.peakDataPoint = [0, this.minimum]
         }
 
         cycleDisplayMode() {
             this.currentDisplayMode = (this.currentDisplayMode + 1) % this.numberOfDisplayModes
+        }
+
+        getBufferSize(): number {
+            return this.dataBuffer.length
         }
 
         getReading(): number {
@@ -53,7 +57,7 @@ namespace microcode {
         }
 
         getNormalisedReading(): number{
-            return this.sensorFn() / this.maxReading
+            return this.sensorFn() / this.maximum
         }
 
         readIntoBuffer(): void {
@@ -75,18 +79,12 @@ namespace microcode {
          * @param color
          */
         draw(fromX: number, fromY: number, color: number): void {
-            if (this.peakDataPoint[0] > 0) {
-                screen.fillCircle(
-                    fromX + this.peakDataPoint[0],
-                    Math.round(screen.height - ((this.peakDataPoint[1] / this.maxReading) * (screen.height - fromY))) - fromY,
-                    3,
-                    3
-                )
-            }
 
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
-                const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.maxReading) * (screen.height - fromY))) - fromY
-                const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.maxReading) * (screen.height - fromY))) - fromY
+                const norm1 = ((this.dataBuffer[i] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
+                const norm2 = ((this.dataBuffer[i + 1] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
+                const y1 = Math.round(screen.height - norm1) - fromY
+                const y2 = Math.round(screen.height - norm2) - fromY
 
                 if (this.dataBuffer[i] > this.peakDataPoint[1]) {
                     this.peakDataPoint = [i, this.dataBuffer[i]]
@@ -121,7 +119,7 @@ namespace microcode {
      */
     export class AccelerometerSensor extends Sensor {
         constructor(dim: Dimension) {
-            super(function () {return input.acceleration(dim)}, "Accelerometer", 0, 100, 1)
+            super(function () {return input.acceleration(dim)}, "Accel.", -1023, 1023, 1)
         }
     }
 
@@ -199,6 +197,11 @@ namespace microcode {
     export class ButtonPressSensor extends Sensor {
         constructor() {
             super(function () {return 1}, "Button Press", 0, 1, 1)
+
+            control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
+                basic.showIcon(IconNames.No)
+            
+            })
         }
     }
 }
