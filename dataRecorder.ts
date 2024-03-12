@@ -13,7 +13,7 @@ namespace microcode {
                 headers.push(sensor.name)
             })
 
-            this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts)
+            this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts, sensors)
             this.loggingStartTime = input.runningTime()
 
             this.measurementOpts = measurementOpts

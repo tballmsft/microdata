@@ -32,6 +32,10 @@ namespace microcode {
             FauxDataLogger.numberOfRows += 1
         }
 
+        public static getNumberOfMetadataRows(): number {
+            return 5 + FauxDataLogger.headers.length
+        }
+
         public static getMetadata() {
             let metadata = [
                 {col1: "Date", col2: FauxDataLogger.dateStamp}, 
@@ -42,7 +46,7 @@ namespace microcode {
             ] 
             
             for (let i = 0; i < FauxDataLogger.headers.length; i++) {
-                metadata.push({col1: "Col 1: " + FauxDataLogger.sensors[i], col2: FauxDataLogger.headers[i]})
+                metadata.push({col1: "Col " + (i + 1).toString(), col2: FauxDataLogger.headers[i]})
             } 
          
             return metadata

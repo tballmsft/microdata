@@ -31,7 +31,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     app.popScene()
-                    app.pushScene(new TabularDataViewer(this.app, 1, DATA_VIEW_DISPLAY_MODE.META_DATA_VIEW))
+                    app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.METADATA_VIEW))
                 },
                 boundaryColor: 7,
             })
@@ -45,7 +45,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     app.popScene()
-                    app.pushScene(new TabularDataViewer(this.app, 1, DATA_VIEW_DISPLAY_MODE.DATA_VIEW))
+                    app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW))
                 },
                 boundaryColor: 7,
             })
