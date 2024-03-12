@@ -50,7 +50,7 @@
         "measurementConfigSelect.ts",
         "fauxDatalogger.ts",
         "sceneFactory.ts",
-        "userOptions.ts",
+        "measurementOptions.ts",
         "dataViewSelect.ts",
         "sensors.ts",
         "generateGraph.ts"
