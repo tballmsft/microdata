@@ -191,16 +191,17 @@ namespace microcode {
         }
     }
 
+
+
     /**
-     * No access to the Microbit Buttons A & B; only the controller buttons A & B; it seems
+     * Need to be transformed into an event based system
      */
     export class ButtonPressSensor extends Sensor {
         constructor() {
             super(function () {return 1}, "Button Press", 0, 1, 1)
 
             control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
-                basic.showIcon(IconNames.No)
-            
+                return 1
             })
         }
     }

@@ -45,14 +45,15 @@
 
         "liveDataViewer.ts",
         "dataRecorder.ts",
-        "recordedDataViewer.ts",
+        "tabularDataViewer.ts",
         "sensorSelect.ts",
         "measurementConfigSelect.ts",
         "fauxDatalogger.ts",
         "sceneFactory.ts",
         "userOptions.ts",
         "dataViewSelect.ts",
-        "sensors.ts"
+        "sensors.ts",
+        "generateGraph.ts"
     ],
 
     "testFiles": [],

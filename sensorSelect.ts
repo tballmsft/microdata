@@ -221,18 +221,18 @@ namespace microcode {
 
             //-----------
 
-            // this.btns.push(new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "tile_button_a",  
-            //     ariaId: "F3",
-            //     x: -60,
-            //     y: 56,
-            //     onClick: () => {
-            //         this.selectedSensors.push(new ButtonPressSensor())
-            //     },      
-            //     dynamicBoundaryColorsOn: true,     
-            // }))
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "tile_button_a",  
+                ariaId: "F3",
+                x: -60,
+                y: 41,
+                onClick: () => {
+                    this.selectedSensors.push(new ButtonPressSensor())
+                },      
+                dynamicBoundaryColorsOn: true,     
+            }))
 
 
             this.btns.push(new Button({

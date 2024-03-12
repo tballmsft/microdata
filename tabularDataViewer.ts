@@ -2,15 +2,13 @@ namespace microcode {
     const MAX_ROWS = 9
     const MAX_COLS = 3
 
-    // git commit -m "recordedDataViewer.ts: Neatend code, ability to draw any number of columns."      
-
     export const enum DATA_VIEW_DISPLAY_MODE {
         META_DATA_VIEW,
         DATA_VIEW,
         GRAPH_VIEW,
     }
     
-    export class RecordedDataViewer extends Scene {
+    export class TabularDataViewer extends Scene {
         private guiState: DATA_VIEW_DISPLAY_MODE
         private xScrollOffset: number
         private yScrollOffset: number
