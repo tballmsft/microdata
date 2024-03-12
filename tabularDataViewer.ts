@@ -96,10 +96,7 @@ namespace microcode {
 
         }
 
-        draw_grid() {
-            const colBufferSize = Screen.WIDTH / Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS) 
-            const rowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
-
+        draw_grid(colBufferSize: number, rowBufferSize: number) {
             for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
                 Screen.drawLine(
                     Screen.LEFT_EDGE + colOffset,
@@ -132,44 +129,25 @@ namespace microcode {
 
             switch (this.guiState) {
                 case DATA_VIEW_DISPLAY_MODE.METADATA_VIEW:
-                    const colSize = Screen.WIDTH / 2
-                    const rowDelta = Screen.HEIGHT / METADATA_MAX_ROWS
+                    const metadataColSize = Screen.WIDTH / 2
+                    const metadataRowSize = Screen.HEIGHT / METADATA_MAX_ROWS
 
-                    for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colSize) {
-                        Screen.drawLine(
-                            Screen.LEFT_EDGE + colOffset,
-                            Screen.TOP_EDGE,
-                            Screen.LEFT_EDGE + colOffset,
-                            Screen.HEIGHT,
-                            0x0
-                        )
-                    }
-        
-                    for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowDelta) {
-                        Screen.drawLine(
-                            Screen.LEFT_EDGE,
-                            Screen.TOP_EDGE + rowOffset,
-                            Screen.WIDTH,
-                            Screen.TOP_EDGE + rowOffset,
-                            0x0
-                        )
-                    }
-
+                    this.draw_grid(metadataColSize, metadataRowSize)
                     const metadata = FauxDataLogger.getMetadata()
 
                     for (let row = 0; row < METADATA_MAX_ROWS; row++) {
                         Screen.print(
                             metadata[row + this.yScrollOffset].col1,
-                            Screen.LEFT_EDGE + (colSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col1.length) / 2),
-                            Screen.TOP_EDGE + (row * rowDelta) + (rowDelta / 2) - 4,
+                            Screen.LEFT_EDGE + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col1.length) / 2),
+                            Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
                             0xb,
                             simage.font8
                         )
                         
                         Screen.print(
                             metadata[row + this.yScrollOffset].col2,
-                            Screen.LEFT_EDGE + colSize + (colSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col2.length) / 2),
-                            Screen.TOP_EDGE + (row * rowDelta) + (rowDelta / 2) - 4,
+                            Screen.LEFT_EDGE + metadataColSize + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col2.length) / 2),
+                            Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
                             0xb,
                             simage.font8
                         )
@@ -177,10 +155,10 @@ namespace microcode {
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
-                    this.draw_grid()
+                    const tabularColSize = Screen.WIDTH / Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS) 
+                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
 
-                    const colSizeBuffer = Screen.WIDTH / Math.min(TABULAR_MAX_COLS, FauxDataLogger.headers.length)
-                    const rowDeltaBuffer = Screen.HEIGHT / Math.min(TABULAR_MAX_ROWS, FauxDataLogger.numberOfRows)
+                    this.draw_grid(tabularColSize, tabularRowBufferSize)
                     
                     for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
                         const data = FauxDataLogger.values[row + this.yScrollOffset].data;
@@ -189,8 +167,8 @@ namespace microcode {
                             const colID = col + this.xScrollOffset
                             Screen.print(
                                 data[colID],
-                                Screen.LEFT_EDGE + (col * colSizeBuffer) + (colSizeBuffer / 2) - ((font.charWidth * data[colID].length) / 2),
-                                Screen.TOP_EDGE + (row * rowDeltaBuffer) + (rowDeltaBuffer / 2) - 4,
+                                Screen.LEFT_EDGE + (col * tabularColSize) + (tabularColSize / 2) - ((font.charWidth * data[colID].length) / 2),
+                                Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                                 0xb,
                                 simage.font8
                             )
