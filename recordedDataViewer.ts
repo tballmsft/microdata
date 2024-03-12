@@ -1,6 +1,6 @@
 namespace microcode {
     const HEADER_OFFSET = 17
-    const MAX_ROWS = 10
+    const MAX_ROWS = 9
 
     export const enum DATA_VIEW_DISPLAY_MODE {
         META_DATA_VIEW,
@@ -147,7 +147,6 @@ namespace microcode {
                         ]
                     }
 
-                    
 
                     for (let i = this.scrollOffset; i < metadata.length; i++) {
                         Screen.print(
@@ -172,22 +171,11 @@ namespace microcode {
                 case DATA_VIEW_DISPLAY_MODE.DATA_VIEW:
                     this.draw_grid()
 
-                    // const data = [
-                    //     {id: 1, col1: "1", col2: "1"}, 
-                    //     {id: 2, col1: "2", col2: "2"}, 
-                    //     {id: 3, col1: "3", col2: "3"}, 
-                    //     {id: 4, col1: "4", col2: "4"}, 
-                    // ]
-                    // const colSizeBuffer = Screen.WIDTH / 2
-                    // const rowDeltaBuffer = Screen.HEIGHT / 4
-
-
                     const colSizeBuffer = Screen.WIDTH / FauxDataLogger.headers.length
-                    const rowDeltaBuffer = Screen.HEIGHT / FauxDataLogger.numberOfRows
-                    let colOffset = 0
-        
-                    for (let i = this.scrollOffset; i < FauxDataLogger.numberOfRows; i++) {
-                        const data = FauxDataLogger.values[i].data;
+                    const rowDeltaBuffer = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
+                    
+                    for (let i = 0; i < Math.min(FauxDataLogger.numberOfRows, MAX_ROWS); i++) {
+                        const data = FauxDataLogger.values[i + this.scrollOffset].data;
 
                         Screen.print(
                             data[0],
@@ -206,22 +194,18 @@ namespace microcode {
                         )
 
 
-                        if (FauxDataLogger.headers.length > 2) {
-                            Screen.print(
-                                data[2],
-                                Screen.LEFT_EDGE + colSizeBuffer + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[2].length) / 2),
-                                Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
-                                0xb,
-                                simage.font8
-                            )
-                        }
+                        // if (FauxDataLogger.headers.length > 2) {
+                        //     Screen.print(
+                        //         data[2],
+                        //         Screen.LEFT_EDGE + colSizeBuffer + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[2].length) / 2),
+                        //         Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
+                        //         0xb,
+                        //         simage.font8
+                        //     )
+                        // }
                         rowOffset += rowDeltaBuffer
                     }
                     break;
-
-                case DATA_VIEW_DISPLAY_MODE.DATA_VIEW:
-
-                    break
             
                 default:
                     break;
