@@ -1,6 +1,8 @@
 namespace microcode {
-    const HEADER_OFFSET = 17
     const MAX_ROWS = 9
+    const MAX_COLS = 3
+
+    // git commit -m "recordedDataViewer.ts: Neatend code, ability to draw any number of columns."      
 
     export const enum DATA_VIEW_DISPLAY_MODE {
         META_DATA_VIEW,
@@ -10,35 +12,27 @@ namespace microcode {
     
     export class RecordedDataViewer extends Scene {
         private guiState: DATA_VIEW_DISPLAY_MODE
-        private saveSlot: number
+        private xScrollOffset: number
+        private yScrollOffset: number
 
-        private scrollOffset: number
+        private numberOfMetadataRows: number
 
         constructor(app: App, saveSlot: number, guiState: DATA_VIEW_DISPLAY_MODE) {
             super(app, "recordedDataViewer")
             this.guiState = guiState
-            this.saveSlot = saveSlot
-            this.scrollOffset = 0
+
+            this.xScrollOffset = 0
+            this.yScrollOffset = 0
+
+            this.numberOfMetadataRows = 4 + FauxDataLogger.headers.length
         }
 
         /* override */ startup() {
             super.startup()
 
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.down.id,
-                () => {
-                    this.scrollOffset = Math.min(this.scrollOffset + 1, MAX_ROWS)
-                }
-            )
-
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.up.id,
-                () => {
-                    this.scrollOffset = Math.max(this.scrollOffset - 1, 0)
-                }
-            )
+            //----------
+            // Controls:
+            //----------
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -48,11 +42,49 @@ namespace microcode {
                     app.pushScene(new DataViewSelect(this.app))
                 }
             )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => {
+                    this.xScrollOffset = Math.max(this.xScrollOffset - 1, 0)
+                }
+            )
+
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => {
+                    if (this.xScrollOffset + 5 < this.numberOfMetadataRows) {
+                        this.xScrollOffset += 1
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.left.id,
+                () => {
+                    this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.right.id,
+                () => {
+                    if (this.yScrollOffset + MAX_COLS < FauxDataLogger.headers.length) {
+                        this.yScrollOffset += 1
+                    }
+                }
+            )
+
         }
 
         draw_grid() {
-            const colBufferSize = Screen.WIDTH / FauxDataLogger.headers.length
-            const rowBufferSize = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
+            const colBufferSize = Screen.WIDTH / Math.min(FauxDataLogger.headers.length, MAX_COLS) 
+            const rowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, MAX_ROWS)
 
             for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
                 Screen.drawLine(
@@ -84,34 +116,23 @@ namespace microcode {
                 0xC
             )
 
-            let rowOffset = 0
-
             switch (this.guiState) {
                 case DATA_VIEW_DISPLAY_MODE.META_DATA_VIEW:
-                    screen.printCenter("MetaData for Save " + this.saveSlot, 2)
-
-                    control.onEvent(
-                        ControllerButtonEvent.Pressed,
-                        controller.A.id,
-                        () => {
-                            this.guiState = DATA_VIEW_DISPLAY_MODE.DATA_VIEW   
-                        }
-                    )
-
+                    const rowSize = 6
                     const colSize = Screen.WIDTH / 2
-                    const rowDelta = Screen.HEIGHT / 4
+                    const rowDelta = Screen.HEIGHT / rowSize
 
                     for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colSize) {
                         Screen.drawLine(
                             Screen.LEFT_EDGE + colOffset,
-                            Screen.TOP_EDGE + HEADER_OFFSET,
+                            Screen.TOP_EDGE,
                             Screen.LEFT_EDGE + colOffset,
                             Screen.HEIGHT,
                             0x0
                         )
                     }
         
-                    for (let rowOffset = HEADER_OFFSET; rowOffset <= Screen.HEIGHT; rowOffset+=rowDelta) {
+                    for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowDelta) {
                         Screen.drawLine(
                             Screen.LEFT_EDGE,
                             Screen.TOP_EDGE + rowOffset,
@@ -121,12 +142,10 @@ namespace microcode {
                         )
                     }
 
-
                     let metadata = []
 
                     if (FauxDataLogger.headers.length == 2) {
                         metadata = [
-                            {col1: "Save", col2: "1"}, 
                             {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
                             {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
                             {col1: "Columns", col2: FauxDataLogger.headers.length.toString()},
@@ -136,7 +155,6 @@ namespace microcode {
                         ]
                     } else {
                         metadata = [
-                            {col1: "Save", col2: "1"}, 
                             {col1: "Taken", col2: FauxDataLogger.dateStamp}, 
                             {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
                             {col1: "Columns", col2: FauxDataLogger.headers.length.toString()},
@@ -147,63 +165,44 @@ namespace microcode {
                         ]
                     }
 
-
-                    for (let i = this.scrollOffset; i < metadata.length; i++) {
+                    for (let row = 0; row < rowSize; row++) {
                         Screen.print(
-                            metadata[i].col1,
-                            Screen.LEFT_EDGE + (colSize / 2) - ((font.charWidth * metadata[i].col1.length) / 2),
-                            Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowDelta / 2) - 4,
+                            metadata[row + this.xScrollOffset].col1,
+                            Screen.LEFT_EDGE + (colSize / 2) - ((font.charWidth * metadata[row + this.xScrollOffset].col1.length) / 2),
+                            Screen.TOP_EDGE + (row * rowDelta) + (rowDelta / 2) - 4,
                             0xb,
                             simage.font8
                         )
                         
                         Screen.print(
-                            metadata[i].col2,
-                            Screen.LEFT_EDGE + colSize + (colSize / 2) - ((font.charWidth * metadata[i].col2.length) / 2),
-                            Screen.TOP_EDGE + HEADER_OFFSET + rowOffset + (rowDelta / 2) - 4,
+                            metadata[row + this.xScrollOffset].col2,
+                            Screen.LEFT_EDGE + colSize + (colSize / 2) - ((font.charWidth * metadata[row + this.xScrollOffset].col2.length) / 2),
+                            Screen.TOP_EDGE + (row * rowDelta) + (rowDelta / 2) - 4,
                             0xb,
                             simage.font8
                         )
-                        rowOffset += rowDelta
                     }
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.DATA_VIEW:
                     this.draw_grid()
 
-                    const colSizeBuffer = Screen.WIDTH / FauxDataLogger.headers.length
+                    const colSizeBuffer = Screen.WIDTH / Math.min(MAX_COLS, FauxDataLogger.headers.length)
                     const rowDeltaBuffer = Screen.HEIGHT / Math.min(MAX_ROWS, FauxDataLogger.numberOfRows)
                     
-                    for (let i = 0; i < Math.min(FauxDataLogger.numberOfRows, MAX_ROWS); i++) {
-                        const data = FauxDataLogger.values[i + this.scrollOffset].data;
+                    for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, MAX_ROWS); row++) {
+                        const data = FauxDataLogger.values[row + this.xScrollOffset].data;
 
-                        Screen.print(
-                            data[0],
-                            Screen.LEFT_EDGE + (colSizeBuffer / 2) - ((font.charWidth * data[0].length) / 2),
-                            Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
-                            0xb,
-                            simage.font8
-                        )
-
-                        Screen.print(
-                            data[1],
-                            Screen.LEFT_EDGE + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[1].length) / 2),
-                            Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
-                            0xb,
-                            simage.font8
-                        )
-
-
-                        // if (FauxDataLogger.headers.length > 2) {
-                        //     Screen.print(
-                        //         data[2],
-                        //         Screen.LEFT_EDGE + colSizeBuffer + colSizeBuffer + (colSizeBuffer / 2) - ((font.charWidth * data[2].length) / 2),
-                        //         Screen.TOP_EDGE + rowOffset + (rowDeltaBuffer / 2) - 4,
-                        //         0xb,
-                        //         simage.font8
-                        //     )
-                        // }
-                        rowOffset += rowDeltaBuffer
+                        for (let col = 0; col < Math.min(FauxDataLogger.headers.length, MAX_COLS); col++) {
+                            const colID = col + this.yScrollOffset
+                            Screen.print(
+                                data[colID],
+                                Screen.LEFT_EDGE + (col * colSizeBuffer) + (colSizeBuffer / 2) - ((font.charWidth * data[colID].length) / 2),
+                                Screen.TOP_EDGE + (row * rowDeltaBuffer) + (rowDeltaBuffer / 2) - 4,
+                                0xb,
+                                simage.font8
+                            )
+                        }
                     }
                     break;
             
