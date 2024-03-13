@@ -153,6 +153,9 @@ namespace microcode {
         else if (id == "led_light_sensor") res = "Light Sensor"
         else if (id == "thermometer") res = "Thermometer"
         else if (id == "accelerometer") res = "Accelerometer"
+        else if (id == "accelerometer X") res = "Accelerometer X"
+        else if (id == "accelerometer Y") res = "Accelerometer Y"
+        else if (id == "accelerometer Z") res = "Accelerometer Z"
 
         else if (id == "Roll") res = "Roll"
         else if (id == "Pitch") res = "Pitch"

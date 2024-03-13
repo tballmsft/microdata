@@ -11,15 +11,11 @@ namespace microcode {
         static numberOfRows: number
         static isEmpty: boolean = true
         static measurementOptions: MeasurementOpts
-
-        private static sensors: Sensor[]
         
-        constructor(headers: string[], mOpts: MeasurementOpts, sensors: Sensor[]) {
+        constructor(headers: string[], mOpts: MeasurementOpts) {
             FauxDataLogger.headers = headers
             FauxDataLogger.values = []
             FauxDataLogger.numberOfRows = 0
-
-            FauxDataLogger.sensors = sensors
             FauxDataLogger.measurementOptions = mOpts
         }
 

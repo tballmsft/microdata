@@ -1,4 +1,10 @@
-namespace microcode {    
+namespace microcode {
+    /**
+     * Choose between viewing:
+     *      Metadata of the recoreded data
+     *      A tabular view of the recorded data
+     *      A graph of the recorded data
+     */
     export class DataViewSelect extends CursorSceneWithPriorPage {
         private metaDataBtn: Button
         private dataViewBtn: Button
@@ -10,6 +16,10 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
+
+            //---------
+            // Control:
+            //---------
 
             if (FauxDataLogger.isEmpty) {
                 control.onEvent(

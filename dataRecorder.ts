@@ -13,7 +13,7 @@ namespace microcode {
                 headers.push(sensor.name)
             })
 
-            this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts, sensors)
+            this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts)
             this.loggingStartTime = input.runningTime()
 
             this.measurementOpts = measurementOpts
@@ -59,7 +59,6 @@ namespace microcode {
                 screen.printCenter(this.measurementOpts.period / 1000 + " second period", 45)   
                 screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
                 screen.printCenter(secondsLeft.toString() + " seconds left", 85);
-
 
                 // datalogger.log(datalogger.createCV(this.measurementOpts.sensorName, this.measurementOpts.sensorFn()))
 

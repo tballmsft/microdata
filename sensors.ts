@@ -1,20 +1,17 @@
 namespace microcode {
-    export type SensorOpts = {
-        sensorFn: () => number, 
-        sensorName: string,
-    };
-
-    const PLOT_SMOOTHING_CONSTANT = 8
-    
+    /**
+     * Abstraction for all available sensors,
+     * Methods are seldom overidden
+     */
     export abstract class Sensor {
         static BUFFER_LIMIT = 100;
+        static PLOT_SMOOTHING_CONSTANT = 8
 
-        sensorFn: () => number
-        name: string
-
-        minimum: number
-        maximum: number
-        peakDataPoint: number[]
+        public sensorFn: () => number
+        public name: string
+        public minimum: number
+        public maximum: number
+        public peakDataPoint: number[]
 
         private numberOfDisplayModes: number;
         private currentDisplayMode: number;
@@ -79,8 +76,8 @@ namespace microcode {
          * @param color
          */
         draw(fromX: number, fromY: number, color: number): void {
-
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
+                // Normalise the data points, then calculate their position for the graph:
                 const norm1 = ((this.dataBuffer[i] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
                 const norm2 = ((this.dataBuffer[i + 1] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
                 const y1 = Math.round(screen.height - norm1) - fromY
@@ -91,7 +88,7 @@ namespace microcode {
                 }
 
                 // Minimal data smoothing:
-                if (Math.abs(y1 - y2) <= PLOT_SMOOTHING_CONSTANT) {
+                if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
                     screen.drawLine(fromX + i, y1, fromX + i - 1, y1, color);
                 }
 
@@ -100,12 +97,18 @@ namespace microcode {
         }
     }
 
+    /**
+     * Onboard Light Sensor; ranged between 0 and 255
+     */
     export class LightSensor extends Sensor {
         constructor() {
             super(function () {return input.lightLevel()}, "Light", 0, 255, 1)
         }
     }
 
+    /**
+     * Onboard Thermometer; ranged between 0 and 100
+     */
     export class TemperatureSensor extends Sensor {
         constructor() {
             super(function () {return input.temperature()}, "Temp.", 0, 100, 1)
@@ -114,8 +117,7 @@ namespace microcode {
 
 
     /**
-     * sensorMinReading not implemented
-     * sensorMaxReading not implemented
+     * Onboard Accelerometer for X, Y, Z dimensions; ranged between -1023, 1023
      */
     export class AccelerometerSensor extends Sensor {
         constructor(dim: Dimension) {
@@ -123,6 +125,9 @@ namespace microcode {
         }
     }
 
+    /**
+     * Onboard Touch Pin Sensor for TouchPin 0, 1, 2; ranged between 0 and 1
+     */
     export class PinSensor extends Sensor {
         constructor(pin: TouchPin) {
             super(function () {
@@ -141,6 +146,11 @@ namespace microcode {
     }
 
 
+    /**
+     * Onboard Magnometer for X, Y, Z dimensions
+     * 
+     * MIN & MAX RANGE UNVERIFIED
+     */
     export class MagnetSensor extends Sensor {
         constructor(dim: Dimension) {
             super(function() {return input.magneticForce(dim)},
@@ -154,8 +164,9 @@ namespace microcode {
 
 
     /**
-     * sensorMinReading not implemented
-     * sensorMaxReading not implemented
+     * Onboard Pitch or Roll sensor
+     * 
+     * MIN & MAX RANGE UNVERIFIED
      */
     export class RotationSensor extends Sensor {
         constructor(rot: Rotation) {
@@ -170,6 +181,8 @@ namespace microcode {
     }
 
     /**
+     * Detection of whether of not the Logo has been pressed
+     * 
      * sensorMinReading may change in future
      * sensorMaxReading may change in future
      */
@@ -179,21 +192,28 @@ namespace microcode {
         }
     }
 
+    /**
+     * Sensor for the current Compass Heading
+     * Ranged between 0 and 360 degrees
+     */
     export class CompassHeadingSensor extends Sensor {
         constructor() {
             super(function () {return input.compassHeading()}, "Compass", 0, 360, 1)
         }
     }    
 
+    /**
+     * Sensor for the Microphone
+     * Ranged between 0 and 255
+     */
     export class VolumeSensor extends Sensor {
         constructor() {
             super(function () {return input.soundLevel()}, "Volume", 0, 255, 1)
         }
     }
 
-
-
     /**
+     * Sensor for Microbit A & B Buttons
      * Need to be transformed into an event based system
      */
     export class ButtonPressSensor extends Sensor {
