@@ -27,6 +27,7 @@ namespace microcode {
 
         /* Continue reading from the sensors? Or pause sensor reading? */
         private requestDataMode: boolean
+
         /* Use the Left & Right Buttons to move by 1 unit? or jump relative to the start/end? */
         private oscilloscopeMovementMode: boolean
         private selectedSensorIndex: number
@@ -54,8 +55,18 @@ namespace microcode {
 
             this.currentZoomDepth = 0
             this.requestDataMode = true // Constant data flow
-            this.oscilloscopeMovementMode = true // Move Left/Right by 1 unit
+            this.oscilloscopeMovementMode = false // Move Left/Right relative to end/start position
+
+            // Ensure selectedSensorIndex is set to the lowest current reading
             this.selectedSensorIndex = 0
+
+            let minimumReading = sensors[0].getReading()
+            for (let i = 1; i < sensors.length; i++) {
+                if (sensors[i].getReading() < minimumReading) {
+                    minimumReading = sensors[i].getReading()
+                    this.selectedSensorIndex = i
+                }
+            }
 
             //--------------------------------
             // Oscilloscope Movement Controls:
@@ -140,7 +151,8 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.currentZoomDepth > 0) {
-                        this.selectedSensorIndex = Math.max(this.selectedSensorIndex - 1, 0)
+                        // Handling negative modulo:
+                        this.selectedSensorIndex = (((this.selectedSensorIndex - 1) % this.sensors.length) + this.sensors.length) % this.sensors.length
                         this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
                     }
                     else {

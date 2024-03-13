@@ -11,7 +11,6 @@ namespace microcode {
         METADATA_VIEW,
         TABULAR_DATA_VIEW,
     }
-    
 
     /**
      * Used to view the recorded data & its meta data
@@ -57,7 +56,6 @@ namespace microcode {
                 }
             )
 
-
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
@@ -93,7 +91,6 @@ namespace microcode {
                     }
                 }
             )
-
         }
 
         draw_grid(colBufferSize: number, rowBufferSize: number) {
