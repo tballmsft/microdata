@@ -49,7 +49,6 @@
         "sensorSelect.ts",
         "measurementConfigSelect.ts",
         "fauxDatalogger.ts",
-        "sceneFactory.ts",
         "measurementOptions.ts",
         "dataViewSelect.ts",
         "sensors.ts",

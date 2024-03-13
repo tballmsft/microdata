@@ -1,5 +1,11 @@
 namespace microcode {
-
+    export enum CursorSceneEnum {
+        LiveDataViewer,
+        SensorSelect,
+        MeasurementConfigSelect,
+        RecordData,
+    }
+    
     export class CursorScene extends Scene {
         navigator: INavigator
         public cursor: Cursor
