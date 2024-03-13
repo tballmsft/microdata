@@ -1,6 +1,4 @@
 namespace microcode {
-    const PLOT_SMOOTHING_CONSTANT = 8
-
     export class GraphGenerator extends Scene {
         private windowWidth: number
         private windowHeight: number
@@ -30,7 +28,6 @@ namespace microcode {
             screen.fill(this.color);
 
             this.plot()
-
             basic.pause(100);
         }
 
@@ -38,68 +35,36 @@ namespace microcode {
          * Display mode for plotting all incoming data on y axis
          */
         private plot() {            
-            let color = 8;
+            let color = 8
 
-            this.draw_axes();
-
-            // // Write Sensor information, displayed below the plot:
-            // for (let i = 0; i < FauxDataLogger.headers.length; i++) {
-            //     // Colour used to represent this sensor, same colour as plotted & ticker:
-            //     screen.fillRect(
-            //         2,
-            //         this.windowHeight - this.windowBotBuffer + 15 + (i * 12),
-            //         7,
-            //         7,
-            //         color
-            //     )
-                
-            //     // Name, reading / maximum, peak
-            //     screen.print(FauxDataLogger.headers[i], 
-            //         14,
-            //         this.windowHeight - this.windowBotBuffer + 15 + (i * 12),
-            //         color
-            //     )
-
-            //     color = (color + 1) % 15
-            // }
+            this.draw_axes()
 
             // Draw data lines:
-            color = 8;
-            let x = 0
-            let xOffset = this.windowWidthBuffer / FauxDataLogger.numberOfRows
+            const fromY = this.windowBotBuffer
+            const fromX = this.windowWidthBuffer + 2
 
-            FauxDataLogger.values.forEach(function(metadata) {
-                    // const y1 = Math.round(screen.height - ((metadata.data[1] / this.maxReading) * (screen.height - this.windowBotBuffer))) - this.windowBotBuffer
-                    // const y2 = Math.round(screen.height - ((Number(metadata.data[1]) / this.maxReading) * (screen.height - this.windowBotBuffer))) - this.windowBotBuffer
-    
-                    // if (this.dataBuffer[i] > this.peakDataPoint[1]) {
-                    //     this.peakDataPoint = [i, this.dataBuffer[i]]
-                    // }
-    
+            for (let col = 1; col < FauxDataLogger.headers.length; col++) {
+                const minimum = FauxDataLogger.sensors[col - 1].minimum
+                const maximum = FauxDataLogger.sensors[col - 1].maximum
+
+                for (let row = 0; row < FauxDataLogger.numberOfRows - 1; row++) {
+                    const norm1 = ((+FauxDataLogger.entries[row].data[col] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+                    const norm2 = ((+FauxDataLogger.entries[row + 1].data[col] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+
+                    // const a = FauxDataLogger.entries[row].data[0]
+                
+                    const y1 = Math.round(screen.height - norm1) - fromY
+                    const y2 = Math.round(screen.height - norm2) - fromY
+
                     // Minimal data smoothing:
-                    // if (Math.abs(y1 - y2) <= PLOT_SMOOTHING_CONSTANT) {
-                    // screen.drawLine(this.windowWidthBuffer + x, y1, this.windowWidthBuffer + x - 1, y1, color);
-                    // }
-
-
-                    x += xOffset
-
-                    // const y1 = Math.round(screen.height - ((this.dataBuffer[i] / this.maxReading) * (screen.height - this.windowBotBuffer))) - this.windowBotBuffer
-                    // const y2 = Math.round(screen.height - ((this.dataBuffer[i + 1] / this.maxReading) * (screen.height - this.windowBotBuffer))) - this.windowBotBuffer
+                    if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
+                        screen.drawLine(fromX + row, y1, fromX + row - 1, y1, color);
+                    }
     
-                    // if (this.dataBuffer[i] > this.peakDataPoint[1]) {
-                    //     this.peakDataPoint = [i, this.dataBuffer[i]]
-                    // }
-    
-                    // // Minimal data smoothing:
-                    // if (Math.abs(y1 - y2) <= PLOT_SMOOTHING_CONSTANT) {
-                    //     screen.drawLine(this.windowWidthBuffer + i, y1, this.windowWidthBuffer + i - 1, y1, color);
-                    // }
-    
-                    // screen.drawLine(this.windowWidthBuffer + i, y1, this.windowWidthBuffer + i - 1, y2, color);
-
+                    screen.drawLine(fromX + row, y1, fromX + row - 1, y2, color);
+                }
                 color = (color + 1) % 15
-            })
+            }
         }
 
         /**

@@ -1,28 +1,38 @@
 namespace microcode {
-    interface MetaData {
+    /**
+     * Internal representation of an logged entry
+     */
+    interface DataEntry {
         id: number, 
         data: string[]
     }
 
+    /**
+     * Temporary replacement for the DataLogger extension
+     *      Allows for development of MicroData without such an extension.
+     *      The downside is that the FauxDatalogger stores the data in RAM.
+     */
     export class FauxDataLogger {
         static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
-        static dateStamp = "06/03/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
-        static values: MetaData[]
+        static dateStamp = "13/03/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
+        static entries: DataEntry[]
         static numberOfRows: number
         static isEmpty: boolean = true
         static measurementOptions: MeasurementOpts
+        static sensors: Sensor[]
         
-        constructor(headers: string[], mOpts: MeasurementOpts) {
+        constructor(headers: string[], mOpts: MeasurementOpts, sensors: Sensor[]) {
             FauxDataLogger.headers = headers
-            FauxDataLogger.values = []
+            FauxDataLogger.entries = []
             FauxDataLogger.numberOfRows = 0
             FauxDataLogger.measurementOptions = mOpts
+            FauxDataLogger.sensors = sensors
         }
 
         public static log(data: string[]) {
             FauxDataLogger.isEmpty = false
-            FauxDataLogger.values.push({
-                id: this.values.length, 
+            FauxDataLogger.entries.push({
+                id: this.entries.length, 
                 data
             })
             FauxDataLogger.numberOfRows += 1

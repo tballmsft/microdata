@@ -158,7 +158,7 @@ namespace microcode {
                     this.draw_grid(tabularColSize, tabularRowBufferSize)
                     
                     for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
-                        const data = FauxDataLogger.values[row + this.yScrollOffset].data;
+                        const data = FauxDataLogger.entries[row + this.yScrollOffset].data;
 
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset

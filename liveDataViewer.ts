@@ -74,13 +74,12 @@ namespace microcode {
 
             // Use Microbit A button to pause/continue reading new data:
             control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_A, () => {
-                this.requestDataMode = !this.requestDataMode
+                this.requestDataMode = !this.requestDataMode    
             })
 
             // Use Microbit B button to control the oscilloscope x-axis movement mode:
             control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_B, () => {
                 this.oscilloscopeMovementMode = !this.oscilloscopeMovementMode
-                // basic.showNumber(5)
             })
 
             // Zoom in:
