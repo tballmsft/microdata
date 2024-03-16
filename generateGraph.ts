@@ -50,8 +50,6 @@ namespace microcode {
                 for (let row = 0; row < FauxDataLogger.numberOfRows - 1; row++) {
                     const norm1 = ((+FauxDataLogger.entries[row].data[col] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
                     const norm2 = ((+FauxDataLogger.entries[row + 1].data[col] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
-
-                    // const a = FauxDataLogger.entries[row].data[0]
                 
                     const y1 = Math.round(screen.height - norm1) - fromY
                     const y2 = Math.round(screen.height - norm2) - fromY

@@ -60,7 +60,7 @@ namespace microcode {
                 screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
                 screen.printCenter(secondsLeft.toString() + " seconds left", 85);
 
-                // datalogger.log(datalogger.createCV(this.measurementOpts.sensorName, this.measurementOpts.sensorFn()))
+                datalogger.log(datalogger.createCV("col1", "hello"))
 
                 // Collect the data to log:
                 let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()] // Log time
