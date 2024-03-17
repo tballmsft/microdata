@@ -1,11 +1,14 @@
 namespace microcode {
+    export enum RecordingMode {
+        EVENT,
+        TIME
+    }
+
     export class DataRecorder extends Scene {
         private fauxDatalogger: FauxDataLogger
-        private loggingStartTime: number
-        private measurementOpts: MeasurementOpts
-        private sensors: Sensor[]
+        private recordingBehaviour: RecordingBehaviour
 
-        constructor(app: App, measurementOpts: MeasurementOpts, sensors: Sensor[]) {
+        constructor(app: App, measurementOpts: MeasurementOpts, sensors: Sensor[], recordingMode: RecordingMode) {
             super(app, "dataRecorder")
 
             let headers: string[] = ["Milli-Sec"]
@@ -13,11 +16,15 @@ namespace microcode {
                 headers.push(sensor.name)
             })
 
-            this.fauxDatalogger = new FauxDataLogger(headers, measurementOpts, sensors)
-            this.loggingStartTime = input.runningTime()
+            new FauxDataLogger(headers, measurementOpts, sensors)
 
-            this.measurementOpts = measurementOpts
-            this.sensors = sensors
+            if (recordingMode === RecordingMode.TIME) {
+                this.recordingBehaviour = new TimeBasedRecording(measurementOpts, sensors)
+            }
+
+            else {
+                this.recordingBehaviour = new EventBasedRecording()
+            }
 
             // Go Back:
             control.onEvent(
@@ -39,6 +46,31 @@ namespace microcode {
                 0xc
             )
 
+            this.recordingBehaviour.update()
+        }
+    }
+
+    interface RecordingBehaviour {
+        update(): void;
+    }
+
+    class TimeBasedRecording implements RecordingBehaviour {
+        private loggingStartTime: number
+        private measurementOpts: MeasurementOpts
+        private sensors: Sensor[]
+
+        constructor(measurementOpts: MeasurementOpts, sensors: Sensor[]) {
+            let headers: string[] = ["Milli-Sec"]
+            sensors.forEach(function(sensor) {
+                headers.push(sensor.name)
+            })
+
+            this.loggingStartTime = input.runningTime()
+            this.measurementOpts = measurementOpts
+            this.sensors = sensors
+        }
+
+        update(): void {
             if (this.measurementOpts.measurements === 0) {
                 screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);
                 screen.printCenter("Press B to back out.", screen.height / 2);
@@ -60,10 +92,11 @@ namespace microcode {
                 screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
                 screen.printCenter(secondsLeft.toString() + " seconds left", 85);
 
-                datalogger.log(datalogger.createCV("col1", "hello"))
+                // datalogger.log(datalogger.createCV("col1", "hello"))
+
+                let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()]
 
                 // Collect the data to log:
-                let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()] // Log time
                 for (let i = 0; i < this.sensors.length; i++) {
                     data.push(this.sensors[i].getReading().toString())
                 }
@@ -73,6 +106,12 @@ namespace microcode {
                 this.measurementOpts.measurements -= 1
                 basic.pause(this.measurementOpts.period)
             }
+        }
+    }
+
+    export class EventBasedRecording implements RecordingBehaviour {
+        update(): void {
+            
         }
     }
 }
