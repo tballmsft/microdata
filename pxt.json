@@ -48,7 +48,6 @@
 
         "sensorSelect.ts",
         "dataViewSelect.ts",
-        "eventConfigSelect.ts",
 
         "recordingConfig.ts",
         "recordingConfigSelection.ts",

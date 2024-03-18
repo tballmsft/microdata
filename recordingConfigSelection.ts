@@ -7,15 +7,21 @@ namespace microcode {
         DEFAULT
     }
 
+
+    /**
+     * Abstract for the screen that allows users to input measurement or event settings.
+     *      Extended by MeasurementConfigSelection and EventConfigSelection
+     * 
+     */
     abstract class RecordingConfigSelection extends Scene {
         private guiState: GUI_STATE
         private guiRows: string[]
         private currentColumn: number
         private selectedSensors: Sensor[]
-
-        // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
-        private userSelection: number[]
         private configDeltas: number[][]
+
+
+        protected userSelection: number[]
 
         constructor(app: App, 
             appName: string, 
@@ -126,22 +132,14 @@ namespace microcode {
 
 
         /**
-         * Convert the .userSelection data into a single milli-second value, 
-         * turn that into a MeasurementOpts obj
-         * @returns MeasurementOptions including the sensor information that gained from sensorSelect
+         * Convert the .userSelection data into a RecordingConfig object for use by the DataRecorder
+         * @returns RecordingConfig {measurements, period, delay}
          */
-        private generateRecordingOptions(): RecordingConfig {
-            const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
-
-            let period: number = 0
-            for (let i = 1; i < this.userSelection.length - 1; i++) {
-                period += this.userSelection[i] * timeConversionTableMs[i - 1]
-            }
-
+        public generateRecordingOptions(): RecordingConfig {
             return {
-                measurements: this.userSelection[0],
-                period,
-                delay: this.userSelection[6]
+                measurements: 0,
+                period: 0,
+                delay: 0      
             }
         }
 
@@ -188,8 +186,6 @@ namespace microcode {
         }
     }
 
-
-
     export class MeasurementConfigSelect extends RecordingConfigSelection {
         constructor(app: App, selectedSensors: Sensor[]) {
             /**
@@ -221,9 +217,34 @@ namespace microcode {
                              "Days: ", 
                              "Start Delay: "
                         ]
+
             super(app, "measurementConfigSelect", selectedSensors, configDeltas, defaultUserSelection, guiRows)
         }
 
 
+        /**
+         * Convert the .userSelection data into a RecordingConfig object for use by the DataRecorder
+         * @returns RecordingConfig {measurements, period, delay}
+         */
+        public generateRecordingOptions(): RecordingConfig {
+            const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
+
+            let period: number = 0
+            for (let i = 1; i < this.userSelection.length - 1; i++) {
+                period += this.userSelection[i] * timeConversionTableMs[i - 1]
+            }
+
+            return {
+                measurements: this.userSelection[0],
+                period,
+                delay: this.userSelection[6]
+            }
+        }
+    }
+
+    export class EventConfigSelect extends RecordingConfigSelection {
+        constructor(app: App, selectedSensors: Sensor[]) {
+            super(app, "eventConfigSelect", selectedSensors, [], [], [])
+        }
     }
 }
