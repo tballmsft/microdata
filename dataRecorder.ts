@@ -5,12 +5,13 @@ namespace microcode {
     }
 
     export class DataRecorder extends Scene {
-        private fauxDatalogger: FauxDataLogger
+        /** State pattern; see the internal classes that implement these behaviours below this file */
         private recordingBehaviour: RecordingBehaviour
 
-        constructor(app: App, measurementOpts: MeasurementOpts, sensors: Sensor[], recordingMode: RecordingMode) {
+        constructor(app: App, measurementOpts: RecordingConfig, sensors: Sensor[], recordingMode: RecordingMode) {
             super(app, "dataRecorder")
 
+            
             let headers: string[] = ["Milli-Sec"]
             sensors.forEach(function(sensor) {
                 headers.push(sensor.name)
@@ -18,6 +19,8 @@ namespace microcode {
 
             new FauxDataLogger(headers, measurementOpts, sensors)
 
+
+            // Get the specified behaviour from the passed RecordingMode Enum:
             if (recordingMode === RecordingMode.TIME) {
                 this.recordingBehaviour = new TimeBasedRecording(measurementOpts, sensors)
             }
@@ -25,6 +28,11 @@ namespace microcode {
             else {
                 this.recordingBehaviour = new EventBasedRecording()
             }
+
+
+            //---------------
+            // User Controls:
+            //---------------
 
             // Go Back:
             control.onEvent(
@@ -50,16 +58,37 @@ namespace microcode {
         }
     }
 
+    
+    //-------------------------------------
+    // Recording behaviour implementations:
+    //-------------------------------------
+
     interface RecordingBehaviour {
         update(): void;
     }
 
+    /**
+     * A public recording behaviour.
+     *      This 
+     */
+    export class EventBasedRecording implements RecordingBehaviour {
+        update(): void {
+            
+        }
+    }
+
+
+    /**
+     * Take N recordings on each of the passed sensors with the specified period,
+     *      Makes use of the static FauxDataLogger that was setup in the parent constructor DataRecorder
+     * Internal Class unlike EventBasedRecording, since this class is only ever invoked via the DataRecorder
+     */
     class TimeBasedRecording implements RecordingBehaviour {
         private loggingStartTime: number
-        private measurementOpts: MeasurementOpts
+        private measurementOpts: RecordingConfig
         private sensors: Sensor[]
 
-        constructor(measurementOpts: MeasurementOpts, sensors: Sensor[]) {
+        constructor(measurementOpts: RecordingConfig, sensors: Sensor[]) {
             let headers: string[] = ["Milli-Sec"]
             sensors.forEach(function(sensor) {
                 headers.push(sensor.name)
@@ -106,12 +135,6 @@ namespace microcode {
                 this.measurementOpts.measurements -= 1
                 basic.pause(this.measurementOpts.period)
             }
-        }
-    }
-
-    export class EventBasedRecording implements RecordingBehaviour {
-        update(): void {
-            
         }
     }
 }

@@ -1,61 +1,61 @@
-namespace microcode {
-    /**
-     * Internal representation of an logged entry
-     */
-    interface DataEntry {
-        id: number, 
-        data: string[]
-    }
+// namespace microcode {
+//     /**
+//      * Internal representation of an logged entry
+//      */
+//     interface DataEntry {
+//         id: number, 
+//         data: string[]
+//     }
 
-    /**
-     * Temporary replacement for the DataLogger extension
-     *      Allows for development of MicroData without such an extension.
-     *      The downside is that the FauxDatalogger stores the data in RAM.
-     */
-    export class FauxDataLogger {
-        static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
-        static dateStamp = "13/03/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
-        static entries: DataEntry[]
-        static numberOfRows: number
-        static isEmpty: boolean = true
-        static measurementOptions: MeasurementOpts
-        static sensors: Sensor[]
+//     /**
+//      * Temporary replacement for the DataLogger extension
+//      *      Allows for development of MicroData without such an extension.
+//      *      The downside is that the FauxDatalogger stores the data in RAM.
+//      */
+//     export class FauxDataLogger {
+//         static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
+//         static dateStamp = "13/03/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
+//         static entries: DataEntry[]
+//         static numberOfRows: number
+//         static isEmpty: boolean = true
+//         static measurementOptions: MeasurementOpts
+//         static sensors: Sensor[]
         
-        constructor(headers: string[], mOpts: MeasurementOpts, sensors: Sensor[]) {
-            FauxDataLogger.headers = headers
-            FauxDataLogger.entries = []
-            FauxDataLogger.numberOfRows = 0
-            FauxDataLogger.measurementOptions = mOpts
-            FauxDataLogger.sensors = sensors
-        }
+//         constructor(headers: string[], mOpts: MeasurementOpts, sensors: Sensor[]) {
+//             FauxDataLogger.headers = headers
+//             FauxDataLogger.entries = []
+//             FauxDataLogger.numberOfRows = 0
+//             FauxDataLogger.measurementOptions = mOpts
+//             FauxDataLogger.sensors = sensors
+//         }
 
-        public static log(data: string[]) {
-            FauxDataLogger.isEmpty = false
-            FauxDataLogger.entries.push({
-                id: this.entries.length, 
-                data
-            })
-            FauxDataLogger.numberOfRows += 1
-        }
+//         public static log(data: string[]) {
+//             FauxDataLogger.isEmpty = false
+//             FauxDataLogger.entries.push({
+//                 id: this.entries.length, 
+//                 data
+//             })
+//             FauxDataLogger.numberOfRows += 1
+//         }
 
-        public static getNumberOfMetadataRows(): number {
-            return 5 + FauxDataLogger.headers.length
-        }
+//         public static getNumberOfMetadataRows(): number {
+//             return 5 + FauxDataLogger.headers.length
+//         }
 
-        public static getMetadata() {
-            let metadata = [
-                {col1: "Date", col2: FauxDataLogger.dateStamp}, 
-                {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
-                {col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
-                {col1: "Measurements", col2: FauxDataLogger.measurementOptions.measurements.toString()}, 
-                {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}
-            ] 
+//         public static getMetadata() {
+//             let metadata = [
+//                 {col1: "Date", col2: FauxDataLogger.dateStamp}, 
+//                 {col1: "Rows", col2: FauxDataLogger.numberOfRows.toString()}, 
+//                 {col1: "Columns", col2: FauxDataLogger.headers.length.toString()}, 
+//                 {col1: "Measurements", col2: FauxDataLogger.measurementOptions.measurements.toString()}, 
+//                 {col1: "Period", col2: FauxDataLogger.measurementOptions.period.toString()}
+//             ] 
             
-            for (let i = 0; i < FauxDataLogger.headers.length; i++) {
-                metadata.push({col1: "Col " + (i + 1).toString(), col2: FauxDataLogger.headers[i]})
-            } 
+//             for (let i = 0; i < FauxDataLogger.headers.length; i++) {
+//                 metadata.push({col1: "Col " + (i + 1).toString(), col2: FauxDataLogger.headers[i]})
+//             } 
          
-            return metadata
-        }
-    }
-}
+//             return metadata
+//         }
+//     }
+// }

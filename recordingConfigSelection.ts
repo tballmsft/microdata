@@ -1,21 +1,13 @@
 namespace microcode {
-    // How the use
-    const CONFIG_DELTAS = [
-        [1, 10], // Quantity
-        [1, 10], // Milli-seconds
-        [1, 5],  // Seconds
-        [1, 5],  // Minutes
-        [1, 5],  // Hours
-        [1, 5],  // Days
-        [1, 5]   // Delay
-    ]
-
+    /**
+     * Is the user changing one of the config values, or not?
+     */
     const enum GUI_STATE {
         WRITING,
         DEFAULT
     }
 
-    export class MeasurementConfigSelect extends Scene {
+    abstract class RecordingConfigSelection extends Scene {
         private guiState: GUI_STATE
         private guiRows: string[]
         private currentColumn: number
@@ -23,25 +15,29 @@ namespace microcode {
 
         // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
         private userSelection: number[]
+        private configDeltas: number[][]
 
-        constructor(app: App, selectedSensors: Sensor[]) {
-            super(app, "dataViewer")
+        constructor(app: App, 
+            appName: string, 
+            selectedSensors: Sensor[],
+            configDeltas: number[][],
+            defaultUserSelection: number[],
+            guiRows: string[]
+        ) {
+            super(app, appName)
 
             this.guiState = GUI_STATE.DEFAULT
-            this.guiRows = ["Measurements: ", 
-                            "Milli-Seconds: ", 
-                            "Seconds: ", 
-                            "Minutes: ", 
-                            "Hours: ", 
-                            "Days: ", 
-                            "Start Delay: "
-                        ]
+            this.guiRows = guiRows
+
+            this.userSelection = defaultUserSelection
+            this.configDeltas = configDeltas
 
             this.currentColumn = 0
             this.selectedSensors = selectedSensors
 
-            // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
-            this.userSelection = [10, 0, 1, 0, 0, 0, 0]
+            //--------------
+            // User Control:
+            //--------------
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -77,7 +73,7 @@ namespace microcode {
                 controller.up.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + CONFIG_DELTAS[this.currentColumn][0], 0)
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + this.configDeltas[this.currentColumn][0], 0)
                     }
 
                     else {
@@ -92,7 +88,7 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - CONFIG_DELTAS[this.currentColumn][0], 0)
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - this.configDeltas[this.currentColumn][0], 0)
                     }
 
                     else {
@@ -107,22 +103,22 @@ namespace microcode {
                 controller.left.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - CONFIG_DELTAS[this.currentColumn][1], 0)
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - this.configDeltas[this.currentColumn][1], 0)
                     }
                 }
             )
 
-            control.onEvent(
+            control.onEvent(    
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + CONFIG_DELTAS[this.currentColumn][1], 0)
+                        this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + this.configDeltas[this.currentColumn][1], 0)
                     }
 
                     else if (this.guiState === GUI_STATE.DEFAULT) {
                         this.app.popScene()
-                        this.app.pushScene(new DataRecorder(this.app, this.generateUserOptions(), this.selectedSensors))
+                        this.app.pushScene(new DataRecorder(this.app, this.generateRecordingOptions(), this.selectedSensors, RecordingMode.TIME))
                     }
                 }
             )
@@ -134,7 +130,7 @@ namespace microcode {
          * turn that into a MeasurementOpts obj
          * @returns MeasurementOptions including the sensor information that gained from sensorSelect
          */
-        private generateUserOptions(): MeasurementOpts {
+        private generateRecordingOptions(): RecordingConfig {
             const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
 
             let period: number = 0
@@ -143,7 +139,6 @@ namespace microcode {
             }
 
             return {
-                sensor: this.selectedSensors[0], // Does not grant multiple sensors
                 measurements: this.userSelection[0],
                 period,
                 delay: this.userSelection[6]
@@ -168,8 +163,7 @@ namespace microcode {
             const pointerX = optionX + 20
             const rowSize = Screen.HEIGHT / (this.userSelection.length + 1)
 
-
-            screen.printCenter("Measurement Settings", 2)
+            screen.printCenter("Recording Settings", 2)
 
             for (let i = 0; i < this.userSelection.length; i++) {
                 screen.print(this.guiRows[i],
@@ -192,5 +186,44 @@ namespace microcode {
                 0
             )
         }
+    }
+
+
+
+    export class MeasurementConfigSelect extends RecordingConfigSelection {
+        constructor(app: App, selectedSensors: Sensor[]) {
+            /**
+             * Values for user selection of:
+             *     Measurement quantity
+             *     Measurement period
+             *     Measurement delay
+             * 
+             * Internal counters will iterate by these values,
+             * upon the corresponding UI element selection.
+             * */
+            const configDeltas = [
+                [1, 10], // Quantity
+                [1, 10], // Milli-seconds
+                [1, 5],  // Seconds
+                [1, 5],  // Minutes
+                [1, 5],  // Hours
+                [1, 5],  // Days
+                [1, 5]   // Delay
+            ]
+
+            // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
+            const defaultUserSelection = [10, 0, 1, 0, 0, 0, 0]
+            const guiRows = ["Measurements: ", 
+                             "Milli-Seconds: ", 
+                             "Seconds: ", 
+                             "Minutes: ", 
+                             "Hours: ", 
+                             "Days: ", 
+                             "Start Delay: "
+                        ]
+            super(app, "measurementConfigSelect", selectedSensors, configDeltas, defaultUserSelection, guiRows)
+        }
+
+
     }
 }

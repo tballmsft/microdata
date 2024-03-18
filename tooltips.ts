@@ -177,6 +177,8 @@ namespace microcode {
         else if (id == "Meta Data") res = "Meta Data"
         else if (id == "View Data") res = "View Data"
         else if (id == "View Graph") res = "View Graph"
+        else if (id == "Measurement Mode") res = "Measurement Mode"
+        else if (id == "Event Mode") res = "Event Mode"
         
         
         return res

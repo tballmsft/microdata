@@ -1,6 +1,5 @@
 namespace microcode {
-    export type MeasurementOpts = {
-        sensor: Sensor,
+    export type RecordingConfig = {
         measurements: number,
         period: number,
         delay: number
