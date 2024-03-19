@@ -8,7 +8,8 @@ namespace microcode {
     }
 
     abstract class Logger {
-        static headers: string[] = ["DEFAULT", "DEFAULT", "DEFAULT"]
+        static headers: string[]
+        static headerStringLengths: number[] // Needed for column size so that values also fit; also pre-calculation since headers are fixed.
         static dateStamp = "13/03/2024" // Microbit does not have access to Date; new Date().toLocaleDateString()
         static entries: DataEntry[]
         static numberOfRows: number
@@ -16,8 +17,23 @@ namespace microcode {
         static measurementOptions: RecordingConfig
         static sensors: Sensor[]
 
-        constructor(headers: string[], mOpts: RecordingConfig, sensors: Sensor[]) {
-            Logger.headers = headers
+        constructor(mOpts: RecordingConfig, sensors: Sensor[]) {
+            Logger.headers = [
+                "Sensor",
+                "Milli-sec",
+                "Event",
+                "Reading"
+            ]
+
+            // Additional characters added for space for lines either side and for width of data below
+            // For example sensor.name may be much longer than just "Sensor"
+            Logger.headerStringLengths = [
+                ("Sensor".length + 4) * font.charWidth,
+                ("Milli-sec".length + 2) * font.charWidth,
+                ("Event".length + 6) * font.charWidth,
+                ("Reading".length + 2) * font.charWidth
+            ]
+
             Logger.entries = []
             Logger.numberOfRows = 0
             Logger.measurementOptions = mOpts
@@ -55,23 +71,29 @@ namespace microcode {
     }
 
     export class FauxDataLogger extends Logger {
-        constructor(headers: string[], mOpts: RecordingConfig, sensors: Sensor[]) {
-            super(headers, mOpts, sensors)
-        }
-    }
+        constructor(mOpts: RecordingConfig, sensors: Sensor[]) {
+            super(mOpts, sensors)
 
-    export class FauxEventLogger extends Logger {
-        constructor(headers: string[], mOpts: RecordingConfig, sensors: Sensor[]) {
-            super(headers, mOpts, sensors)
+            // Add initial entry for the headers, Logger.isEmpty remains false:
+            Logger.entries.push({
+                id: Logger.entries.length, 
+                data: Logger.headers
+            })
         }
 
         public static log(data: string[]) {
             Logger.isEmpty = false
             Logger.entries.push({
-                id: this.entries.length, 
+                id: Logger.entries.length, 
                 data
             })
             Logger.numberOfRows += 1
+        }
+    }
+
+    export class FauxEventLogger extends Logger {
+        constructor(mOpts: RecordingConfig, sensors: Sensor[]) {
+            super(mOpts, sensors)
         }
     }
 }

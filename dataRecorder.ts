@@ -11,14 +11,8 @@ namespace microcode {
         constructor(app: App, measurementOpts: RecordingConfig, sensors: Sensor[], recordingMode: RecordingMode) {
             super(app, "dataRecorder")
 
-            
-            let headers: string[] = ["Milli-Sec"]
-            sensors.forEach(function(sensor) {
-                headers.push(sensor.name)
-            })
-
-            new FauxDataLogger(headers, measurementOpts, sensors)
-
+            // Construct the static FauxDataLogger:
+            new FauxDataLogger(measurementOpts, sensors)
 
             // Get the specified behaviour from the passed RecordingMode Enum:
             if (recordingMode === RecordingMode.TIME) {
@@ -123,14 +117,17 @@ namespace microcode {
 
                 // datalogger.log(datalogger.createCV("col1", "hello"))
 
-                let data: string[] = [(input.runningTime() - this.loggingStartTime).toString()]
-
-                // Collect the data to log:
-                for (let i = 0; i < this.sensors.length; i++) {
-                    data.push(this.sensors[i].getReading().toString())
-                }
-
-                FauxDataLogger.log(data)
+                this.sensors.forEach(function(sensor) {
+                    // Of the same format as FauxDataLogger.header
+                    // May be worth creating a class for this purpose
+                    const data: string[] = [
+                        sensor.name, 
+                        (input.runningTime() - this.loggingStartTime).toString(), 
+                        "N/A",
+                        sensor.getReading().toString()
+                    ]
+                    FauxDataLogger.log(data)
+                })
 
                 this.measurementOpts.measurements -= 1
                 basic.pause(this.measurementOpts.period)

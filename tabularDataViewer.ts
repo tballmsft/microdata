@@ -86,14 +86,14 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.xScrollOffset + TABULAR_MAX_COLS < FauxDataLogger.headers.length) {
+                    if (this.xScrollOffset + TABULAR_MAX_COLS < FauxDataLogger.headers.length + 1) {
                         this.xScrollOffset += 1
                     }
                 }
             )
         }
 
-        draw_grid(colBufferSize: number, rowBufferSize: number) {
+        drawGrid(colBufferSize: number, rowBufferSize: number) {
             for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
                 Screen.drawLine(
                     Screen.LEFT_EDGE + colOffset,
@@ -104,6 +104,42 @@ namespace microcode {
                 )
             }
 
+            for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowBufferSize) {
+                Screen.drawLine(
+                    Screen.LEFT_EDGE,
+                    Screen.TOP_EDGE + rowOffset,
+                    Screen.WIDTH,
+                    Screen.TOP_EDGE + rowOffset,
+                    0x0
+                )
+            }
+        }
+
+
+        /**
+         * Each header and its corresopnding rows of data have variable lengths,
+         *      The small screen sizes exaggerates these differences, hence variable column sizing.
+         * Uses FauxDataLogger.headerStringLengths to get these lengths
+         * @param colBufferSizes FauxDataLogger.headerStringLengths spliced by this.xScrollOffset
+         * @param rowBufferSize remains constant
+         */
+        drawGridOfVariableColSize(colBufferSizes: number[], rowBufferSize: number) {
+            let cumulativeColOffset = 0
+            
+            colBufferSizes.forEach(function(headerLen) {
+                cumulativeColOffset += headerLen
+
+                if (cumulativeColOffset < Screen.WIDTH) {
+                    Screen.drawLine(
+                        Screen.LEFT_EDGE + cumulativeColOffset,
+                        Screen.TOP_EDGE,
+                        Screen.LEFT_EDGE + cumulativeColOffset,
+                        Screen.HEIGHT,
+                        0x0
+                    )
+                }
+            })
+            
             for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowBufferSize) {
                 Screen.drawLine(
                     Screen.LEFT_EDGE,
@@ -129,7 +165,7 @@ namespace microcode {
                     const metadataColSize = Screen.WIDTH / 2
                     const metadataRowSize = Screen.HEIGHT / METADATA_MAX_ROWS
 
-                    this.draw_grid(metadataColSize, metadataRowSize)
+                    this.drawGrid(metadataColSize, metadataRowSize)
                     const metadata = FauxDataLogger.getMetadata()
 
                     for (let row = 0; row < METADATA_MAX_ROWS; row++) {
@@ -152,23 +188,31 @@ namespace microcode {
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
-                    const tabularColSize = Screen.WIDTH / Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS) 
                     const tabularRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
 
-                    this.draw_grid(tabularColSize, tabularRowBufferSize)
+                    this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
                     
                     for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
                         const data = FauxDataLogger.entries[row + this.yScrollOffset].data;
 
+                        let cumulativeColOffset = 0
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
+                            const colOffset = (font.charWidth * data[colID].length) + 2
+
+                            if (cumulativeColOffset + colOffset > Screen.WIDTH) {
+                                break
+                            }
+
                             Screen.print(
                                 data[colID],
-                                Screen.LEFT_EDGE + (col * tabularColSize) + (tabularColSize / 2) - ((font.charWidth * data[colID].length) / 2),
+                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
                                 Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                                 0xb,
                                 simage.font8
                             )
+
+                            cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
                         }
                     }
                     break;
