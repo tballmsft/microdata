@@ -4,33 +4,67 @@ namespace microcode {
      * Methods are seldom overidden
      */
     export abstract class Sensor {
-        static BUFFER_LIMIT = 100;
-        static PLOT_SMOOTHING_CONSTANT = 8
+        static readonly BUFFER_LIMIT: number = 100;
+        static readonly PLOT_SMOOTHING_CONSTANT: number = 8
 
         public sensorFn: () => number
         public name: string
+        public iconName: string
+        public ariaID: string
+
+        // Reading Statistics:
         public minimum: number
         public maximum: number
         public peakDataPoint: number[]
 
-        private numberOfDisplayModes: number;
-        private currentDisplayMode: number;
-
         private dataBuffer: number[]
+        private startTime: number
+
+        // Details regarding how the sensor should asynchronously record measurements/report events
+        private config: RecordingConfig
+
+        // Potential to add different display options
+        // For example: view a magnometer as a line-graph or directionally
+        private numberOfDisplayModes: number
+        private currentDisplayMode: number
 
         constructor(sensorFn: () => number, 
             name: string,
             sensorMinReading: number,
             sensorMaxReading: number,
-            numberOfDisplayModes: number
+            numberOfDisplayModes: number,
+            iconName: string,
+            ariaID: string
         ) {
             this.sensorFn = sensorFn
             this.name = name
+            this.iconName = iconName
+            this.ariaID = ariaID
+
             this.minimum = sensorMinReading
             this.maximum = sensorMaxReading
+            this.peakDataPoint = [0, this.minimum] // [x, y]
+
             this.numberOfDisplayModes = numberOfDisplayModes
+            this.numberOfDisplayModes = 1 // Default
+
             this.dataBuffer = []
-            this.peakDataPoint = [0, this.minimum]
+            this.startTime = 0 // This value will be set upon the first reading
+        }
+
+
+        /**
+         * It would be better for this config to be passed in upon sensor construction
+         *      This requires a Sensor Factory
+         * 
+         * Invoked at the end of recordingConfigSelection
+         *  
+         * This method should be removed in future releases
+         * 
+         * @param config Period, Measurement quantity, event handling, etc
+         */
+        setConfig(config: RecordingConfig) {
+            this.config = config
         }
 
         cycleDisplayMode() {
@@ -63,6 +97,28 @@ namespace microcode {
                 this.peakDataPoint[0] -= 1
             }
             this.dataBuffer.push(this.getReading());
+        }
+
+        private handleEvent(): void {
+            const reading = this.getReading().toString()
+            const data: string[] = [
+                this.name, 
+                (input.runningTime() - this.startTime).toString(), 
+                this.config.sensorEvent.inequality + " " + reading,
+                reading
+            ]
+            FauxDataLogger.log(data)
+        }
+
+        startPolling() {
+            this.startTime = input.runningTime()
+            let currentPollID = 0
+
+            while (currentPollID < this.config.measurements) {
+                this.config.sensorEvent.handleEvent(this.getReading(), this.handleEvent)
+                currentPollID += 1
+                basic.pause(this.config.period)
+            }
         }
         
 
@@ -102,7 +158,7 @@ namespace microcode {
      */
     export class LightSensor extends Sensor {
         constructor() {
-            super(function () {return input.lightLevel()}, "Light", 0, 255, 1)
+            super(function () {return input.lightLevel()}, "Light", 0, 255, 1, "led_light_sensor", "led_light_sensor")
         }
     }
 
@@ -111,7 +167,7 @@ namespace microcode {
      */
     export class TemperatureSensor extends Sensor {
         constructor() {
-            super(function () {return input.temperature()}, "Temp.", 0, 100, 1)
+            super(function () {return input.temperature()}, "Temp.", 0, 100, 1, "thermometer", "thermometer")
         }
     }
 
@@ -121,7 +177,14 @@ namespace microcode {
      */
     export class AccelerometerSensor extends Sensor {
         constructor(dim: Dimension) {
-            super(function () {return input.acceleration(dim)}, "Accel.", -1023, 1023, 1)
+            super(function () {return input.acceleration(dim)}, 
+                "Accel. " + ['X', 'Y', 'Z'][dim], 
+                -1023, 
+                1023, 
+                1,
+                "accelerometer",
+                "accelerometer " + + ['X', 'Y', 'Z'][dim]
+            )
         }
     }
 
@@ -140,7 +203,9 @@ namespace microcode {
                 "Pin " + pin.toString(),
                 0,
                 1,
-                1
+                1,
+                "pin_" + pin.toString(),
+                "Pin " + pin.toString()
             )
         }
     }
@@ -157,7 +222,9 @@ namespace microcode {
                 "Magnet " + dim.toString(),
                 0,
                 1,
-                1
+                1,
+                "magnet",
+                "S10"
             )
         }
     }
@@ -176,7 +243,7 @@ namespace microcode {
                 name = "Roll"
             }
 
-            super(function () {return input.rotation(rot)}, name, 0, 100, 1)    
+            super(function () {return input.rotation(rot)}, name, 0, 100, 1, "right_turn", name)    
         }
     }
 
@@ -188,7 +255,7 @@ namespace microcode {
      */
     export class LogoPressSensor extends Sensor {
         constructor() {
-            super(function () {if(input.logoIsPressed()) {return 1} return 0}, "Logo Pressed", 0, 1, 1)
+            super(function () {if(input.logoIsPressed()) {return 1} return 0}, "Logo Pressed", 0, 1, 1, "finger_press", "Logo Press")
         }
     }
 
@@ -198,7 +265,7 @@ namespace microcode {
      */
     export class CompassHeadingSensor extends Sensor {
         constructor() {
-            super(function () {return input.compassHeading()}, "Compass", 0, 360, 1)
+            super(function () {return input.compassHeading()}, "Compass", 0, 360, 1, "compass", "Compass")
         }
     }    
 
@@ -208,7 +275,7 @@ namespace microcode {
      */
     export class VolumeSensor extends Sensor {
         constructor() {
-            super(function () {return input.soundLevel()}, "Volume", 0, 255, 1)
+            super(function () {return input.soundLevel()}, "Volume", 0, 255, 1, "speaker", "Volume")
         }
     }
 
@@ -218,7 +285,7 @@ namespace microcode {
      */
     export class ButtonPressSensor extends Sensor {
         constructor() {
-            super(function () {return 1}, "Button Press", 0, 1, 1)
+            super(function () {return 1}, "Button Press", 0, 1, 1, "tile_button_a", "F3")
 
             control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
                 return 1
