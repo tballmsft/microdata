@@ -3,5 +3,6 @@ namespace microcode {
         measurements: number,
         period: number,
         delay: number
+        sensorEvent?: SensorEvent
     };
 }
