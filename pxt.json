@@ -42,23 +42,18 @@
         "ruleEditor.ts",
         "editor.ts",
         "samples.ts",
-
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
-
         "sensorSelect.ts",
         "dataViewSelect.ts",
-
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
-        "recordingModeSelection.ts",
-
         "sensors.ts",
         "fauxLoggers.ts",
         "dataRecorder.ts",
-        "generateGraph.ts"
+        "generateGraph.ts",
+        "sensorEvent.ts"
     ],
-
     "testFiles": [],
     "targetVersions": {
         "target": "6.1.10",

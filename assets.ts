@@ -77,6 +77,7 @@ namespace microcode {
             if (name == "speaker") return icondb.speaker
 
             if (name == "tile_button_a") return icondb.tile_button_a
+            if (name == "tile_button_b") return icondb.tile_button_b
             if (name == "compass") return icondb.compass
 
             if (name == "settingsGear") return icondb.settingsGear
