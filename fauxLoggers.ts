@@ -79,6 +79,7 @@ namespace microcode {
                 id: Logger.entries.length, 
                 data: Logger.headers
             })
+            Logger.numberOfRows += 1
         }
 
         public static log(data: string[]) {

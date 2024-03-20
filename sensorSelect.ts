@@ -241,10 +241,6 @@ namespace microcode {
                         this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
                     }
 
-                    if (this.nextSceneEnum === CursorSceneEnum.EventConfigSelect) {
-                        this.app.pushScene(new EventConfigSelect(app, this.selectedSensors))
-                    }
-
                     else {
                         this.app.pushScene(new MeasurementConfigSelect(app, this.selectedSensors))
                     }

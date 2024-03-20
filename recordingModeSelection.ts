@@ -27,7 +27,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.EventConfigSelect))
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },
             })
 

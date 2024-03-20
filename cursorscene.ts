@@ -3,7 +3,6 @@ namespace microcode {
         LiveDataViewer,
         SensorSelect,
         MeasurementConfigSelect,
-        EventConfigSelect,
         RecordData,
     }
     
