@@ -1,28 +1,29 @@
 namespace microcode {
-    export enum RecordingMode {
-        EVENT,
-        TIME
-    }
+    const MAX_SENSORS_ON_SCREEN: number = 5
+    const SENSOR_BOX_COLORS: number[] = [2,3,4,6,7,9]
 
     export class DataRecorder extends Scene {
-        /** State pattern; see the internal classes that implement these behaviours below this file */
-        private recordingBehaviour: RecordingBehaviour
+        private sensors: Sensor[]
 
-        constructor(app: App, measurementOpts: RecordingConfig, sensors: Sensor[], recordingMode: RecordingMode) {
+        // UI:
+        private currentSensorIndex: number
+        private sensorIndexOffset: number
+        private sensorBoxColor: number
+
+        constructor(app: App, sensors: Sensor[]) {
             super(app, "dataRecorder")
 
-            // Construct the static FauxDataLogger:
-            new FauxDataLogger(measurementOpts, sensors)
+            new FauxDataLogger(sensors)
 
-            // Get the specified behaviour from the passed RecordingMode Enum:
-            if (recordingMode === RecordingMode.TIME) {
-                this.recordingBehaviour = new TimeBasedRecording(measurementOpts, sensors)
-            }
+            this.sensors = sensors
+            this.sensorIndexOffset = 0
+            this.currentSensorIndex = 0
+            this.sensorBoxColor = 16
 
-            else {
-                this.recordingBehaviour = new EventBasedRecording()
-            }
-
+            // Start logging:
+            this.sensors.forEach((sensor) => {
+                sensor.log(this)
+            })
 
             //---------------
             // User Controls:
@@ -37,9 +38,39 @@ namespace microcode {
                     this.app.pushScene(new Home(this.app))
                 }
             )
+
+            // Scroll Up
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => {
+                    this.currentSensorIndex = Math.max(0, this.currentSensorIndex - 1)
+
+                    if (this.sensorIndexOffset > 0) {
+                        this.sensorIndexOffset = Math.max(0, this.sensorIndexOffset - 1)
+                    }
+                    
+                    this.update()
+                }
+            )
+
+            // Scroll Down
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => {
+                    this.currentSensorIndex = Math.min(this.currentSensorIndex + 1, this.sensors.length - 1)
+
+                    if (this.currentSensorIndex > 4) {
+                        this.sensorIndexOffset = Math.min(this.sensorIndexOffset + 1, this.sensors.length - 5)
+                    }
+
+                    this.update()
+                }
+            )
         }
 
-        update() {
+        update(): void {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
                 Screen.TOP_EDGE,
@@ -48,89 +79,102 @@ namespace microcode {
                 0xc
             )
 
-            this.recordingBehaviour.update()
-        }
-    }
 
-    
-    //-------------------------------------
-    // Recording behaviour implementations:
-    //-------------------------------------
+            // Check if all sensors have finished their work:
+            let recordingsComplete = true
+            for (let i = 0; i < this.sensors.length; i++) {
+                if (this.sensors[i].config.measurements > 0) {
+                    recordingsComplete = false
+                    break
+                }
+            }
 
-    interface RecordingBehaviour {
-        update(): void;
-    }
-
-    /**
-     * A public recording behaviour.
-     *      This 
-     */
-    export class EventBasedRecording implements RecordingBehaviour {
-        update(): void {
-            
-        }
-    }
-
-
-    /**
-     * Take N recordings on each of the passed sensors with the specified period,
-     *      Makes use of the static FauxDataLogger that was setup in the parent constructor DataRecorder
-     * Internal Class unlike EventBasedRecording, since this class is only ever invoked via the DataRecorder
-     */
-    class TimeBasedRecording implements RecordingBehaviour {
-        private loggingStartTime: number
-        private measurementOpts: RecordingConfig
-        private sensors: Sensor[]
-
-        constructor(measurementOpts: RecordingConfig, sensors: Sensor[]) {
-            let headers: string[] = ["Milli-Sec"]
-            sensors.forEach(function(sensor) {
-                headers.push(sensor.name)
-            })
-
-            this.loggingStartTime = input.runningTime()
-            this.measurementOpts = measurementOpts
-            this.sensors = sensors
-        }
-
-        update(): void {
-            if (this.measurementOpts.measurements === 0) {
+            if (recordingsComplete) {
                 screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);
                 screen.printCenter("Press B to back out.", screen.height / 2);
             }
 
-            else if (this.measurementOpts.delay > 0) {
-                screen.printCenter("Data logger starting in", (screen.height / 2) - 10);
-                screen.printCenter(this.measurementOpts.delay + " seconds...", screen.height / 2)
-                this.measurementOpts.delay -= 1
-
-                basic.pause(1000)
-            }
-
             else {
-                const secondsLeft: number = (this.measurementOpts.measurements * this.measurementOpts.period) / 1000
-                screen.printCenter("Recording data...", 10);
+                screen.printCenter("Recording data...", 4);
+                let y = 16
 
-                screen.printCenter(this.measurementOpts.period / 1000 + " second period", 45)   
-                screen.printCenter(this.measurementOpts.measurements.toString() + " measurements left", 65);
-                screen.printCenter(secondsLeft.toString() + " seconds left", 85);
+                for (let i = this.sensorIndexOffset; i < this.sensors.length; i++) {
+                    if (i - this.sensorIndexOffset > MAX_SENSORS_ON_SCREEN) {
+                        break
+                    }
+                    
+                    // Get the colour for this box
+                    this.sensorBoxColor = SENSOR_BOX_COLORS[i % SENSOR_BOX_COLORS.length]
 
-                // datalogger.log(datalogger.createCV("col1", "hello"))
+                    if (i != this.currentSensorIndex) {
+                        screen.fillRect(
+                            5,
+                            y,
+                            142,
+                            16,
+                            16
+                        )
+                        
+                        screen.fillRect(
+                            7,
+                            y,
+                            145,
+                            14,
+                            this.sensorBoxColor
+                        )
 
-                this.sensors.forEach(function(sensor) {
-                    // Of the same format as FauxDataLogger.header
-                    // May be worth creating a class for this purpose
-                    const data: string[] = [
-                        sensor.name, 
-                        (input.runningTime() - this.loggingStartTime).toString(), 
-                        "N/A",
-                        sensor.getReading().toString()
-                    ]
-                    FauxDataLogger.log(data)
-                })
+                        screen.print(
+                            this.sensors[i].name,
+                            12,
+                            y + 2,
+                            15
+                        )
+                    }
 
-                this.measurementOpts.measurements -= 1
-                basic.pause(this.measurementOpts.period)
+                    else {
+                        screen.fillRect(
+                            5,
+                            y,
+                            142,
+                            47,
+                            16
+                        )
+
+                        screen.fillRect(
+                            7,
+                            y,
+                            145,
+                            45,
+                            this.sensorBoxColor
+                        )
+
+                        const sensor = this.sensors[i]
+                        screen.print(
+                            sensor.name,
+                            12,
+                            y + 2,
+                            15
+                        )
+
+                        const sensorInfo: string[] = [
+                            sensor.config.period / 1000 + " second period", 
+                            sensor.config.measurements.toString() + " measurements left",
+                            ((sensor.config.measurements * sensor.config.period) / 1000).toString() + " seconds left"
+                        ]
+
+                        sensorInfo.forEach((info) => {
+                            y += 12
+                            screen.print(
+                                info,
+                                24,
+                                y,
+                                15
+                            )
+                        });
+                    }
+
+                    y += 14
+                }
             }
         }
     }
