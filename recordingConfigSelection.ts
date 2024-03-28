@@ -1,94 +1,111 @@
 namespace microcode {
     /**
-     * PROMPT_SHARED_CONFIG: Ask if the user wants sensors to share measurement configs; so they only input 1
      * SELECTING_SENSOR: User is selecting a sensor to modify
      * WRITING: User is modifying a setting
      * DEFAULT: User is not changing any settings & PROMPT_SHARED_CONFIG has occured.
      */
     const enum GUI_STATE {
-        PROMPT_SHARED_CONFIG,
         SELECTING_SENSOR,
         WRITING,
         DEFAULT
     }
 
+    /**
+     * The user may be writing to the UI elements for the 
+     * recording config or the events
+     * 
+     */
     const enum WRITING_MODE {
-        MEASUREMENT,
-        EVENT,
+        RECORDING_SETTINGS,
+        EVENT_SETTINGS,
     }
 
 
     /**
-     * Abstract for the screen that allows users to input measurement or event settings.
-     *      Extended by MeasurementConfigSelection and EventConfigSelection
-     * 
+     * The Recording Settings is a sub-window on the right-hand-side.
+     * It consists of a list of rows that the user can manipulate to change the RecordingConfig
      */
-    abstract class RecordingConfigSelection extends Scene {
-        // UI Control:
+    type RecordingSettingsGUIColumn = {
+        /** The name of this recording setting (record, ms, second, minute, hour, etc) */
+        name: string,
+        /** The current value that the user has selected for this row (minute = 2); all of (ms, second, minute, hour, day) will be converted into ms at the end */
+        value: number,
+        /** How much the value should increment or decrement by when the user selects this element and presses up or down (typically 1) */
+        smallDelta: number, 
+        /** How much the value should increment or decrement by when the user selects this element and presses left or right (typically 5 or 10) */
+        largeDelta: number
+    }
+
+
+    /**
+     * The (ms, second, minute, hour, day) ui elements kept in RecordingSettingsGUIColumn.value are converted into ms using this:
+     */
+    const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
+
+
+    /**
+     * Responsible for allowing the user to select the specific recording configurations for each passed sensor.
+     * The user may also choose to select an event for each sensor.
+     * 
+     * After submission the DataRecorder is loaded & these sensor configs excercised.
+     */
+    export class RecordingConfigSelection extends Scene {
         private guiState: GUI_STATE
         private writingMode: WRITING_MODE
-        private guiRows: string[]
-        private currentColumn: number
-        private configDeltas: number[][]
-        protected userSelection: number[]
 
-        /** That were passed via selectSensors */
-        private sensors: Sensor[]
-        private selectedSensorIndex: number
+        /** Each sensor may have a unique configuration, the UI should track the state of each configuration. This grid is responsible for that.
+         *  guiRows[n] corresponds to the nth sensor; its contents will be converted into a RecordingConfig and passed to the sensor at completion.
+         */
+        private guiRows: RecordingSettingsGUIColumn[][]
+        private currentSensorRow: number
+        private currentConfigRow: number
+
+        
 
         /**
          * Sensor measurement control (unique per sensor)
          *      Number of measurements, period, event control, etc
          * 
-         * Each sensor is granted their config upon the progression from this screen.
+         * Each sensor is granted its config upon progression from this screen, via SensorFactory.new()
          *      This could be improved via a Factory; where a sensor enum is passed.
          *      Or a builder design pattern
          */
         private sensorConfigs: RecordingConfig[]
-        private sensorsShareConfigs: boolean
+        private sensorBlueprints: SensorBlueprint[]
 
-        private acceptShareConfigButton: Sprite
-        private declineShareConfigButton: Sprite
+        /** Whether or not the user has manipulated the UI for a sensor. 
+         *  Selecting a sensor, but leaving its config as default counts as 'changing' it; since the user may purposefully set it as such.
+        */
+        private configHasChanged: boolean[]
 
-        constructor(app: App, 
-            appName: string, 
-            sensors: Sensor[],
-            configDeltas: number[][],
-            defaultUserSelection: number[],
-            guiRows: string[]
-        ) {
-            super(app, appName)
+        constructor(app: App, sensorBlueprints: SensorBlueprint[]){
+            super(app, "measurementConfigSelect")
+            this.guiState = GUI_STATE.SELECTING_SENSOR
+            this.writingMode = WRITING_MODE.RECORDING_SETTINGS
 
-            this.guiState = GUI_STATE.PROMPT_SHARED_CONFIG
-            this.writingMode = WRITING_MODE.MEASUREMENT
-            this.guiRows = guiRows
-            this.userSelection = defaultUserSelection
-            this.configDeltas = configDeltas
-            this.currentColumn = 0
-
-            this.sensors = sensors
-            this.selectedSensorIndex = 0
+            this.guiRows = []
             this.sensorConfigs = []
-            this.sensorsShareConfigs = false
+            this.configHasChanged = []
+            this.sensorBlueprints = sensorBlueprints
 
+            // Each sensor has a unique config; the user selects this using these UI elements:
+            for (let _ = 0; _ < this.sensorBlueprints.length; _++) {
+                this.guiRows.push([
+                    {name: "Records", value: 20, smallDelta: 1, largeDelta: 10},
+                    {name: "ms",      value: 0,  smallDelta: 1, largeDelta: 10},
+                    {name: "Seconds", value: 1,  smallDelta: 1, largeDelta: 5},
+                    {name: "Minutes", value: 0,  smallDelta: 1, largeDelta: 5},
+                    {name: "Hours",   value: 0,  smallDelta: 1, largeDelta: 5},
+                    {name: "Days",    value: 0,  smallDelta: 1, largeDelta: 5},
+                    {name: "Delay",   value: 0,  smallDelta: 1, largeDelta: 5},
+                ])
 
-            // Probably a much neater way of configuring this...
+                this.configHasChanged.push(false)
+                this.sensorConfigs.push({measurements: 20, period: 1000, delay: 0})
+            }
 
-            this.acceptShareConfigButton = new Sprite({img: icons.get("tile_button_a")})
-                this.acceptShareConfigButton.bindXfrm(new Affine())
-                this.acceptShareConfigButton.xfrm.parent = new Affine()
-                this.acceptShareConfigButton.xfrm.worldPos.x = Screen.HALF_WIDTH
-                this.acceptShareConfigButton.xfrm.worldPos.y = Screen.HALF_HEIGHT
-                this.acceptShareConfigButton.xfrm.localPos.x = -35
-                this.acceptShareConfigButton.xfrm.localPos.y = 8
-
-            this.declineShareConfigButton = new Sprite({img: icons.get("tile_button_b")})
-                this.declineShareConfigButton.bindXfrm(new Affine())
-                this.declineShareConfigButton.xfrm.parent = new Affine()
-                this.declineShareConfigButton.xfrm.worldPos.x = Screen.HALF_WIDTH
-                this.declineShareConfigButton.xfrm.worldPos.y = Screen.HALF_HEIGHT
-                this.declineShareConfigButton.xfrm.localPos.x = 34
-                this.declineShareConfigButton.xfrm.localPos.y = 8
+            this.currentSensorRow = 0
+            this.currentConfigRow = 0
 
             //--------------
             // User Control:
@@ -99,17 +116,17 @@ namespace microcode {
                 controller.A.id,
                 () => {
                     switch (this.guiState) {
-                        case GUI_STATE.PROMPT_SHARED_CONFIG:
-                            this.sensorsShareConfigs = true
-                            this.guiState = GUI_STATE.SELECTING_SENSOR
-                            break;
-                        
                         case GUI_STATE.SELECTING_SENSOR:
-                            this.guiState = GUI_STATE.DEFAULT    
+                            this.guiState = GUI_STATE.DEFAULT
+                            this.configHasChanged[this.currentSensorRow] = true
                             break;
 
                         case GUI_STATE.DEFAULT:
                             this.guiState = GUI_STATE.WRITING
+                            break;
+                        
+                        case GUI_STATE.WRITING:
+                            this.guiState = GUI_STATE.DEFAULT
                             break;
                     
                         default:
@@ -124,11 +141,6 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     switch (this.guiState) {
-                        case GUI_STATE.PROMPT_SHARED_CONFIG:
-                            this.sensorsShareConfigs = false
-                            this.guiState = GUI_STATE.SELECTING_SENSOR 
-                            break;
-
                         case GUI_STATE.SELECTING_SENSOR:
                             this.app.popScene()
                             this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))            
@@ -139,9 +151,6 @@ namespace microcode {
                             break
 
                         case GUI_STATE.DEFAULT:
-                            // this.app.popScene()
-                            // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
-                            
                             this.guiState = GUI_STATE.SELECTING_SENSOR
                             break;
                     
@@ -158,18 +167,19 @@ namespace microcode {
                 () => {
                     if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         // Non-negative modulo:
-                        this.selectedSensorIndex = (((this.selectedSensorIndex - 1) % this.sensors.length) + this.sensors.length) % this.sensors.length
+                        this.currentSensorRow = (((this.currentSensorRow - 1) % this.sensorBlueprints.length) + this.sensorBlueprints.length) % this.sensorBlueprints.length
                     }
 
-                    if (this.guiState === GUI_STATE.WRITING) {
-                        if (this.writingMode == WRITING_MODE.MEASUREMENT) {
-                            this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + this.configDeltas[this.currentColumn][0], 0)
+                   else  if (this.guiState === GUI_STATE.WRITING) {
+                        if (this.writingMode == WRITING_MODE.RECORDING_SETTINGS) {
+                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
                         }
                     }
 
                     else {
                         // Non-negative modulo:
-                        this.currentColumn = (((this.currentColumn - 1) % this.userSelection.length) + this.userSelection.length) % this.userSelection.length
+                        const numberOfMeasurementRows = this.guiRows[0].length
+                        this.currentConfigRow = (((this.currentConfigRow - 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
                 }
             )
@@ -179,22 +189,18 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
-                        this.selectedSensorIndex = (this.selectedSensorIndex + 1) % this.sensors.length
+                        this.currentSensorRow = (this.currentSensorRow + 1) % this.sensorBlueprints.length
                     }
 
-                    if (this.guiState === GUI_STATE.WRITING) {
-                        if (this.writingMode === WRITING_MODE.MEASUREMENT) {
-                            this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - this.configDeltas[this.currentColumn][0], 0)
-                        }
-
-                        else {
-                            this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - this.configDeltas[this.currentColumn][0], 0)
+                    else if (this.guiState === GUI_STATE.WRITING) {
+                        if (this.writingMode === WRITING_MODE.RECORDING_SETTINGS) {
+                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
                         }
                     }
 
                     else {
-                        // Non-negative modulo:
-                        this.currentColumn = (this.currentColumn + 1) % this.userSelection.length
+                        const numberOfMeasurementRows = this.guiRows[0].length
+                        this.currentConfigRow = (((this.currentConfigRow + 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
                 }
             )
@@ -204,17 +210,17 @@ namespace microcode {
                 controller.left.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        if (this.writingMode === WRITING_MODE.MEASUREMENT) {                        
-                            this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] - this.configDeltas[this.currentColumn][1], 0)
+                        if (this.writingMode === WRITING_MODE.RECORDING_SETTINGS) {                        
+                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
                         }
                     }
 
                     if (this.guiState == GUI_STATE.SELECTING_SENSOR) {
-                        if (this.writingMode == WRITING_MODE.MEASUREMENT) {
-                            this.writingMode = WRITING_MODE.EVENT
+                        if (this.writingMode == WRITING_MODE.RECORDING_SETTINGS) {
+                            this.writingMode = WRITING_MODE.EVENT_SETTINGS
                         }
                         else {
-                            this.writingMode = WRITING_MODE.MEASUREMENT
+                            this.writingMode = WRITING_MODE.RECORDING_SETTINGS
                         }
                     }
                 }
@@ -225,41 +231,30 @@ namespace microcode {
                 controller.right.id,
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
-                        if (this.writingMode === WRITING_MODE.MEASUREMENT) {
-                            this.userSelection[this.currentColumn] = Math.max(this.userSelection[this.currentColumn] + this.configDeltas[this.currentColumn][1], 0)
+                        if (this.writingMode === WRITING_MODE.RECORDING_SETTINGS) {
+                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
                         }
                     }
 
                     if (this.guiState == GUI_STATE.SELECTING_SENSOR) {
-                        if (this.writingMode == WRITING_MODE.MEASUREMENT) {
-                            this.writingMode = WRITING_MODE.EVENT
+                        if (this.writingMode == WRITING_MODE.RECORDING_SETTINGS) {
+                            this.writingMode = WRITING_MODE.EVENT_SETTINGS
                         }
                         else {
-                            this.writingMode = WRITING_MODE.MEASUREMENT
+                            this.writingMode = WRITING_MODE.RECORDING_SETTINGS
                         }
                     }
 
                     else if (this.guiState === GUI_STATE.DEFAULT) {
-                        // Pass the configs onto the sensors:
-                        this.sensors.map((sensor, index) => sensor.setConfig(this.sensorConfigs[index]))
+                        // Build the sensors according to their specific configuration:
+                        this.setSensorConfigs()
+                        const sensors: Sensor[] = this.sensorBlueprints.map((blueprint, index) => SensorFactory.new(blueprint, this.sensorConfigs[index]))
 
                         this.app.popScene()
-                        this.app.pushScene(new DataRecorder(this.app, this.generateRecordingOptions(), this.sensors, RecordingMode.TIME))
+                        this.app.pushScene(new DataRecorder(this.app, sensors))
                     }
                 }
             )
-        }
-
-        /**
-         * Convert the .userSelection data into a RecordingConfig object for use by the DataRecorder
-         * @returns RecordingConfig {measurements, period, delay}
-         */
-        public generateRecordingOptions(): RecordingConfig {
-            return {
-                measurements: 0,
-                period: 0,
-                delay: 0      
-            }
         }
 
         update() {
@@ -272,224 +267,62 @@ namespace microcode {
             )
 
             screen.printCenter("Recording Settings", 2)
-
             this.drawSensors()
 
-            if (this.guiState != GUI_STATE.SELECTING_SENSOR && this.guiState != GUI_STATE.PROMPT_SHARED_CONFIG) {
-                if (this.writingMode == WRITING_MODE.MEASUREMENT) {
+            if (this.guiState == GUI_STATE.WRITING || this.guiState == GUI_STATE.DEFAULT) {
+                if (this.writingMode == WRITING_MODE.RECORDING_SETTINGS) {
                     this.drawMeasurementSelectWindow()
                 }
                 else {
                     this.drawEventSelectWindow()
                 }
             }
-
-            // Drawn ontop of above grapics, as pop-up
-            if (this.guiState == GUI_STATE.PROMPT_SHARED_CONFIG) {
-                // Border:
-                // Slightly taller and wider than box for depth effect
-                screen.fillRect(
-                    Screen.HALF_WIDTH - 51,
-                    Screen.HALF_HEIGHT - 26,
-                    103,
-                    56,
-                    5
-                )
-
-                // Body
-                screen.fillRect(
-                    Screen.HALF_WIDTH - 50,
-                    Screen.HALF_HEIGHT - 25,
-                    100,
-                    53,
-                    7
-                )
-
-                screen.printCenter("Unique config", Screen.HALF_HEIGHT - 25 + 4, 16)
-                screen.printCenter("per sensor?", Screen.HALF_HEIGHT - 25 + 12, 16)
-
-                // Draw button prompts:
-                screen.print(
-                    "Yes",
-                    Screen.HALF_WIDTH - 41,
-                    Screen.HALF_HEIGHT + 14,
-                    16
-                )
-
-                screen.print(
-                    "No",
-                    Screen.HALF_WIDTH + 31,
-                    Screen.HALF_HEIGHT + 14,
-                    16
-                )
-                
-                this.acceptShareConfigButton.draw()
-                this.declineShareConfigButton.draw()
-            }
         }
 
         private drawMeasurementSelectWindow() {
-            let timeAsString;
-            let rowOffset = 0;
-
-            const pointerX = Screen.WIDTH - 12
-            const optionX = pointerX - 15
-            const headerX = optionX - (font.charWidth * this.guiRows[0].length) - 8
-            const rowSize = Screen.HEIGHT / (this.userSelection.length + 1)
+            const optionX = Screen.WIDTH - 17
+            const headerX = optionX - (font.charWidth * this.guiRows[this.currentSensorRow][0].name.length) - 6
+            const rowSize = Screen.HEIGHT / (this.guiRows[0].length + 1)
 
             // Sub-window:
             // Outline:
             screen.fillRect(
-                headerX - 4,
-                12,
-                Screen.WIDTH - headerX + 4,
-                Screen.HEIGHT - 15,
+                headerX - 9,
+                14,
+                Screen.WIDTH - headerX + 8,
+                Screen.HEIGHT,
+                0
+            )
+
+            screen.fillRect(
+                headerX - 7,
+                15,
+                Screen.WIDTH - headerX + 10,
+                Screen.HEIGHT - 2,
                 6
             )
 
+            // Box around the current measurement row:
             screen.fillRect(
-                headerX - 2,
-                14,
-                Screen.WIDTH - headerX + 2,
-                Screen.HEIGHT - 19,
-                4
-            )
-
-            for (let i = 0; i < this.userSelection.length; i++) {
-                screen.print(
-                    this.guiRows[i],
-                    headerX,
-                    18 + rowOffset
-                )
-                
-                timeAsString = this.userSelection[i].toString()
-                screen.print(
-                    timeAsString,
-                    optionX,
-                    18 + rowOffset
-                )
-                rowOffset += rowSize
-            }
-
-            // Cursor arrow
-            screen.print("<-",
-                pointerX,
-                18 + (rowSize * this.currentColumn),
-                0
-            )
-        }
-
-        private drawEventSelectWindow() {
-            const pointerY = Screen.HEIGHT - 83
-            const yOffset = 18
-            const rowSize = Screen.HEIGHT / (this.sensors.length + 1)
-
-            // Sub-window:
-            // Outline:
-            screen.fillRect(
-                74,
-                yOffset + ((this.selectedSensorIndex + 1) * rowSize) - 2,
-                60,
+                headerX - 8,
+                18 + (this.currentConfigRow * rowSize) - 3,
+                Screen.WIDTH - headerX + 4,
                 font.charHeight + 9,
                 16
             )
 
             screen.fillRect(
-                74,
-                yOffset + ((this.selectedSensorIndex + 1) * rowSize) - 2,
-                58,
+                headerX - 6,
+                18 + (this.currentConfigRow * rowSize) - 3,
+                Screen.WIDTH - headerX + 5,
                 font.charHeight + 6,
-                9
-            )
-
-            const middleSensorRange = this.sensors[this.selectedSensorIndex].maximum - this.sensors[this.selectedSensorIndex].minimum
-            
-            // Write Event expression:
-            screen.print(
-                sensorEventSymbols[0] + " " + middleSensorRange.toString(),
-                80,
-                yOffset + ((this.selectedSensorIndex + 1) * rowSize) - 1,
-                16
-            )            
-
-            screen.print(
-                "^",
-                80,
-                yOffset + ((this.selectedSensorIndex + 1) * rowSize) + 20
-            )
-
-            // const sensorSprite = new Sprite({img: icons.get(this.sensors[this.selectedSensorIndex].iconName)})
-            // sensorSprite.bindXfrm(new Affine())
-            // sensorSprite.xfrm.parent = new Affine()
-            // sensorSprite.xfrm.worldPos.x = 100
-            // sensorSprite.xfrm.worldPos.y = 16 + ((this.selectedSensorIndex + 1) * rowSize)
-            // sensorSprite.xfrm.localPos.x = 5
-            // sensorSprite.xfrm.localPos.y = 0
-        }
-
-        private drawSensors() {
-            const headerX = 4
-            const rowSize = Screen.HEIGHT / (this.sensors.length + 1)
-
-            let writingModeColour = 5 // Measurement mode
-
-            if (this.writingMode == WRITING_MODE.EVENT) {
-                writingModeColour = 9
-            }
-
-            // Box around header:
-            screen.fillRect(
-                0,
-                16,
-                80,
-                font.charHeight + 9,
-                16
-            )
-
-            screen.fillRect(
-                1,
-                16,
-                78,
-                font.charHeight + 6,
-                writingModeColour
-            )
-
-            // Box around selected:
-            screen.fillRect(
-                0,
-                18 + ((this.selectedSensorIndex + 1) * rowSize) - 2,
-                56,
-                font.charHeight + 9,
-                16
-            )
-
-            screen.fillRect(
-                1,
-                18 + ((this.selectedSensorIndex + 1) * rowSize) - 2,
-                54,
-                font.charHeight + 6,
-                writingModeColour
-            )
-
-            let headerText = "Record "
-            if (this.writingMode == WRITING_MODE.MEASUREMENT) {
-                headerText += "Data"
-            }
-            else {
-                headerText += "Event"
-            }
-
-            // Header:
-            screen.print(
-                headerText,
-                headerX,
-                17,
-                16
+                5
             )
 
             let color = 0
-            for (let rowID = 0; rowID < this.sensors.length; rowID++) {
-                if (this.selectedSensorIndex === rowID) {
+            let rowOffset = 0;
+            for (let configRow = 0; configRow < this.guiRows[0].length; configRow++) {
+                if (configRow == this.currentConfigRow) {
                     color = 16
                 }
 
@@ -498,74 +331,117 @@ namespace microcode {
                 }
 
                 screen.print(
-                    this.sensors[rowID].name,
-                    headerX,
-                    17 + ((rowID + 1) * rowSize),
+                    this.guiRows[this.currentSensorRow][configRow].name,
+                    headerX - 1,
+                    18 + rowOffset,
                     color
+                )
+
+                screen.print(
+                    this.guiRows[this.currentSensorRow][configRow].value.toString(),
+                    optionX - 3,
+                    18 + rowOffset,
+                    color
+                )
+                rowOffset += rowSize
+            }
+        }
+
+        private drawEventSelectWindow() {
+            const pointerY = Screen.HEIGHT - 83
+            const yOffset = 18
+            const rowSize = Screen.HEIGHT / (this.sensorBlueprints.length + 1)
+
+            // Sub-window:
+            // Outline:
+            screen.fillRect(
+                74,
+                yOffset + ((this.currentSensorRow + 1) * rowSize) - 2,
+                60,
+                font.charHeight + 9,
+                16
+            )
+
+            screen.fillRect(
+                74,
+                yOffset + ((this.currentSensorRow + 1) * rowSize) - 2,
+                58,
+                font.charHeight + 6,
+                9
+            )
+
+            // const middleSensorRange = this.sensorBlueprints[this.selectedSensorIndex].maximum - Math.abs(this.sensorBlueprints[this.selectedSensorIndex].minimum)
+            
+            // Write Event expression:
+            screen.print(
+                sensorEventSymbols[0] + " 0", // + middleSensorRange.toString(),
+                80,
+                yOffset + ((this.currentSensorRow + 1) * rowSize) - 1,
+                15 // black
+            )
+        }
+
+        private drawSensors() {
+            const headerX = 4
+            const rowSize = Screen.HEIGHT / (this.sensorBlueprints.length + 1)
+
+            let boxColor = 2
+            for (let rowID = 0; rowID < this.sensorBlueprints.length; rowID++) {
+                const name = SensorFactory.new(this.sensorBlueprints[rowID], this.sensorConfigs[rowID]).name
+
+                // Select the color for the bounding box:
+                boxColor = 2 // red: unchanged
+                if (rowID == this.currentSensorRow) {
+                    boxColor = 5 // yellow: selected
+                }
+
+                else if (this.configHasChanged[rowID]) {
+                    boxColor = 7 // green: changed
+                }
+
+                screen.fillRect(
+                    0,
+                    18 + (rowID * rowSize) - 3,
+                    (name.length) * font.charWidth + 4,
+                    font.charHeight + 9,
+                    16
+                )
+    
+                screen.fillRect(
+                    1,
+                    18 + (rowID * rowSize) - 3,
+                    (name.length) * font.charWidth + 5,
+                    font.charHeight + 6,
+                    boxColor
+                )
+
+                screen.print(
+                    name,
+                    headerX - 2,
+                    20 + (rowID * rowSize) + 1,
+                    15 // black
                 )
             }
         }
-    }
-
-    export class MeasurementConfigSelect extends RecordingConfigSelection {
-        constructor(app: App, selectedSensors: Sensor[]) {
-            /**
-             * Values for user selection of:
-             *     Measurement quantity
-             *     Measurement period
-             *     Measurement delay
-             * 
-             * Internal counters will iterate by these values,
-             * upon the corresponding UI element selection.
-             * */
-            const configDeltas = [
-                [1, 10], // Quantity
-                [1, 10], // Milli-seconds
-                [1, 5],  // Seconds
-                [1, 5],  // Minutes
-                [1, 5],  // Hours
-                [1, 5],  // Days
-                [1, 5]   // Delay
-            ]
-
-            // [Quantity, Milli-seconds, Seconds, Minutes, Hours, Days, Start Delay]:
-            // const defaultUserSelection = [10, 0, 1, 0, 0, 0, 0]
-            const defaultUserSelection = [10, 30, 0, 0, 0, 0, 0]
-            const guiRows = ["Records: ", 
-                             "MilliSec: ", 
-                             "Seconds: ", 
-                             "Minutes: ", 
-                             "Hours: ", 
-                             "Days: ", 
-                             "Delay: "
-                        ]
-
-            super(app, "measurementConfigSelect", selectedSensors, configDeltas, defaultUserSelection, guiRows)
-        }
 
         /**
-         * Convert the .userSelection data into a RecordingConfig object for use by the DataRecorder
-         * @returns RecordingConfig {measurements, period, delay}
+         * Convert the .guiRows data into a RecordingConfig object for use by the DataRecorder
+         * Set the this.sensorConfigs[this.currentSensorRow] to this RecordingConfig object
          */
-        public generateRecordingOptions(): RecordingConfig {
-            const timeConversionTableMs: number[] = [1, 1000, 60000, 3600000, 86400000]
+        private setSensorConfigs(): void {
+            for (let sensorRow = 0; sensorRow < this.guiRows.length; sensorRow++) {
+                
+                let period: number = 0
+                for (let col = 1; col < this.guiRows[0].length - 1; col++) {
+                    period += this.guiRows[sensorRow][col].value * timeConversionTableMs[col - 1]
+                }
 
-            let period: number = 0
-            for (let i = 1; i < this.userSelection.length - 1; i++) {
-                period += this.userSelection[i] * timeConversionTableMs[i - 1]
+                this.sensorConfigs[sensorRow] = {
+                    measurements: this.guiRows[sensorRow][0].value,
+                    period,
+                    delay: this.guiRows[sensorRow][6].value
+                }
             }
-
-            return {
-                measurements: this.userSelection[0],
-                period,
-                delay: this.userSelection[6]
-            }
-        }
-    }
-
-    export class EventConfigSelect extends RecordingConfigSelection {
-        constructor(app: App, selectedSensors: Sensor[]) {
-            super(app, "eventConfigSelect", selectedSensors, [], [], [])
         }
     }
 }
