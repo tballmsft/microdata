@@ -7,13 +7,13 @@ namespace microcode {
      */
     export class SensorSelect extends CursorSceneWithPriorPage {
         private btns: Button[]
-        private selectedSensors: Sensor[]
+        private selectedSensorBlueprints: SensorBlueprint[]
         private nextSceneEnum: CursorSceneEnum
 
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
-            this.selectedSensors = []
+            this.selectedSensorBlueprints = []
             this.nextSceneEnum = nextSceneEnum
         }
 
@@ -28,7 +28,7 @@ namespace microcode {
                 x: -60,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Accelerometer, dim: Dimension.X}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -41,7 +41,7 @@ namespace microcode {
                 x: -30,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.Y))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Accelerometer, dim: Dimension.Y}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -54,7 +54,7 @@ namespace microcode {
                 x: 0,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.Z))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Accelerometer, dim: Dimension.Z}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -67,7 +67,7 @@ namespace microcode {
                 x: 30,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new RotationSensor(Rotation.Pitch))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Rotation, rot: Rotation.Pitch}))
                 }, 
                 dynamicBoundaryColorsOn: true,          
             }))
@@ -80,7 +80,7 @@ namespace microcode {
                 x: 60,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new RotationSensor(Rotation.Roll))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Rotation, rot: Rotation.Roll}))
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -95,7 +95,7 @@ namespace microcode {
                 x: -60,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P0))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Pin, pin: TouchPin.P0}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -108,7 +108,7 @@ namespace microcode {
                 x: -30,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P1))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Pin, pin: TouchPin.P0}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -122,7 +122,7 @@ namespace microcode {
                 x: 0,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P2))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Pin, pin: TouchPin.P0}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -136,7 +136,7 @@ namespace microcode {
                 x: 30,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new LightSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Light}))
                 },
                 dynamicBoundaryColorsOn: true,  
             }))
@@ -149,7 +149,7 @@ namespace microcode {
                 x: 60,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new TemperatureSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Temperature}))
                 },
                 dynamicBoundaryColorsOn: true,
             }))
@@ -164,7 +164,7 @@ namespace microcode {
                 x: -60,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new MagnetSensor(Dimension.X))
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Magnet, dim: Dimension.X}))
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -177,7 +177,7 @@ namespace microcode {
                 x: -30,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new LogoPressSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.LogoPress}))
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -190,7 +190,7 @@ namespace microcode {
                 x: 0,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new VolumeSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.Volume}))
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -203,7 +203,7 @@ namespace microcode {
                 x: 30,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.CompassHeading}))
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -216,7 +216,7 @@ namespace microcode {
                 x: 60,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new ButtonPressSensor())
+                    this.selectedSensorBlueprints.push(new SensorBlueprint({id: SensorID.ButtonPress}))
                 },
                 dynamicBoundaryColorsOn: true,     
             }))
@@ -231,18 +231,17 @@ namespace microcode {
                 x: 60,
                 y: 44,
                 onClick: () => {
-                    if (this.selectedSensors.length === 0) {
+                    if (this.selectedSensorBlueprints.length === 0) {
                         return
                     }
 
                     this.app.popScene()
-
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
+                        this.app.pushScene(new LiveDataViewer(app, this.selectedSensorBlueprints))
                     }
 
                     else {
-                        this.app.pushScene(new MeasurementConfigSelect(app, this.selectedSensors))
+                        this.app.pushScene(new RecordingConfigSelection(app, this.selectedSensorBlueprints))
                     }
                 }
             }))

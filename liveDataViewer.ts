@@ -35,10 +35,12 @@ namespace microcode {
         /* To plot */
         private sensors: Sensor[]
 
-        constructor(app: App, sensors: Sensor[]) {
+        constructor(app: App, sensorBlueprints: SensorBlueprint[]) {
             super(app, "liveDataViewer")
             this.color = 0
-            this.sensors = sensors
+
+            const config: RecordingConfig = {measurements: 0, period: 0, delay: 0}
+            this.sensors = sensorBlueprints.map((blueprint) => SensorFactory.new(blueprint, config))
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
@@ -60,10 +62,10 @@ namespace microcode {
             // Ensure selectedSensorIndex is set to the lowest current reading
             this.selectedSensorIndex = 0
 
-            let minimumReading = sensors[0].getReading()
-            for (let i = 1; i < sensors.length; i++) {
-                if (sensors[i].getReading() < minimumReading) {
-                    minimumReading = sensors[i].getReading()
+            let minimumReading = this.sensors[0].getReading()
+            for (let i = 1; i < this.sensors.length; i++) {
+                if (this.sensors[i].getReading() < minimumReading) {
+                    minimumReading = this.sensors[i].getReading()
                     this.selectedSensorIndex = i
                 }
             }
@@ -168,7 +170,6 @@ namespace microcode {
                     if (this.currentZoomDepth != 0) {
                         if (!this.oscilloscopeMovementMode && this.selectedXCoordinate - (Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2) > 0) {
                             this.selectedXCoordinate -= Math.round(Math.abs(this.sensors[this.selectedSensorIndex].getDataBufferLength() - this.selectedXCoordinate) / 2)
-
                         }
                         else {
                             this.selectedXCoordinate = Math.max(0, this.selectedXCoordinate - 1)
@@ -233,22 +234,36 @@ namespace microcode {
 
             this.draw_axes();
 
+            const yStart = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
+            let y = yStart
+
             // Write Sensor information, displayed below the plot:
             for (let i = 0; i < this.sensors.length; i++) {
                 // Colour used to represent this sensor, same colour as plotted & ticker:
+                y += (i * 12)
+
                 screen.fillRect(
                     2,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15 + (i * 12),
+                    y,
                     7,
                     7,
                     color
                 )
-                
-                // Name, reading / maximum, peak
-                screen.print(this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maximum +
-                    " Peak " + this.sensors[i].peakDataPoint[1], 
+
+                // Name, reading / maximum
+                screen.print(
+                    this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maximum,
                     14,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15 + (i * 12),
+                    y,
+                    color
+                )
+
+                // Write the peak reading just below and with a slight xOffset from the above:
+                y += 12
+                screen.print(
+                    "Peak " + this.sensors[i].peakDataPoint[1], 
+                    44,
+                    y,
                     color
                 )
 
@@ -334,7 +349,7 @@ namespace microcode {
             this.sensors.forEach(function(sensor) {
                 sensor.draw(
                     this.windowWidthBuffer + 2 + this.xScrollOffset, 
-                    this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset, 
+                    this.windowBotBuffer - 2 * this.yScrollOffset, 
                     color
                 )
                 color = (color + 3) % 15

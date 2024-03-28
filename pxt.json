@@ -42,6 +42,7 @@
         "ruleEditor.ts",
         "editor.ts",
         "samples.ts",
+        
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
         "sensorSelect.ts",
@@ -49,10 +50,11 @@
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
         "sensors.ts",
-        "fauxLoggers.ts",
+        "fauxDataLogger.ts",
         "dataRecorder.ts",
         "generateGraph.ts",
-        "sensorEvent.ts"
+        "sensorEvent.ts",
+        "sensorFactory.ts"
     ],
     "testFiles": [],
     "targetVersions": {

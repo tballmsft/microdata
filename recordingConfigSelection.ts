@@ -13,7 +13,6 @@ namespace microcode {
     /**
      * The user may be writing to the UI elements for the 
      * recording config or the events
-     * 
      */
     const enum WRITING_MODE {
         RECORDING_SETTINGS,
