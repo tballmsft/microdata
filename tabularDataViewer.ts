@@ -10,6 +10,7 @@ namespace microcode {
     export const enum DATA_VIEW_DISPLAY_MODE {
         METADATA_VIEW,
         TABULAR_DATA_VIEW,
+        FILTERED_DATA_VIEW,
     }
 
     /**
@@ -21,6 +22,7 @@ namespace microcode {
         private yScrollOffset: number
 
         private numberOfMetadataRows: number
+        private currentRowIndex: number
 
         constructor(app: App, guiState: DATA_VIEW_DISPLAY_MODE) {
             super(app, "recordedDataViewer")
@@ -28,6 +30,7 @@ namespace microcode {
 
             this.xScrollOffset = 0
             this.yScrollOffset = 0
+            this.currentRowIndex = 1
 
             this.numberOfMetadataRows = FauxDataLogger.getNumberOfMetadataRows()
         }
@@ -43,8 +46,23 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => {
-                    app.popScene()
-                    app.pushScene(new DataViewSelect(this.app))
+                    if(this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
+                    }
+                    else {
+                        app.popScene()
+                        app.pushScene(new DataViewSelect(this.app))
+                    }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                () => {
+                    if (this.guiState == DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
+                        this.guiState = DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW
+                    }
                 }
             )
 
@@ -52,7 +70,15 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.xScrollOffset - 1, 0)
+                    if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
+                        if (this.currentRowIndex <= 1) {
+                            this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
+                        }
+
+                        else {
+                            this.currentRowIndex = Math.max(this.currentRowIndex - 1, 1)
+                        }
+                    }
                 }
             )
 
@@ -66,9 +92,13 @@ namespace microcode {
                         }
                     }
 
-                    else {
-                        if (this.yScrollOffset + 1 < FauxDataLogger.numberOfRows - TABULAR_MAX_ROWS) {
+                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
+                        if (this.currentRowIndex + 1 >= Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)) {
                             this.yScrollOffset += 1
+                        }
+
+                        else {
+                            this.currentRowIndex = Math.min(this.currentRowIndex + 1, FauxDataLogger.numberOfRows)
                         }
                     }
                 }
@@ -149,6 +179,17 @@ namespace microcode {
                     0x0
                 )
             }
+            
+            if (this.guiState == DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
+                // Draw selected box:
+                Screen.drawRect(
+                    Screen.LEFT_EDGE,
+                    Screen.TOP_EDGE + (this.currentRowIndex * rowBufferSize),
+                    colBufferSizes[0],
+                    rowBufferSize,
+                    6
+                )
+            }
         }
 
         draw() {
@@ -186,24 +227,63 @@ namespace microcode {
                         )
                     }
                     break;
+                
+                
+                case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW:
+                    const filteredRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows / FauxDataLogger.sensors.length, TABULAR_MAX_ROWS)
+                    this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
+
+                    const filteredSensor: string = FauxDataLogger.entries[this.currentRowIndex].data[0];
+                    let filteredData: string[][] = []
+
+                    FauxDataLogger.entries.forEach((entry) => {
+                        if (entry.data[0] == filteredSensor) {
+                            filteredData.push(entry.data)
+                        }
+                    });
+                    
+                    for (let row = 0; row < Math.min(filteredData.length, TABULAR_MAX_ROWS); row++) {
+                        let cumulativeColOffset = 0
+                        const data = filteredData[row + 1]
+
+                        for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
+                            const colID = col + this.xScrollOffset
+                            const colOffset = (font.charWidth * filteredData[colID].length) + 2
+        
+                            if (cumulativeColOffset + colOffset > Screen.WIDTH) {
+                                break
+                            }
+        
+                            Screen.print(
+                                data[colID],
+                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
+                                Screen.TOP_EDGE + (row * filteredRowBufferSize) + (filteredRowBufferSize / 2) - 4,
+                                0xb,
+                                simage.font8
+                            )
+        
+                            cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
+                        }
+                    }
+
+                    break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
                     const tabularRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
-
                     this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
                     
                     for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
                         const data = FauxDataLogger.entries[row + this.yScrollOffset].data;
-
+        
                         let cumulativeColOffset = 0
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
                             const colOffset = (font.charWidth * data[colID].length) + 2
-
+        
                             if (cumulativeColOffset + colOffset > Screen.WIDTH) {
                                 break
                             }
-
+        
                             Screen.print(
                                 data[colID],
                                 Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
@@ -211,10 +291,11 @@ namespace microcode {
                                 0xb,
                                 simage.font8
                             )
-
+        
                             cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
                         }
                     }
+
                     break;
             
                 default:
