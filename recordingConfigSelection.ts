@@ -537,13 +537,13 @@ namespace microcode {
                 screen.fillRect(
                     1,
                     22 + (row * rowSize) - 3,
-                    (this.sensors[this.currentSensorRow].name.length) * font.charWidth + 5,
+                    (this.sensors[row].name.length) * font.charWidth + 5,
                     font.charHeight + 6,
                     boxColor
                 )
 
                 screen.print(
-                    this.sensors[this.currentSensorRow].name,
+                    this.sensors[row].name,
                     headerX - 2,
                     24 + (row * rowSize) - 1,
                     15 // black
