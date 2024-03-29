@@ -25,11 +25,9 @@ namespace microcode {
      * The Recording Settings is a sub-window on the right-hand-side.
      * It consists of a list of rows that the user can manipulate to change the RecordingConfig
      */
-    type RecordingSettingsGUIColumn = {
+    type RecordingConfigGUIRows = {
         /** The name of this recording setting (record, ms, second, minute, hour, etc) */
         name: string,
-        /** The current value that the user has selected for this row (minute = 2); all of (ms, second, minute, hour, day) will be converted into ms at the end */
-        value: number,
         /** How much the value should increment or decrement by when the user selects this element and presses up or down (typically 1) */
         smallDelta: number, 
         /** How much the value should increment or decrement by when the user selects this element and presses left or right (typically 5 or 10) */
@@ -52,10 +50,8 @@ namespace microcode {
         private guiState: GUI_STATE
         private writingMode: WRITE_MODE
 
-        /** Each sensor may have a unique configuration, the UI should track the state of each configuration. This grid is responsible for that.
-         *  guiRows[n] corresponds to the nth sensor; its contents will be converted into a RecordingConfig and passed to the sensor at completion.
-         */
-        private guiRows: RecordingSettingsGUIColumn[][]
+        private guiRows: RecordingConfigGUIRows[]
+        private guiValues: number[][]
 
         // These elements can be reduced in the future:
         private currentSensorRow: number
@@ -78,24 +74,32 @@ namespace microcode {
             this.guiState = GUI_STATE.SELECTING_SENSOR
             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
 
-            this.guiRows = []
+            this.guiRows = [
+                {name: "Records", smallDelta: 1, largeDelta: 10},
+                {name: "ms",      smallDelta: 1, largeDelta: 10},
+                {name: "Seconds", smallDelta: 1, largeDelta: 5},
+                {name: "Minutes", smallDelta: 1, largeDelta: 5},
+                {name: "Hours",   smallDelta: 1, largeDelta: 5},
+                {name: "Days",    smallDelta: 1, largeDelta: 5},
+                {name: "Delay",   smallDelta: 1, largeDelta: 5},
+            ]
+
+            this.guiValues = []
             this.sensorConfigs = []
             this.configHasChanged = []
             this.sensors = sensors
 
-            // Each sensor has a unique config; the user selects this using these UI elements:
-            // This does create more objects than is strictly neccessary (multiple name:), though it is not presently an issue:
             for (let _ = 0; _ < this.sensors.length; _++) {
-                this.guiRows.push([
-                    {name: "Records", value: 20, smallDelta: 1, largeDelta: 10},
-                    {name: "ms",      value: 0,  smallDelta: 1, largeDelta: 10},
-                    {name: "Seconds", value: 1,  smallDelta: 1, largeDelta: 5},
-                    {name: "Minutes", value: 0,  smallDelta: 1, largeDelta: 5},
-                    {name: "Hours",   value: 0,  smallDelta: 1, largeDelta: 5},
-                    {name: "Days",    value: 0,  smallDelta: 1, largeDelta: 5},
-                    {name: "Delay",   value: 0,  smallDelta: 1, largeDelta: 5},
+                // Defaults for each sensor:
+                this.guiValues.push([
+                    10, // Records
+                    0,  // ms
+                    1,  // Seconds
+                    0,  // Minutes
+                    0,  // Hours
+                    0,  // Days
+                    0   // Delay
                 ])
-
                 this.configHasChanged.push(false)
                 this.sensorConfigs.push({measurements: 20, period: 1000, delay: 0})
             }
@@ -192,7 +196,7 @@ namespace microcode {
 
                    else if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode == WRITE_MODE.RECORDING_SETTINGS) {
-                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
+                            this.guiValues[this.currentSensorRow][this.currentConfigRow] = this.guiValues[this.currentSensorRow][this.currentConfigRow] + this.guiRows[this.currentConfigRow].smallDelta
                         }
 
                         else {
@@ -208,7 +212,7 @@ namespace microcode {
 
                     else {
                         // Non-negative modulo:
-                        const numberOfMeasurementRows = this.guiRows[0].length
+                        const numberOfMeasurementRows = this.guiRows.length
                         this.currentConfigRow = (((this.currentConfigRow - 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
                 }
@@ -224,7 +228,7 @@ namespace microcode {
 
                     else if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {
-                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
+                            this.guiValues[this.currentSensorRow][this.currentConfigRow] = Math.max(this.guiValues[this.currentSensorRow][this.currentConfigRow] - this.guiRows[this.currentConfigRow].smallDelta, 0)
                         }
 
                         else {
@@ -237,7 +241,7 @@ namespace microcode {
                     }
 
                     else {
-                        const numberOfMeasurementRows = this.guiRows[0].length
+                        const numberOfMeasurementRows = this.guiRows.length
                         this.currentConfigRow = (((this.currentConfigRow + 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
                 }
@@ -249,7 +253,7 @@ namespace microcode {
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {                        
-                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
+                            this.guiValues[this.currentSensorRow][this.currentConfigRow] = Math.max(this.guiValues[this.currentSensorRow][this.currentConfigRow] - this.guiRows[this.currentConfigRow].largeDelta, 0)
                         }
 
                         else {
@@ -280,7 +284,7 @@ namespace microcode {
                 () => {
                     if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {
-                            this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
+                            this.guiValues[this.currentSensorRow][this.currentConfigRow] = this.guiValues[this.currentSensorRow][this.currentConfigRow] + this.guiRows[this.currentConfigRow].largeDelta
                         }
 
                         else {
@@ -310,17 +314,16 @@ namespace microcode {
          * Set the this.sensorConfigs[this.currentSensorRow] to this RecordingConfig object
          */
         private setSensorConfigs(): void {
-            for (let sensorRow = 0; sensorRow < this.guiRows.length; sensorRow++) {
-                
+            for (let sensorRow = 0; sensorRow < this.sensors.length; sensorRow++) {
                 let period: number = 0
-                for (let col = 1; col < this.guiRows[0].length - 1; col++) {
-                    period += this.guiRows[sensorRow][col].value * TIME_CONVERSION_TABLE[col - 1]
+                for (let col = 1; col < this.guiRows.length - 1; col++) {
+                    period += this.guiValues[sensorRow][col] * TIME_CONVERSION_TABLE[col - 1]
                 }
 
                 this.sensorConfigs[sensorRow] = {
-                    measurements: this.guiRows[sensorRow][0].value,
+                    measurements: this.guiValues[sensorRow][0],
                     period,
-                    delay: this.guiRows[sensorRow][6].value
+                    delay: this.guiValues[sensorRow][6]
                 }
             }
         }
@@ -396,8 +399,8 @@ namespace microcode {
 
         private drawConfigSelectionWindow() {
             const optionX = Screen.WIDTH - 17
-            const headerX = optionX - (font.charWidth * this.guiRows[this.currentSensorRow][0].name.length) - 6
-            const rowSize = Screen.HEIGHT / (this.guiRows[0].length + 1)
+            const headerX = optionX - (font.charWidth * this.guiRows[0].name.length) - 6
+            const rowSize = Screen.HEIGHT / (this.guiRows.length + 1)
 
             // Sub-window:
             // Outline:
@@ -435,16 +438,16 @@ namespace microcode {
             )
 
             let rowOffset = 0;
-            for (let configRow = 0; configRow < this.guiRows[0].length; configRow++) {
+            for (let configRow = 0; configRow < this.guiRows.length; configRow++) {
                 screen.print(
-                    this.guiRows[this.currentSensorRow][configRow].name,
+                    this.guiRows[configRow].name,
                     headerX - 1,
                     18 + rowOffset,
                     15 // Black
                 )
 
                 screen.print(
-                    this.guiRows[this.currentSensorRow][configRow].value.toString(),
+                    this.guiValues[this.currentSensorRow][configRow].toString(),
                     optionX - 3,
                     18 + rowOffset,
                     15 // Black
