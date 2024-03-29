@@ -56,27 +56,24 @@ namespace microcode {
          *  guiRows[n] corresponds to the nth sensor; its contents will be converted into a RecordingConfig and passed to the sensor at completion.
          */
         private guiRows: RecordingSettingsGUIColumn[][]
+
+        // These elements can be reduced in the future:
         private currentSensorRow: number
         private currentConfigRow: number
         private currentWriteModeRow: number
 
-        /**
-         * Sensor measurement control (unique per sensor)
-         *      Number of measurements, period, event control, etc
-         * 
-         * Each sensor is granted its config upon progression from this screen, via SensorFactory.new()
-         *      This could be improved via a Factory; where a sensor enum is passed.
-         *      Or a builder design pattern
-         */
+        private currentEventColumn: number
+        private eventConfigs: number[]
+
+        private sensors: Sensor[]
         private sensorConfigs: RecordingConfig[]
-        private sensorBlueprints: SensorBlueprint[]
 
         /** Whether or not the user has manipulated the UI for a sensor. 
          *  Selecting a sensor, but leaving its config as default counts as 'changing' it; since the user may purposefully set it as such.
         */
         private configHasChanged: boolean[]
 
-        constructor(app: App, sensorBlueprints: SensorBlueprint[]){
+        constructor(app: App, sensors: Sensor[]){
             super(app, "measurementConfigSelect")
             this.guiState = GUI_STATE.SELECTING_SENSOR
             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
@@ -84,10 +81,11 @@ namespace microcode {
             this.guiRows = []
             this.sensorConfigs = []
             this.configHasChanged = []
-            this.sensorBlueprints = sensorBlueprints
+            this.sensors = sensors
 
             // Each sensor has a unique config; the user selects this using these UI elements:
-            for (let _ = 0; _ < this.sensorBlueprints.length; _++) {
+            // This does create more objects than is strictly neccessary (multiple name:), though it is not presently an issue:
+            for (let _ = 0; _ < this.sensors.length; _++) {
                 this.guiRows.push([
                     {name: "Records", value: 20, smallDelta: 1, largeDelta: 10},
                     {name: "ms",      value: 0,  smallDelta: 1, largeDelta: 10},
@@ -106,9 +104,23 @@ namespace microcode {
             this.currentConfigRow = 0
             this.currentWriteModeRow = 0
 
+            this.currentEventColumn = 0
+            this.eventConfigs = [0, 0] // [x: (0 -> sensorEventSymbols.length), y: (sensor.min -> sensor.max)] 
+
             //--------------
             // User Control:
             //--------------
+
+            // Use Microbit A button to progress:
+            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_A, () => {
+                // Build the sensors according to their specific configuration:
+                this.setSensorConfigs()
+                this.sensors.map((sensor, index) => sensor.setRecordingConfig(this.sensorConfigs[index]))
+
+                this.app.popScene()
+                this.app.pushScene(new DataRecorder(this.app, this.sensors))
+            })
+
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -122,8 +134,9 @@ namespace microcode {
 
                         case GUI_STATE.SELECTING_WRITE_MODE:
                             this.guiState = GUI_STATE.DEFAULT
+                            this.writingMode = [WRITE_MODE.RECORDING_SETTINGS, WRITE_MODE.EVENT_SETTINGS][this.currentWriteModeRow]
                             break;
-
+ 
                         case GUI_STATE.DEFAULT:
                             this.guiState = GUI_STATE.WRITING
                             break;
@@ -174,12 +187,17 @@ namespace microcode {
                 () => {
                     if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         // Non-negative modulo:
-                        this.currentSensorRow = (((this.currentSensorRow - 1) % this.sensorBlueprints.length) + this.sensorBlueprints.length) % this.sensorBlueprints.length
+                        this.currentSensorRow = (((this.currentSensorRow - 1) % this.sensors.length) + this.sensors.length) % this.sensors.length
                     }
 
-                   else  if (this.guiState === GUI_STATE.WRITING) {
+                   else if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode == WRITE_MODE.RECORDING_SETTINGS) {
                             this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
+                        }
+
+                        else {
+                            // Non-negative modulo:
+                            this.eventConfigs[0] = (((this.eventConfigs[0] - 1) % sensorEventSymbols.length) + sensorEventSymbols.length) % sensorEventSymbols.length
                         }
                     }
 
@@ -201,12 +219,16 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
-                        this.currentSensorRow = (this.currentSensorRow + 1) % this.sensorBlueprints.length
+                        this.currentSensorRow = (this.currentSensorRow + 1) % this.sensors.length
                     }
 
                     else if (this.guiState === GUI_STATE.WRITING) {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {
                             this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].smallDelta, 0)
+                        }
+
+                        else {
+                            this.eventConfigs[0] = ((this.eventConfigs[0] + 1) % sensorEventSymbols.length)
                         }
                     }
 
@@ -229,6 +251,16 @@ namespace microcode {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {                        
                             this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value - this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
                         }
+
+                        else {
+                            const maxReading: number = this.sensors[this.currentSensorRow].maximum
+                            // Non-negative modulo:
+                            this.eventConfigs[1] = (((this.eventConfigs[1] - 1) % maxReading) + maxReading) % maxReading
+                        }
+                    }
+
+                    else if (this.guiState === GUI_STATE.DEFAULT) {
+                        this.currentEventColumn = (((this.currentEventColumn + 1) % 2) + 2) % 2
                     }
 
                     else if (this.guiState == GUI_STATE.SELECTING_SENSOR) {
@@ -250,6 +282,14 @@ namespace microcode {
                         if (this.writingMode === WRITE_MODE.RECORDING_SETTINGS) {
                             this.guiRows[this.currentSensorRow][this.currentConfigRow].value = Math.max(this.guiRows[this.currentSensorRow][this.currentConfigRow].value + this.guiRows[this.currentSensorRow][this.currentConfigRow].largeDelta, 0)
                         }
+
+                        else {
+                            this.eventConfigs[1] = ((this.eventConfigs[1] + 1) % this.sensors[this.currentSensorRow].minimum)
+                        }
+                    }
+
+                    else if (this.guiState === GUI_STATE.DEFAULT) {
+                        this.currentEventColumn = (this.currentEventColumn + 1) % 2
                     }
 
                     else if (this.guiState == GUI_STATE.SELECTING_SENSOR) {
@@ -259,15 +299,6 @@ namespace microcode {
                         else {
                             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
                         }
-                    }
-
-                    else if (this.guiState === GUI_STATE.DEFAULT) {
-                        // Build the sensors according to their specific configuration:
-                        this.setSensorConfigs()
-                        const sensors: Sensor[] = this.sensorBlueprints.map((blueprint, index) => SensorFactory.new(blueprint, this.sensorConfigs[index]))
-
-                        this.app.popScene()
-                        this.app.pushScene(new DataRecorder(this.app, sensors))
                     }
                 }
             )
@@ -324,7 +355,6 @@ namespace microcode {
         //----------------------------
         // Internal Drawing Functions:
         //----------------------------
-
 
         private drawWriteModeSelection() {
             this.currentWriteModeRow
@@ -424,46 +454,68 @@ namespace microcode {
         }
 
         private drawEventSelectionWindow() {
-            const yOffset = 18
-            const rowSize = Screen.HEIGHT / (this.sensorBlueprints.length + 1)
+            const xOffset = 12
 
-            // Sub-window:
-            // Outline:
+            // Window:
             screen.fillRect(
-                74,
-                yOffset + ((this.currentSensorRow + 1) * rowSize) - 2,
-                60,
-                font.charHeight + 9,
-                16
+                xOffset,
+                Screen.HALF_HEIGHT - 22,
+                Screen.WIDTH - 24,
+                44,
+                15
             )
 
             screen.fillRect(
-                74,
-                yOffset + ((this.currentSensorRow + 1) * rowSize) - 2,
-                58,
-                font.charHeight + 6,
-                9
+                xOffset,
+                Screen.HALF_HEIGHT - 22,
+                Screen.WIDTH - 24,
+                40,
+                3
             )
 
-            // const middleSensorRange = this.sensorBlueprints[this.selectedSensorIndex].maximum - Math.abs(this.sensorBlueprints[this.selectedSensorIndex].minimum)
-            
+            // This temporary object creation is very inefficient; it can be rectified in the future by creating the sensors and then loading their configs at the end:
+            const sensor: Sensor = this.sensors[this.currentSensorRow]
+            const middleSensorRange: string = (sensor.maximum - Math.abs(sensor.minimum)).toString()
+
+            // Box around selected element:
+            if (this.currentEventColumn == 0) {
+                for (let borderOffset = 0; borderOffset < 2; borderOffset) {
+                    screen.drawRect(
+                        xOffset + 6 + (sensor.name.length * font.charWidth) + 9 - borderOffset,
+                        Screen.HALF_HEIGHT - 7 - borderOffset,
+                        (sensorEventSymbols[this.eventConfigs[0]].length * font.charWidth) + 5 + borderOffset,
+                        12 + borderOffset,
+                        6
+                    )
+                }
+            }
+            else {
+                for (let borderOffset = 0; borderOffset < 2; borderOffset) {
+                    screen.drawRect(
+                        xOffset + 6 + (sensor.name.length * font.charWidth) + 9 + (middleSensorRange.length * font.charWidth) + 7 - borderOffset,
+                        Screen.HALF_HEIGHT - 7 - borderOffset,
+                        (sensor.maximum.toString().length * font.charWidth) + 5 + borderOffset,
+                        12 + borderOffset,
+                        6
+                    )
+                }
+            }
+
             // Write Event expression:
             screen.print(
-                sensorEventSymbols[0] + " 0", // + middleSensorRange.toString(),
-                80,
-                yOffset + ((this.currentSensorRow + 1) * rowSize) - 1,
+                sensor.name + " " + sensorEventSymbols[this.eventConfigs[0]] + " " + middleSensorRange,
+                xOffset * 2,
+                Screen.HALF_HEIGHT - 5,
                 15 // black
             )
         }
 
         private drawSensorSelection() {
             const headerX = 4
-            const rowSize = Screen.HEIGHT / (this.sensorBlueprints.length + 1)
+            const rowSize = Screen.HEIGHT / (this.sensors.length + 1)
 
             let boxColor = 2
-            for (let row = 0; row < this.sensorBlueprints.length; row++) {
-                const name = SensorFactory.new(this.sensorBlueprints[row], this.sensorConfigs[row]).name
-
+            for (let row = 0; row < this.sensors.length; row++) {
                 // Select the color for the bounding box:
                 boxColor = 2 // red: unchanged
                 if (row == this.currentSensorRow) {
@@ -477,7 +529,7 @@ namespace microcode {
                 screen.fillRect(
                     0,
                     22 + (row * rowSize) - 3,
-                    (name.length) * font.charWidth + 4,
+                    (this.sensors[row].name.length) * font.charWidth + 4,
                     font.charHeight + 9,
                     16
                 )
@@ -485,15 +537,15 @@ namespace microcode {
                 screen.fillRect(
                     1,
                     22 + (row * rowSize) - 3,
-                    (name.length) * font.charWidth + 5,
+                    (this.sensors[this.currentSensorRow].name.length) * font.charWidth + 5,
                     font.charHeight + 6,
                     boxColor
                 )
 
                 screen.print(
-                    name,
+                    this.sensors[this.currentSensorRow].name,
                     headerX - 2,
-                    24 + (row * rowSize) + 1,
+                    24 + (row * rowSize) - 1,
                     15 // black
                 )
             }

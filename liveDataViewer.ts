@@ -35,12 +35,11 @@ namespace microcode {
         /* To plot */
         private sensors: Sensor[]
 
-        constructor(app: App, sensorBlueprints: SensorBlueprint[]) {
+        constructor(app: App, sensors: Sensor[]) {
             super(app, "liveDataViewer")
             this.color = 0
 
-            const config: RecordingConfig = {measurements: 0, period: 0, delay: 0}
-            this.sensors = sensorBlueprints.map((blueprint) => SensorFactory.new(blueprint, config))
+            this.sensors = sensors
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT

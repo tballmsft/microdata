@@ -44,6 +44,10 @@ namespace microcode {
             this.config = config
         }
 
+        setRecordingConfig(config: RecordingConfig) {
+            this.config = config
+        }
+
         getBufferSize(): number {return this.dataBuffer.length}
         getReading(): number {return this.sensorFn()}
         getNthReading(n: number): number {return this.dataBuffer[n]}
@@ -113,8 +117,8 @@ namespace microcode {
      * Onboard Light Sensor; ranged between 0 and 255
      */
     export class LightSensor extends Sensor {
-        constructor(config: RecordingConfig) {
-            super(function () {return input.lightLevel()}, "Light", 0, 255, "led_light_sensor", "led_light_sensor", config)
+        constructor() {
+            super(function () {return input.lightLevel()}, "Light", 0, 255, "led_light_sensor", "led_light_sensor")
         }
     }
 
@@ -122,8 +126,8 @@ namespace microcode {
      * Onboard Thermometer; ranged between 0 and 100
      */
     export class TemperatureSensor extends Sensor {
-        constructor(config: RecordingConfig) {
-            super(function () {return input.temperature()}, "Temp.", 0, 100, "thermometer", "thermometer", config)
+        constructor() {
+            super(function () {return input.temperature()}, "Temp.", 0, 100, "thermometer", "thermometer")
         }
     }
 
@@ -132,14 +136,13 @@ namespace microcode {
      * Onboard Accelerometer for X, Y, Z dimensions; ranged between -1023, 1023
      */
     export class AccelerometerSensor extends Sensor {
-        constructor(dim: Dimension, config: RecordingConfig) {
+        constructor(dim: Dimension) {
             super(function () {return input.acceleration(dim)}, 
                 "Accel. " + ['X', 'Y', 'Z'][dim], 
                 -1023, 
                 1023, 
                 "accelerometer",
                 "accelerometer " + + ['X', 'Y', 'Z'][dim],
-                config
             )
         }
     }
@@ -148,7 +151,7 @@ namespace microcode {
      * Onboard Touch Pin Sensor for TouchPin 0, 1, 2; ranged between 0 and 1
      */
     export class PinSensor extends Sensor {
-        constructor(pin: TouchPin, config: RecordingConfig) {
+        constructor(pin: TouchPin) {
             super(function () {
                     let res: number = 0
                     input.onPinPressed(pin, function () {
@@ -160,8 +163,7 @@ namespace microcode {
                 0,
                 1,
                 "pin_" + pin.toString(),
-                "Pin " + pin.toString(),
-                config
+                "Pin " + pin.toString()
             )
         }
     }
@@ -173,14 +175,13 @@ namespace microcode {
      * MIN & MAX RANGE UNVERIFIED
      */
     export class MagnetSensor extends Sensor {
-        constructor(dim: Dimension, config: RecordingConfig) {
+        constructor(dim: Dimension) {
             super(function() {return input.magneticForce(dim)},
                 "Magnet " + dim.toString(),
                 0,
                 1,
                 "magnet",
-                "S10",
-                config
+                "Magnet"
             )
         }
     }
@@ -192,14 +193,14 @@ namespace microcode {
      * MIN & MAX RANGE UNVERIFIED
      */
     export class RotationSensor extends Sensor {
-        constructor(rot: Rotation, config: RecordingConfig) {
+        constructor(rot: Rotation) {
             let name: string = "Pitch"
 
             if (rot === Rotation.Roll) {
                 name = "Roll"
             }
 
-            super(function () {return input.rotation(rot)}, name, 0, 100, "right_turn", name, config)    
+            super(function () {return input.rotation(rot)}, name, 0, 100, "right_turn", name)    
         }
     }
 
@@ -210,15 +211,14 @@ namespace microcode {
      * sensorMaxReading may change in future
      */
     export class LogoPressSensor extends Sensor {
-        constructor(config: RecordingConfig) {
+        constructor() {
             super(
                 function () {if(input.logoIsPressed()) {return 1} return 0}, 
                 "Logo Pressed", 
                 0,
                 1, 
                 "finger_press", 
-                "Logo Press", 
-                config
+                "Logo Press"
             )
         }
     }
@@ -228,15 +228,14 @@ namespace microcode {
      * Ranged between 0 and 360 degrees
      */
     export class CompassHeadingSensor extends Sensor {
-        constructor(config: RecordingConfig) {
+        constructor() {
             super(
                 function () {return input.compassHeading()}, 
                 "Compass", 
                 0, 
                 360, 
                 "compass", 
-                "Compass",
-                config
+                "Compass"
             )
         }
     }    
@@ -246,15 +245,14 @@ namespace microcode {
      * Ranged between 0 and 255
      */
     export class VolumeSensor extends Sensor {
-        constructor(config: RecordingConfig) {
+        constructor() {
             super(
                 function () {return input.soundLevel()}, 
                 "Volume", 
                 0, 
                 255, 
                 "speaker", 
-                "Volume", 
-                config
+                "Volume"
             )
         }
     }
@@ -264,8 +262,8 @@ namespace microcode {
      * Need to be transformed into an event based system
      */
     export class ButtonPressSensor extends Sensor {
-        constructor(config: RecordingConfig) {
-            super(function () {return 1}, "Button ", 0, 1, "tile_button_a", "F3", config)
+        constructor() {
+            super(function () {return 1}, "Button ", 0, 1, "tile_button_a", "F3")
 
             control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
                 return 1

@@ -53,8 +53,7 @@
         "fauxDataLogger.ts",
         "dataRecorder.ts",
         "generateGraph.ts",
-        "sensorEvent.ts",
-        "sensorFactory.ts"
+        "sensorEvent.ts"
     ],
     "testFiles": [],
     "targetVersions": {
