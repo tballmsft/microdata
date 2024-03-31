@@ -56,6 +56,7 @@ namespace microcode {
         private guiValues: number[][]
 
         // These elements can be reduced in the future:
+        // Better to complete the UI features, then reduce. Reduction to occur prior to the start of prototype 12
         private currentSensorRow: number
         private currentConfigRow: number
         private currentWriteModeRow: number
@@ -481,7 +482,7 @@ namespace microcode {
                     18 + rowOffset,
                     15 // Black
                 )
-
+                    
                 screen.print(
                     this.guiValues[this.currentSensorRow][configRow].toString(),
                     optionX - 3,
@@ -539,6 +540,14 @@ namespace microcode {
                     text,
                     headerX - 55,
                     tutorialTextYOffset,
+                    15 // Black
+                )
+
+                // Bullet point:
+                screen.fillCircle(
+                    headerX - 61,
+                    tutorialTextYOffset + 4,
+                    2,
                     15 // Black
                 )
                 
