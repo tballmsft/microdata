@@ -5,6 +5,7 @@ namespace microcode {
      * DEFAULT: User is not changing any settings & PROMPT_SHARED_CONFIG has occured.
      */
     const enum GUI_STATE {
+        TUTORIAL,
         SELECTING_SENSOR,
         SELECTING_WRITE_MODE,
         WRITING,
@@ -39,6 +40,7 @@ namespace microcode {
      * The (ms, second, minute, hour, day) ui elements kept in RecordingSettingsGUIColumn.value are converted into ms using this:
      */
     const TIME_CONVERSION_TABLE: number[] = [1, 1000, 60000, 3600000, 86400000]
+    const MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN: number = 3
 
     /**
      * Responsible for allowing the user to select the specific recording configurations for each passed sensor.
@@ -64,6 +66,9 @@ namespace microcode {
         private sensors: Sensor[]
         private sensorConfigs: RecordingConfig[]
 
+        private tutorialText: string[]
+        private tutorialTextIndexOffset: number
+
         /** Whether or not the user has manipulated the UI for a sensor. 
          *  Selecting a sensor, but leaving its config as default counts as 'changing' it; since the user may purposefully set it as such.
         */
@@ -71,7 +76,7 @@ namespace microcode {
 
         constructor(app: App, sensors: Sensor[]){
             super(app, "measurementConfigSelect")
-            this.guiState = GUI_STATE.SELECTING_SENSOR
+            this.guiState = GUI_STATE.TUTORIAL
             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
 
             this.guiRows = [
@@ -111,6 +116,18 @@ namespace microcode {
             this.currentEventColumn = 0
             this.eventConfigs = [0, 0] // [x: (0 -> sensorEventSymbols.length), y: (sensor.min -> sensor.max)] 
 
+            this.tutorialText = [
+                "This screen is where\nyou configure your\nsensors.",
+                "Use A & B to move\nthrough menus.",
+                "Use UP and DOWN to\nscroll through\nmenus. Try it now!",
+                "The current sensor\nwill be yellow Press\nA to select it!",
+                "Configured sensors\nare green.",
+                "Unconfigured sensors\nare red.",
+                "Press A to configure\nsome sensors!",
+            ]
+            this.tutorialTextIndexOffset = 0
+
+
             //--------------
             // User Control:
             //--------------
@@ -131,6 +148,10 @@ namespace microcode {
                 controller.A.id,
                 () => {
                     switch (this.guiState) {
+                        case GUI_STATE.TUTORIAL:
+                            this.guiState = GUI_STATE.SELECTING_SENSOR
+                            break;
+
                         case GUI_STATE.SELECTING_SENSOR:
                             this.guiState = GUI_STATE.SELECTING_WRITE_MODE
                             this.configHasChanged[this.currentSensorRow] = true
@@ -161,9 +182,13 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     switch (this.guiState) {
-                        case GUI_STATE.SELECTING_SENSOR:
+                        case GUI_STATE.TUTORIAL:
                             this.app.popScene()
-                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))            
+                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))   
+                            break;
+
+                        case GUI_STATE.SELECTING_SENSOR:
+                            this.guiState = GUI_STATE.TUTORIAL
                             break;
 
                         case GUI_STATE.SELECTING_WRITE_MODE:
@@ -189,7 +214,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
+                    if (this.guiState === GUI_STATE.TUTORIAL) {
+                        this.tutorialTextIndexOffset = Math.max(this.tutorialTextIndexOffset - 1, 0)
+                    }
+                    else if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         // Non-negative modulo:
                         this.currentSensorRow = (((this.currentSensorRow - 1) % this.sensors.length) + this.sensors.length) % this.sensors.length
                     }
@@ -222,7 +250,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
+                    if (this.guiState === GUI_STATE.TUTORIAL) {
+                        this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialText.length - MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
+                    }
+
+                    else if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         this.currentSensorRow = (this.currentSensorRow + 1) % this.sensors.length
                     }
 
@@ -340,6 +372,10 @@ namespace microcode {
             screen.printCenter("Recording Settings", 2)
             this.drawSensorSelection()
 
+            if (this.guiState == GUI_STATE.TUTORIAL) {
+                this.drawTutorialWindow()
+            }
+
             if (this.guiState == GUI_STATE.WRITING || this.guiState == GUI_STATE.DEFAULT) {
                 if (this.writingMode == WRITE_MODE.RECORDING_SETTINGS) {
                     this.drawConfigSelectionWindow()
@@ -351,7 +387,7 @@ namespace microcode {
 
             else if (this.guiState == GUI_STATE.SELECTING_WRITE_MODE) {
                 this.drawWriteModeSelection()
-            }
+            }            
         }
 
 
@@ -454,6 +490,60 @@ namespace microcode {
                 )
                 rowOffset += rowSize
             }
+        }
+
+        private drawTutorialWindow() {
+            const headerX = Screen.HALF_WIDTH
+            const headerY = Screen.HALF_HEIGHT - 60 + 8
+
+            // Sub-window:
+            // Outline:
+            screen.fillRect(
+                Screen.HALF_WIDTH - 70,
+                Screen.HALF_HEIGHT - 60,
+                140,
+                120,
+                15 // Black
+            )
+
+            screen.fillRect(
+                Screen.HALF_WIDTH - 70 + 3,
+                Screen.HALF_HEIGHT - 60 + 3,
+                140 - 6,
+                120 - 6,
+                3 // Pink
+            )
+
+            const tutorialTextLength = ("Tutorial".length * font.charWidth)
+
+            screen.print(
+                "Tutorial",
+                headerX - (tutorialTextLength / 2),
+                headerY,
+                15 // Black
+            )
+                
+            // Underline the title:
+            screen.fillRect(
+                headerX - (tutorialTextLength / 2) - 4,
+                Screen.HALF_HEIGHT - 60 + 17,
+                tutorialTextLength + 4,
+                1,
+                15 // Black
+            )
+
+            let tutorialTextYOffset = 25
+            const limit = Math.min(this.tutorialText.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
+            this.tutorialText.slice(this.tutorialTextIndexOffset, limit).forEach((text) => {
+                screen.print(
+                    text,
+                    headerX - 55,
+                    tutorialTextYOffset,
+                    15 // Black
+                )
+                
+                tutorialTextYOffset += (text.split("\n").length * font.charHeight * 1.33) + 3 // .match() and matchAll() are not present; .split() is memory inefficient
+            })
         }
 
         private drawEventSelectionWindow() {
