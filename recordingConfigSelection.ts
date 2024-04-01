@@ -42,6 +42,13 @@ namespace microcode {
     const TIME_CONVERSION_TABLE: number[] = [1, 1000, 60000, 3600000, 86400000]
     const MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN: number = 3
 
+
+    type TutorialTip = {
+        text: string,
+        keywords?: string[],
+        keywordColors?: number[],
+    }
+
     /**
      * Responsible for allowing the user to select the specific recording configurations for each passed sensor.
      * The user may also choose to select an event for each sensor.
@@ -67,7 +74,7 @@ namespace microcode {
         private sensors: Sensor[]
         private sensorConfigs: RecordingConfig[]
 
-        private tutorialText: string[]
+        private tutorialTextTips: TutorialTip[]
         private tutorialTextIndexOffset: number
 
         /** Whether or not the user has manipulated the UI for a sensor. 
@@ -117,14 +124,16 @@ namespace microcode {
             this.currentEventColumn = 0
             this.eventConfigs = [0, 0] // [x: (0 -> sensorEventSymbols.length), y: (sensor.min -> sensor.max)] 
 
-            this.tutorialText = [
-                "This screen is where\nyou configure your\nsensors.",
-                "Use A & B to move\nthrough menus.",
-                "Use UP and DOWN to\nscroll through\nmenus. Try it now!",
-                "The current sensor\nwill be yellow Press\nA to select it!",
-                "Configured sensors\nare green.",
-                "Unconfigured sensors\nare red.",
-                "Press A to configure\nsome sensors!",
+
+            // Optional keyword colouring:
+            this.tutorialTextTips = [
+                {text: "This screen is where\nyou configure your\nsensors."},
+                {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
+                {text: "Use UP and DOWN to\nscroll through\nmenus. Try it now!"},
+                {text: "The current sensor\nwill be yellow Press\nA to select it!", keywords: [" yellow ", "A "], keywordColors: [5, 6]},  // Yellow and Red
+                {text: "Configured sensors\nare green.", keywords: [" green"], keywordColors: [7]}, // Green
+                {text: "Unconfigured sensors\nare red.", keywords: [" red"], keywordColors: [2]},  // Red
+                {text: "Press A to configure\nsome sensors!", keywords: [" A "], keywordColors: [6]},  // Blue
             ]
             this.tutorialTextIndexOffset = 0
 
@@ -252,7 +261,7 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === GUI_STATE.TUTORIAL) {
-                        this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialText.length - MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
+                        this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialTextTips.length - MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
                     }
 
                     else if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
@@ -397,7 +406,6 @@ namespace microcode {
         //----------------------------
 
         private drawWriteModeSelection() {
-            this.currentWriteModeRow
             const yPosText = (Screen.HEIGHT / 3)
             const xPosText: number = Screen.WIDTH - 38
             const text: string[] = ["Config", "Events"]
@@ -516,7 +524,6 @@ namespace microcode {
             )
 
             const tutorialTextLength = ("Tutorial".length * font.charWidth)
-
             screen.print(
                 "Tutorial",
                 headerX - (tutorialTextLength / 2),
@@ -533,15 +540,60 @@ namespace microcode {
                 15 // Black
             )
 
+            // Print the tutorial tips as bulletpoints:
+            // Some tutorials have coloured keywords, the tip is printed in all black first, then the keyword is printed ontop:
+
             let tutorialTextYOffset = 25
-            const limit = Math.min(this.tutorialText.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
-            this.tutorialText.slice(this.tutorialTextIndexOffset, limit).forEach((text) => {
+            const tipsOnScreen = Math.min(this.tutorialTextTips.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
+
+            this.tutorialTextTips.slice(this.tutorialTextIndexOffset, tipsOnScreen).forEach((tip) => {
                 screen.print(
-                    text,
+                    tip.text,
                     headerX - 55,
                     tutorialTextYOffset,
                     15 // Black
                 )
+
+                // Keyword highlighting:
+                if (tip.keywords != null) {
+                    for (let id = 0; id < tip.keywords.length; id++) {
+                        let keyword = tip.keywords[id]
+
+                        const keywordIndex = tip.text.indexOf(keyword)
+                        const stringBeforeKeyword = tip.text.split(keyword, keywordIndex)[0]
+                        const newlinesBeforeKeyword = stringBeforeKeyword.split("\n", keywordIndex)
+
+                        // Find the position of the last newline before the keyword:
+                        let newlineBeforeKeywordIndex = 0
+                        for (let i = keywordIndex; i > 0; i--) {
+                            if (stringBeforeKeyword.charAt(i) == "\n") {
+                                newlineBeforeKeywordIndex = i
+                                break
+                            }
+                        }
+
+                        // Qty of characters between the last newline before the keyword is the xOffset:
+                        let xOffset = (keywordIndex - newlineBeforeKeywordIndex) * font.charWidth
+
+                        // Account for newline char:
+                        if (newlineBeforeKeywordIndex != 0) {
+                            xOffset -= 1 * font.charWidth
+                        }
+                        
+                        // Number of newlines before the keyword are pushed infront:
+                        for (let _ = 0; _ < newlinesBeforeKeyword.length - 1; _++) {
+                            keyword = "\n" + keyword
+                        }
+
+                        // Print them directly ontop of the word in black, but with the specified colouring:
+                        screen.print(
+                            keyword, 
+                            headerX - 55 + xOffset,
+                            tutorialTextYOffset,
+                            tip.keywordColors[id],
+                        )
+                    }
+                }
 
                 // Bullet point:
                 screen.fillCircle(
@@ -551,7 +603,7 @@ namespace microcode {
                     15 // Black
                 )
                 
-                tutorialTextYOffset += (text.split("\n").length * font.charHeight * 1.33) + 3 // .match() and matchAll() are not present; .split() is memory inefficient
+                tutorialTextYOffset += (tip.text.split("\n").length * font.charHeight * 1.33) + 3 // .match() and matchAll() are not present; .split() is memory inefficient
             })
         }
 
