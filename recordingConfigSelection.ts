@@ -8,6 +8,7 @@ namespace microcode {
         TUTORIAL,
         SELECTING_SENSOR,
         SELECTING_WRITE_MODE,
+        CONFIRM_CONFIGURATION,
         WRITING,
         DEFAULT
     }
@@ -142,17 +143,6 @@ namespace microcode {
             // User Control:
             //--------------
 
-            // Use Microbit A button to progress:
-            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_A, () => {
-                // Build the sensors according to their specific configuration:
-                this.setSensorConfigs()
-                this.sensors.map((sensor, index) => sensor.setRecordingConfig(this.sensorConfigs[index]))
-
-                this.app.popScene()
-                this.app.pushScene(new DataRecorder(this.app, this.sensors))
-            })
-
-
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
@@ -171,7 +161,16 @@ namespace microcode {
                             this.guiState = GUI_STATE.DEFAULT
                             this.writingMode = [WRITE_MODE.RECORDING_SETTINGS, WRITE_MODE.EVENT_SETTINGS][this.currentWriteModeRow]
                             break;
- 
+
+                        case GUI_STATE.CONFIRM_CONFIGURATION:
+                            // Build the sensors according to their specific configuration:
+                            this.setSensorConfigs()
+                            this.sensors.map((sensor, index) => sensor.setRecordingConfig(this.sensorConfigs[index]))
+
+                            this.app.popScene()
+                            this.app.pushScene(new DataRecorder(this.app, this.sensors))
+                            break;
+                            
                         case GUI_STATE.DEFAULT:
                             this.guiState = GUI_STATE.WRITING
                             break;
@@ -198,10 +197,23 @@ namespace microcode {
                             break;
 
                         case GUI_STATE.SELECTING_SENSOR:
+                            // Upon entering check if all sensors are set: set the gui to allow the user to confirm their selection if so:
                             this.guiState = GUI_STATE.TUTORIAL
                             break;
 
                         case GUI_STATE.SELECTING_WRITE_MODE:
+                            for (let i = 0; i < this.configHasChanged.length; i++) {
+                                if (this.configHasChanged[i]) {
+                                    this.guiState = GUI_STATE.CONFIRM_CONFIGURATION
+                                }
+                                else {
+                                    this.guiState = GUI_STATE.SELECTING_SENSOR
+                                    break;
+                                }
+                            }
+                            break;
+
+                        case GUI_STATE.CONFIRM_CONFIGURATION:
                             this.guiState = GUI_STATE.SELECTING_SENSOR
                             break;
 
@@ -386,7 +398,11 @@ namespace microcode {
                 this.drawTutorialWindow()
             }
 
-            if (this.guiState == GUI_STATE.WRITING || this.guiState == GUI_STATE.DEFAULT) {
+            else if (this.guiState == GUI_STATE.CONFIRM_CONFIGURATION) {
+                this.drawConfirmationWindow()
+            }
+
+            else if (this.guiState == GUI_STATE.WRITING || this.guiState == GUI_STATE.DEFAULT) {
                 if (this.writingMode == WRITE_MODE.RECORDING_SETTINGS) {
                     this.drawConfigSelectionWindow()
                 }
@@ -499,6 +515,95 @@ namespace microcode {
                 )
                 rowOffset += rowSize
             }
+        }
+
+        private drawConfirmationWindow() {
+            const headerX = Screen.HALF_WIDTH
+
+            // Sub-window:
+            // Outline:
+            screen.fillRect(
+                Screen.HALF_WIDTH - 60,
+                Screen.HALF_HEIGHT - 50,
+                120,
+                100,
+                15 // Black
+            )
+
+            screen.fillRect(
+                Screen.HALF_WIDTH - 60 + 3,
+                Screen.HALF_HEIGHT - 50 + 3,
+                120 - 6,
+                100 - 6,
+                4 // Orange
+            )
+
+            const tutorialTextLength = ("Confirm Settings?".length * font.charWidth)
+            screen.print(
+                "Confirm Settings?",
+                headerX - (tutorialTextLength / 2),
+                Screen.HALF_HEIGHT - 60 + 18,
+                15 // Black
+            )
+                
+            // Underline the title:
+            screen.fillRect(
+                headerX - (tutorialTextLength / 2) - 2,
+                Screen.HALF_HEIGHT - 60 + 27,
+                tutorialTextLength + 2,
+                2,
+                15 // Black
+            )
+
+            // A & B Options:
+
+            // Blue Yes Button:
+            screen.fillRect(
+                Screen.HALF_WIDTH - 34,
+                Screen.HALF_HEIGHT + 13,
+                13,
+                12,
+                6 // Blue
+            )
+
+            screen.print(
+                "A",
+                Screen.HALF_WIDTH - 30,
+                Screen.HALF_HEIGHT + 15,
+                1,
+                simage.font8
+            )
+
+            screen.print(
+                "Done",
+                Screen.HALF_WIDTH - 39,
+                Screen.HALF_HEIGHT + 27,
+                1
+            )
+
+            // Red No Button:
+            screen.fillRect(
+                Screen.HALF_WIDTH + 26,
+                Screen.HALF_HEIGHT + 13,
+                13,
+                12,
+                2 // Red
+            )
+
+            screen.print(
+                "B",
+                Screen.HALF_WIDTH + 30,
+                Screen.HALF_HEIGHT + 15,
+                1,
+                simage.font8
+            )
+
+            screen.print(
+                "Back",
+                Screen.HALF_WIDTH + 21,
+                Screen.HALF_HEIGHT + 27,
+                1
+            )
         }
 
         private drawTutorialWindow() {
