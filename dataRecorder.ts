@@ -22,7 +22,7 @@ namespace microcode {
 
             // Start logging:
             this.sensors.forEach((sensor) => {
-                sensor.log(this)
+                sensor.log()
             })
 
             //---------------
@@ -156,11 +156,24 @@ namespace microcode {
                             15
                         )
 
-                        const sensorInfo: string[] = [
-                            sensor.config.period / 1000 + " second period", 
-                            sensor.config.measurements.toString() + " measurements left",
-                            ((sensor.config.measurements * sensor.config.period) / 1000).toString() + " seconds left"
-                        ]
+                        let sensorInfo: string[]
+                        if (sensor.loggingMode == SensorLoggingMode.RECORDING) {
+                            const config = sensor.config as RecordingConfig
+                            sensorInfo = [
+                                config.period / 1000 + " second period", 
+                                config.measurements.toString() + " measurements left",
+                                ((sensor.config.measurements * config.period) / 1000).toString() + " seconds left"
+                            ]
+                        }
+
+                        else {
+                            const config = sensor.config as EventConfig
+                            sensorInfo = [
+                                config.measurements.toString() + " events left",
+                                "Logging " + config.inequality + " " + config.comparator + " events",
+                                sensor.lastLoggedEventDescription
+                            ]
+                        }
 
                         sensorInfo.forEach((info) => {
                             y += 12
