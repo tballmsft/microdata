@@ -3,6 +3,11 @@ namespace microcode {
         measurements: number,
         period: number,
         delay: number
-        sensorEvent?: SensorEvent
+    };
+
+    export type EventConfig = {
+        measurements: number,
+        inequality: string,
+        comparator: number
     };
 }

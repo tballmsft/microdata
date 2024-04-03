@@ -28,7 +28,12 @@ namespace microcode {
                 x: -60,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
+                    // if (this.btns[0].selected) {
+                    //     delete this.selectedSensors[this.selectedSensors.findIndex((sensor) => sensor.iconName == "accelerometer")]
+                    // }
+                    // else {
+                        this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
+                    // }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -247,6 +252,11 @@ namespace microcode {
             }))
 
             this.navigator.addButtons(this.btns)
+        }
+
+
+        private handleNewSensor() {
+
         }
 
         draw() {

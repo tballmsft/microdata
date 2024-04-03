@@ -198,7 +198,7 @@ namespace microcode {
         private iconId: string | SImage
         private _ariaId: string
         public onClick?: (button: Button) => void
-        private selected: boolean
+        public selected: boolean
         private dynamicBoundaryColorsOn: boolean
         private boundaryColor: number
 
