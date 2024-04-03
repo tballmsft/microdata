@@ -216,7 +216,7 @@ namespace microcode {
 
             if (this.requestDataMode) {
                 this.sensors.forEach(function(sensor) {
-                    sensor.readIntoBuffer()
+                    sensor.readIntoBufferOnce()
                 })
             }
 
@@ -241,6 +241,7 @@ namespace microcode {
                 // Colour used to represent this sensor, same colour as plotted & ticker:
                 y += (i * 12)
 
+                // Colour block to the left of the name:
                 screen.fillRect(
                     2,
                     y,
@@ -269,7 +270,6 @@ namespace microcode {
                 color = (color + 3) % 15
             }
 
-
             // The data from the sensors will shift to the left over time as the buffer is filled
             // Shift the selected coordinate appropriately; so that the Circle around the selected point is accurate
             if (this.requestDataMode && this.selectedXCoordinate != null && this.sensors[this.selectedSensorIndex].getBufferSize() == Sensor.BUFFER_LIMIT) {
@@ -294,6 +294,22 @@ namespace microcode {
                     5,
                     1
                 )
+
+                screen.print(
+                    "x =" + this.selectedXCoordinate.toString(),
+                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
+                    y + 5,
+                    color,
+                    simage.font5,
+                )
+
+                screen.print(
+                    "y =" + this.sensors[this.selectedSensorIndex].getReading().toString(),
+                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
+                    y + 15,
+                    color,
+                    simage.font5,
+                )
             }
 
             // Draw the latest reading on the right-hand side as a Ticker if at no-zoom:
@@ -317,30 +333,6 @@ namespace microcode {
                     }
                     color = (color + 3) % 15
                 })
-            }
-
-            // Check because they may become null my scrolling off the screen:
-            else if (this.selectedXCoordinate != null && this.selectedYCoordinate != null) {
-                const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset
-                const sensorRange = (this.sensors[this.selectedSensorIndex].maximum + Math.abs(this.sensors[this.selectedSensorIndex].minimum))
-                const norm = ((this.selectedYCoordinate / sensorRange) * (Screen.HEIGHT - fromY))
-                const y = Math.round(Screen.HEIGHT - norm) - fromY
-
-                screen.print(
-                    "x =" + this.selectedXCoordinate.toString(),
-                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
-                    y - 5,
-                    color,
-                    simage.font5,
-                )
-
-                screen.print(
-                    "y =" + this.sensors[this.selectedSensorIndex].getReading().toString(),
-                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
-                    y - 15,
-                    color,
-                    simage.font5,
-                )
             }
 
             // Draw data lines:
