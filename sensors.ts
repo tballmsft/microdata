@@ -1,4 +1,12 @@
 namespace microcode {
+    export enum SensorLoggingMode {
+        RECORDING,
+        EVENTS
+    }
+
+
+    const EVENT_POLLING_PERIOD_MS = 100
+
     /**
      * Abstraction for all available sensors,
      * Methods are seldom overidden
@@ -11,15 +19,18 @@ namespace microcode {
         public sensorFn: () => number
         public iconName: string
         public ariaID: string
-        public config: RecordingConfig
+        public startTime: number
+
+        public config: RecordingConfig | EventConfig
+        public loggingMode: SensorLoggingMode
 
         // Reading Statistics:
         public minimum: number
         public maximum: number
         public peakDataPoint: number[]
+        public lastLoggedEventDescription: string
 
         private dataBuffer: number[]
-        private startTime: number
 
         constructor(sensorFn: () => number, 
             name: string,
@@ -33,19 +44,27 @@ namespace microcode {
             this.sensorFn = sensorFn
             this.iconName = iconName
             this.ariaID = ariaID
+            this.startTime = 0 // This value will be set upon the first reading
+
+            this.config = config
+            this.loggingMode = null
 
             this.minimum = sensorMinReading
             this.maximum = sensorMaxReading
             this.peakDataPoint = [0, this.minimum] // [x, y]
+            this.lastLoggedEventDescription = ""
 
             this.dataBuffer = []
-            this.startTime = 0 // This value will be set upon the first reading
-
-            this.config = config
         }
 
         setRecordingConfig(config: RecordingConfig) {
             this.config = config
+            this.loggingMode = SensorLoggingMode.RECORDING
+        }
+
+        setEventConfig(config: EventConfig) {
+            this.config = config
+            this.loggingMode = SensorLoggingMode.EVENTS
         }
 
         getBufferSize(): number {return this.dataBuffer.length}
@@ -54,7 +73,7 @@ namespace microcode {
         getDataBufferLength(): number {return this.dataBuffer.length}
         getNormalisedReading(): number{return this.sensorFn() / this.maximum}
 
-        readIntoBuffer(): void {
+        readIntoBufferOnce(): void {
             if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
                 this.dataBuffer.shift();
                 this.peakDataPoint[0] -= 1
@@ -62,27 +81,56 @@ namespace microcode {
             this.dataBuffer.push(this.getReading());
         }
 
-        log(dataRecorder: DataRecorder) {
+        /**
+         * Spawns an independent background fiber to log sensor data according to its .config
+         */
+        log() {
             control.inBackground(() => {
                 if (this.startTime == 0) {
                     this.startTime = input.runningTime()
                 }
 
-                while (this.config.measurements > 0)  {
+                if (this.loggingMode == SensorLoggingMode.EVENTS) {
+                    this.logEvents(this.config as EventConfig)
+                }
+
+                else {
+                    this.logData(this.config as RecordingConfig)
+                }
+            })
+        }
+
+        private logData(config: RecordingConfig) {
+            while (config.measurements > 0)  {
+                FauxDataLogger.log([
+                    this.name, 
+                    (input.runningTime() - this.startTime).toString(),
+                    this.getReading().toString(),
+                    "N/A"
+                ])
+                basic.pause(config.period)
+                config.measurements -= 1
+            }
+        }
+
+        private logEvents(config: EventConfig) {
+            let sensorEventFunction = sensorEventFunctionLookup[config.inequality]
+
+            while (config.measurements > 0)  {
+                const reading = this.getReading()
+
+                if (sensorEventFunction(reading, config.comparator)) {
                     FauxDataLogger.log([
                         this.name, 
                         (input.runningTime() - this.startTime).toString(),
-                        this.getReading().toString(),
-                        "N/A"
+                        reading.toString(),
+                        reading + " " + config.inequality + " " + config.comparator
                     ])
-                    
-                    this.config.measurements -= 1
-                    basic.pause(this.config.period)
-
-                    // Update the screen
-                    // dataRecorder.update()
+                    config.measurements -= 1
                 }
-            })
+
+                basic.pause(EVENT_POLLING_PERIOD_MS)
+            }
         }
 
         /**

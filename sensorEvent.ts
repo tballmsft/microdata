@@ -1,50 +1,29 @@
 namespace microcode {
     /**
+     * Used to lookup the implemented events via sensorEventFunctionLookup[]
+     * 
      * Currently only events that check for inequalities are implemented,
      *      The only sensors that are incompatible with this are Buttons
      * The following code may be generalised to support them though.
      */
-
-
-    /**
-     * Function invoked to check if a reading <operator> target is true
-     *      Upon that the callback is invoked
-     *          The callback handles the event via sensors.handleEvent()
-     *              This private method will cause the event to be logged.
-     */
-    type SensorEventFunction = (reading: number, target: number, callback: () => void) => void
-
-    /**
-     * Inequality as string to function that performs said inequality
-     *      Inequality presence => callback()
-     */
-    export const sensorEventFunctionLookup: {[inequality: string]: SensorEventFunction} = {
-        "=": function(reading: number, target: number, callback: () => void)  {if (reading === target) {callback()}},
-        ">": function(reading: number, target: number, callback: () => void)  {if (reading > target) {callback()}},
-        "<": function(reading: number, target: number, callback: () => void)  {if (reading < target) {callback()}},
-        ">=": function(reading: number, target: number, callback: () => void) {if (reading >= target) {callback()}},
-        "<=": function(reading: number, target: number, callback: () => void) {if (reading <= target) {callback()}},
-    }
-
     export const sensorEventSymbols = ["=", ">", "<", ">=", "<="]
 
+    
     /**
-     * Simple class that is optionally owned by the recordingConfig.
-     *      Acts as a wrapper for the above InequalityFunctions
+     * Type for value bound to inequality key within sensorEventFunctionLookup
+     * 
+     * One of these is optionally held by a sensor - see by sensor.setRecordingConfig
      */
-    export class SensorEvent {
-        public readonly inequality: string // Used to build Logged String
-        private readonly target: number
-        private readonly inequalityFunction: SensorEventFunction
+    export type SensorEventFunction = (reading: number, comparator: number) => boolean
 
-        constructor(inequality: string, target: number) {
-            this.inequality = inequality
-            this.target = target
-            this.inequalityFunction = sensorEventFunctionLookup[inequality]
-        }
-
-        public handleEvent(reading: number, callback: () => void): void {
-            this.inequalityFunction(reading, this.target, callback)
-        }
+    /**
+     * Get aa function that performs that inequality check & logs it with an event description if the event has triggered.
+     */
+    export const sensorEventFunctionLookup: {[inequality: string]: SensorEventFunction} = {
+        "=":  function(reading: number, comparator: number) {return reading == comparator},
+        ">":  function(reading: number, comparator: number) {return reading >  comparator},
+        "<":  function(reading: number, comparator: number) {return reading <  comparator},
+        ">=": function(reading: number, comparator: number) {return reading >= comparator},
+        "<=": function(reading: number, comparator: number) {return reading <= comparator}
     }
 }
