@@ -71,12 +71,12 @@ namespace microcode {
                 controller.up.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        if (this.currentRowIndex <= 1) {
-                            this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
+                        if (this.currentRowIndex > 1) {
+                            this.currentRowIndex = Math.max(this.currentRowIndex - 1, 1)
                         }
 
                         else {
-                            this.currentRowIndex = Math.max(this.currentRowIndex - 1, 1)
+                            this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
                         }
                     }
                 }
@@ -93,12 +93,13 @@ namespace microcode {
                     }
 
                     else if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        if (this.currentRowIndex + 1 >= Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)) {
-                            this.yScrollOffset += 1
+                        const limit = Math.min(FauxDataLogger.numberOfRows - 1, TABULAR_MAX_ROWS - 1)
+                        if (this.currentRowIndex < limit) {
+                            this.currentRowIndex = Math.min(this.currentRowIndex + 1, FauxDataLogger.numberOfRows - 1)
                         }
 
-                        else {
-                            this.currentRowIndex = Math.min(this.currentRowIndex + 1, FauxDataLogger.numberOfRows)
+                        else if (this.currentRowIndex + this.yScrollOffset < FauxDataLogger.numberOfRows - 1) {
+                            this.yScrollOffset = Math.min(this.yScrollOffset + 1, FauxDataLogger.numberOfRows - 1)
                         }
                     }
                 }
@@ -116,7 +117,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.xScrollOffset + TABULAR_MAX_COLS < FauxDataLogger.headers.length + 1) {
+                    if (this.xScrollOffset + TABULAR_MAX_COLS < FauxDataLogger.headers.length) {
                         this.xScrollOffset += 1
                     }
                 }
@@ -156,10 +157,17 @@ namespace microcode {
         drawGridOfVariableColSize(colBufferSizes: number[], rowBufferSize: number) {
             let cumulativeColOffset = 0
             
-            colBufferSizes.forEach(function(headerLen) {
-                cumulativeColOffset += headerLen
+            // colBufferSizes.forEach(function(headerLen) {
+            for (let col = 0; col < colBufferSizes.length; col++) {
+                // The last column should use all remaining space, if it is lesser than that remaining space:
+                if (col == colBufferSizes.length - 1 && colBufferSizes[col] < cumulativeColOffset) {
+                    cumulativeColOffset += Screen.WIDTH - cumulativeColOffset
+                }
+                else {
+                    cumulativeColOffset += colBufferSizes[col]
+                }
 
-                if (cumulativeColOffset < Screen.WIDTH) {
+                if (cumulativeColOffset <= Screen.WIDTH) {
                     Screen.drawLine(
                         Screen.LEFT_EDGE + cumulativeColOffset,
                         Screen.TOP_EDGE,
@@ -168,7 +176,7 @@ namespace microcode {
                         0x0
                     )
                 }
-            })
+            }
             
             for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowBufferSize) {
                 Screen.drawLine(
@@ -233,7 +241,7 @@ namespace microcode {
                     const filteredRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows / FauxDataLogger.sensors.length, TABULAR_MAX_ROWS)
                     this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
 
-                    const filteredSensor: string = FauxDataLogger.entries[this.currentRowIndex].data[0];
+                    const filteredSensor: string = FauxDataLogger.entries[this.currentRowIndex + this.yScrollOffset].data[0];
                     let filteredData: string[][] = []
 
                     FauxDataLogger.entries.forEach((entry) => {
