@@ -1,4 +1,22 @@
 namespace microcode {
+    const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
+        "accelerometer X": new AccelerometerSensor(Dimension.X),
+        "accelerometer Y": new AccelerometerSensor(Dimension.Y),
+        "accelerometer Z": new AccelerometerSensor(Dimension.Z),
+        "Pitch": new RotationSensor(Rotation.Pitch),
+        "Roll": new RotationSensor(Rotation.Roll),
+        "Pin 0": new PinSensor(TouchPin.P0),
+        "Pin 1": new PinSensor(TouchPin.P1),
+        "Pin 2": new PinSensor(TouchPin.P2),
+        "led_light_sensor": new LightSensor(),
+        "thermometer": new TemperatureSensor(),
+        "S10": new MagnetSensor(Dimension.X),
+        "Logo Press": new LogoPressSensor(),
+        "Volume": new VolumeSensor(),
+        "Compass": new CompassHeadingSensor(),
+        "F3": new ButtonPressSensor()
+    }
+
     /**
      * Responsible for allowing the user to select any number of sensors.
      *      These sensors are passed to either the measurement screen or the live data view
@@ -7,13 +25,13 @@ namespace microcode {
      */
     export class SensorSelect extends CursorSceneWithPriorPage {
         private btns: Button[]
-        private selectedSensors: Sensor[]
+        private selectedSensorNames: string[]
         private nextSceneEnum: CursorSceneEnum
 
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
-            this.selectedSensors = []
+            this.selectedSensorNames = []
             this.nextSceneEnum = nextSceneEnum
         }
 
@@ -28,12 +46,13 @@ namespace microcode {
                 x: -60,
                 y: -40,
                 onClick: () => {
-                    // if (this.btns[0].selected) {
-                    //     delete this.selectedSensors[this.selectedSensors.findIndex((sensor) => sensor.iconName == "accelerometer")]
-                    // }
-                    // else {
-                        this.selectedSensors.push(new AccelerometerSensor(Dimension.X))
-                    // }
+                    const index = this.selectedSensorNames.indexOf("accelerometer X")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("accelerometer X")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -46,7 +65,13 @@ namespace microcode {
                 x: -30,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.Y))
+                    const index = this.selectedSensorNames.indexOf("accelerometer Y")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("accelerometer Y")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -59,7 +84,13 @@ namespace microcode {
                 x: 0,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new AccelerometerSensor(Dimension.Z))
+                    const index = this.selectedSensorNames.indexOf("accelerometer Z")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("accelerometer Z")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -72,7 +103,13 @@ namespace microcode {
                 x: 30,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new RotationSensor(Rotation.Pitch))
+                    const index = this.selectedSensorNames.indexOf("Pitch")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Pitch")
+                    }
                 }, 
                 dynamicBoundaryColorsOn: true,          
             }))
@@ -85,7 +122,13 @@ namespace microcode {
                 x: 60,
                 y: -40,
                 onClick: () => {
-                    this.selectedSensors.push(new RotationSensor(Rotation.Roll))
+                    const index = this.selectedSensorNames.indexOf("Roll")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Roll")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -100,7 +143,13 @@ namespace microcode {
                 x: -60,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P0))
+                    const index = this.selectedSensorNames.indexOf("Pin 0")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Pin 0")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -113,7 +162,13 @@ namespace microcode {
                 x: -30,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P1))
+                    const index = this.selectedSensorNames.indexOf("Pin 1")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Pin 1")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -127,7 +182,13 @@ namespace microcode {
                 x: 0,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new PinSensor(TouchPin.P2))
+                    const index = this.selectedSensorNames.indexOf("Pin 2")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Pin 2")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -141,7 +202,13 @@ namespace microcode {
                 x: 30,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new LightSensor())
+                    const index = this.selectedSensorNames.indexOf("led_light_sensor")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("led_light_sensor")
+                    }
                 },
                 dynamicBoundaryColorsOn: true,  
             }))
@@ -154,7 +221,13 @@ namespace microcode {
                 x: 60,
                 y: -11,
                 onClick: () => {
-                    this.selectedSensors.push(new TemperatureSensor())
+                    const index = this.selectedSensorNames.indexOf("thermometer")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("thermometer")
+                    }
                 },
                 dynamicBoundaryColorsOn: true,
             }))
@@ -169,7 +242,13 @@ namespace microcode {
                 x: -60,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new MagnetSensor(Dimension.X))
+                    const index = this.selectedSensorNames.indexOf("S10")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("S10")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true,
             }))
@@ -182,7 +261,13 @@ namespace microcode {
                 x: -30,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new LogoPressSensor())
+                    const index = this.selectedSensorNames.indexOf("Logo Press")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Logo Press")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -195,7 +280,13 @@ namespace microcode {
                 x: 0,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new VolumeSensor())
+                    const index = this.selectedSensorNames.indexOf("Volume")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Volume")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -208,7 +299,13 @@ namespace microcode {
                 x: 30,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new CompassHeadingSensor())
+                    const index = this.selectedSensorNames.indexOf("Compass")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Compass")
+                    }
                 },          
                 dynamicBoundaryColorsOn: true, 
             }))
@@ -221,7 +318,13 @@ namespace microcode {
                 x: 60,
                 y: 18,
                 onClick: () => {
-                    this.selectedSensors.push(new ButtonPressSensor())
+                    const index = this.selectedSensorNames.indexOf("F3")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("F3")
+                    }
                 },
                 dynamicBoundaryColorsOn: true,     
             }))
@@ -236,29 +339,24 @@ namespace microcode {
                 x: 60,
                 y: 44,
                 onClick: () => {
-                    if (this.selectedSensors.length === 0) {
+                    if (this.selectedSensorNames.length === 0) {
                         return
                     }
-
+                    const sensors = this.selectedSensorNames.map((name) => SENSOR_LOOKUP_TABLE[name])
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(app, this.selectedSensors))
+                        this.app.pushScene(new LiveDataViewer(app, sensors))
                     }
 
                     else {
-                        this.app.pushScene(new RecordingConfigSelection(app, this.selectedSensors))
+                        this.app.pushScene(new RecordingConfigSelection(app, sensors))
                     }
                 }
             }))
 
             this.navigator.addButtons(this.btns)
         }
-
-
-        private handleNewSensor() {
-
-        }
-
+        
         draw() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
