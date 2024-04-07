@@ -207,11 +207,12 @@ namespace microcode {
                     })
                     return res
                 },
-                "Pin " + pin.toString(),
+                // Pins are 0, 1, 2 = 100, 101, 102
+                "Pin " + (pin % 100),
                 0,
                 1,
-                "pin_" + pin.toString(),
-                "Pin " + pin.toString()
+                "pin_" + (pin % 100),
+                "Pin " + (pin % 100)
             )
         }
     }
