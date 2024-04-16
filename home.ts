@@ -12,7 +12,7 @@ namespace microcode {
             super.startup()
 
             // MicroData loading test:
-            basic.showString("MicroData Home")
+            basic.showString("Home")
 
             this.liveDataBtn = new Button({
                 parent: null,
@@ -22,8 +22,8 @@ namespace microcode {
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                 },
             })
 
@@ -35,8 +35,8 @@ namespace microcode {
                 x: 0,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },
             })
 
@@ -48,8 +48,8 @@ namespace microcode {
                 x: 50,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new DataViewSelect(this.app))
+                    // this.app.popScene()
+                    // this.app.pushScene(new DataViewSelect(this.app))
                 },
             })
 
