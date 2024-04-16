@@ -12,7 +12,7 @@ namespace microcode {
 
         constructor() {
             // One interval delay to ensure all static constructors have executed.
-            basic.pause(10)
+            basic.pause(30)
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
             this.pushScene(new Home(this))

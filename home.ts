@@ -16,7 +16,7 @@ namespace microcode {
 
             this.liveDataBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
+                // style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
                 x: -50,
@@ -29,7 +29,7 @@ namespace microcode {
 
             this.recordDataBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
+                // style: ButtonStyles.Transparent,
                 icon: "edit_program",
                 ariaId: "Record",
                 x: 0,
@@ -42,7 +42,7 @@ namespace microcode {
 
             this.viewBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
+                // style: ButtonStyles.Transparent,
                 icon: "largeDisk",
                 ariaId: "View",
                 x: 50,
