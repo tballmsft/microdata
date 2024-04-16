@@ -69,7 +69,7 @@ namespace microcode {
             )
         }
 
-        private yOffset = -Screen.HEIGHT >> 1
+        // private yOffset = -Screen.HEIGHT >> 1
         draw() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
@@ -117,12 +117,12 @@ namespace microcode {
             //     )
             // }
 
-            // this.recordDataBtn.draw()
-            // this.liveDataBtn.draw()
-            // this.viewBtn.draw()
+            this.recordDataBtn.draw()
+            this.liveDataBtn.draw()
+            this.viewBtn.draw()
 
-            // this.drawVersion()
-            // super.draw()
+            this.drawVersion()
+            super.draw()
         }
     }
 }
