@@ -12,11 +12,11 @@ namespace microcode {
 
         constructor() {
             // One interval delay to ensure all static constructors have executed.
-            basic.pause(5)
+            basic.pause(10)
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
             this.pushScene(new Home(this))
-            // this.pushScene(new SensorSelect(this))
+            // this.pushScene(new SensorSelect(this, CursorSceneEnum.LiveDataViewer))
         }
 
         public saveBuffer(slot: string, buf: Buffer) {
