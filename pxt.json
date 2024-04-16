@@ -1,7 +1,7 @@
 {
-    "name": "microcode",
-    "version": "2.5.30",
-    "description": "Physical computing library for micro:bit V2",
+    "name": "microdata",
+    "version": "1.0.00",
+    "description": "Data science with micro:bit v2",
     "dependencies": {
         "core": "*",
         "radio": "*",
@@ -56,13 +56,7 @@
         "sensorEvent.ts"
     ],
     "testFiles": [],
-    "targetVersions": {
-        "target": "6.1.10",
-        "targetId": "microbit"
-    },
     "supportedTargets": [
         "microbit"
-    ],
-    "preferredEditor": "tsprj",
-    "disableTargetTemplateFiles": true
+    ]
 }
