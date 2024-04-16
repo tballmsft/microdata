@@ -50,8 +50,8 @@ namespace microcode {
                         this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
                     }
                     else {
-                        app.popScene()
-                        app.pushScene(new DataViewSelect(this.app))
+                        this.app.popScene()
+                        this.app.pushScene(new DataViewSelect(this.app))
                     }
                 }
             )

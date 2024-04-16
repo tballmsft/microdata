@@ -112,8 +112,8 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     if (this.windowHeight <= Screen.HEIGHT && this.windowWidth <= Screen.WIDTH) {
-                        app.popScene()
-                        app.pushScene(new Home(app))
+                        this.app.popScene()
+                        this.app.pushScene(new Home(this.app))
                     }
                     
                     else {

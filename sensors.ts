@@ -91,7 +91,7 @@ namespace microcode {
                 }
 
                 if (this.loggingMode == SensorLoggingMode.EVENTS) {
-                    this.logEvents(this.config as EventConfig)
+                    this.logEvent(this.config as EventConfig)
                 }
 
                 else {
@@ -101,6 +101,8 @@ namespace microcode {
         }
 
         private logData(config: RecordingConfig) {
+            // datalogger.
+            
             while (config.measurements > 0)  {
                 FauxDataLogger.log([
                     this.name, 
@@ -113,7 +115,7 @@ namespace microcode {
             }
         }
 
-        private logEvents(config: EventConfig) {
+        private logEvent(config: EventConfig) {
             let sensorEventFunction = sensorEventFunctionLookup[config.inequality]
 
             while (config.measurements > 0)  {

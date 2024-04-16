@@ -345,11 +345,11 @@ namespace microcode {
                     const sensors = this.selectedSensorNames.map((name) => SENSOR_LOOKUP_TABLE[name])
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(app, sensors))
+                        this.app.pushScene(new LiveDataViewer(this.app, sensors))
                     }
 
                     else {
-                        this.app.pushScene(new RecordingConfigSelection(app, sensors))
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
                     }
                 }
             }))

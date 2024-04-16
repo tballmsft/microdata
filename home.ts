@@ -11,6 +11,9 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            // MicroData loading test:
+            basic.showString("MicroData Home")
+
             this.liveDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,

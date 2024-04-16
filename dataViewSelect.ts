@@ -40,8 +40,8 @@ namespace microcode {
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    app.popScene()
-                    app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.METADATA_VIEW))
+                    this.app.popScene()
+                    this.app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.METADATA_VIEW))
                 },
                 boundaryColor: 7,
             })
@@ -54,8 +54,8 @@ namespace microcode {
                 x: 0,
                 y: 30,
                 onClick: () => {
-                    app.popScene()
-                    app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW))
+                    this.app.popScene()
+                    this.app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW))
                 },
                 boundaryColor: 7,
             })
@@ -68,8 +68,8 @@ namespace microcode {
                 x: 50,
                 y: 30,
                 onClick: () => {
-                    app.popScene()
-                    app.pushScene(new GraphGenerator(this.app))
+                    this.app.popScene()
+                    this.app.pushScene(new GraphGenerator(this.app))
                 },
                 boundaryColor: 7,
             })
