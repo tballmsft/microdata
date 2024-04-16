@@ -14,48 +14,48 @@ namespace microcode {
             // MicroData loading test:
             basic.showString("Home")
 
-            // this.liveDataBtn = new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "linear_graph_1",
-            //     ariaId: "linear_graph",
-            //     x: -50,
-            //     y: 30,
-            //     onClick: () => {
-            //         // this.app.popScene()
-            //         // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-            //     },
-            // })
+            this.liveDataBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "linear_graph_1",
+                ariaId: "linear_graph",
+                x: -50,
+                y: 30,
+                onClick: () => {
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                },
+            })
 
-            // this.recordDataBtn = new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "edit_program",
-            //     ariaId: "Record",
-            //     x: 0,
-            //     y: 30,
-            //     onClick: () => {
-            //         // this.app.popScene()
-            //         // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
-            //     },
-            // })
+            this.recordDataBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "edit_program",
+                ariaId: "Record",
+                x: 0,
+                y: 30,
+                onClick: () => {
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                },
+            })
 
-            // this.viewBtn = new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "largeDisk",
-            //     ariaId: "View",
-            //     x: 50,
-            //     y: 30,
-            //     onClick: () => {
-            //         // this.app.popScene()
-            //         // this.app.pushScene(new DataViewSelect(this.app))
-            //     },
-            // })
+            this.viewBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "largeDisk",
+                ariaId: "View",
+                x: 50,
+                y: 30,
+                onClick: () => {
+                    // this.app.popScene()
+                    // this.app.pushScene(new DataViewSelect(this.app))
+                },
+            })
 
-            // const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.viewBtn]
+            const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.viewBtn]
 
-            // this.navigator.addButtons(btns)
+            this.navigator.addButtons(btns)
         }
 
         private drawVersion() {
@@ -78,26 +78,26 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-            // this.yOffset = Math.min(0, this.yOffset + 2)
+            this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()
             const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0
             const margin = 2
             const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
-            // const y = Screen.TOP_EDGE + OFFSET //+ dy
-            // Screen.drawTransparentImage(
-            //     wordLogo,
-            //     Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
-            //     ,
-            //     y + this.yOffset
-            // )
-            // Screen.drawTransparentImage(
-            //     microbitLogo,
-            //     Screen.LEFT_EDGE +
-            //         ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
-            //         ,
-            //     y - wordLogo.height + this.yOffset + margin
-            // )
-            // if (!this.yOffset) {
+            const y = Screen.TOP_EDGE + OFFSET //+ dy
+            Screen.drawTransparentImage(
+                wordLogo,
+                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
+                ,
+                y + this.yOffset
+            )
+            Screen.drawTransparentImage(
+                microbitLogo,
+                Screen.LEFT_EDGE +
+                    ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
+                    ,
+                y - wordLogo.height + this.yOffset + margin
+            )
+            if (!this.yOffset) {
                 const tagline = resolveTooltip("tagline")
                 Screen.print(
                     tagline,
@@ -115,14 +115,14 @@ namespace microcode {
                     0xb,
                     microcode.font
                 )
-            // }
+            }
 
-            // this.recordDataBtn.draw()
-            // this.liveDataBtn.draw()
-            // this.viewBtn.draw()
+            this.recordDataBtn.draw()
+            this.liveDataBtn.draw()
+            this.viewBtn.draw()
 
-            // this.drawVersion()
-            // super.draw()
+            this.drawVersion()
+            super.draw()
         }
     }
 }
