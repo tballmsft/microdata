@@ -198,6 +198,9 @@ namespace microcode {
         private iconId: string | SImage
         private _ariaId: string
         public onClick?: (button: Button) => void
+        public selected: boolean
+        private dynamicBoundaryColorsOn: boolean
+        private boundaryColor: number
 
         public get ariaId(): string {
             return (
@@ -226,7 +229,9 @@ namespace microcode {
             ariaId?: string
             x: number
             y: number
-            onClick?: (button: Button) => void
+            onClick?: (button: Button) => void,
+            dynamicBoundaryColorsOn?: boolean
+            boundaryColor?: number
         }) {
             super(
                 opts.x,
@@ -238,10 +243,30 @@ namespace microcode {
             this._ariaId = opts.ariaId
             this.onClick = opts.onClick
             this.buildSprite(this.image_())
+
+            this.selected = false
+
+            if (opts.dynamicBoundaryColorsOn == null) {
+                opts.dynamicBoundaryColorsOn = false
+            }
+            else {
+                this.dynamicBoundaryColorsOn = opts.dynamicBoundaryColorsOn
+                this.boundaryColor = 2
+            }
+
+            if (opts.boundaryColor != null) {
+                this.dynamicBoundaryColorsOn = true
+                this.boundaryColor = opts.boundaryColor
+            }
         }
 
         public getIcon() {
             return this.iconId
+        }
+
+
+        public toggleSelected(): void {
+            this.selected = !this.selected
         }
 
         private image_() {
@@ -265,6 +290,27 @@ namespace microcode {
             }
             if (this.onClick) {
                 this.onClick(this)
+            }
+        }
+
+
+        public draw() {
+            super.draw()
+
+            if (this.dynamicBoundaryColorsOn) {
+                let boundaryColour = this.boundaryColor // Red
+                if (this.selected) {
+                    boundaryColour = 7 // green
+                }
+
+                for (let dist = 1; dist <= 3; dist++) {
+                    Screen.outlineBoundsXfrm(
+                        this.xfrm,
+                        this.icon.bounds,
+                        dist,
+                        boundaryColour
+                    )
+                }
             }
         }
     }

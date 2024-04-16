@@ -1,8 +1,8 @@
 namespace microcode {
     export class Home extends CursorScene {
-        samplesBtn: Button
-        editBtn: Button
-        diskBtn: Button
+        private recordDataBtn: Button
+        private liveDataBtn: Button
+        private viewBtn: Button
 
         constructor(app: App) {
             super(app)
@@ -11,85 +11,59 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            this.editBtn = new Button({
+            // MicroData loading test:
+            basic.showString("Home")
+
+            this.liveDataBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "edit_program",
-                ariaId: "C0",
+                // style: ButtonStyles.Transparent,
+                icon: "linear_graph_1",
+                ariaId: "linear_graph",
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new Editor(this.app))
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                 },
             })
 
-            this.samplesBtn = new Button({
+            this.recordDataBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "smiley_buttons",
-                ariaId: "C1",
+                // style: ButtonStyles.Transparent,
+                icon: "edit_program",
+                ariaId: "Record",
                 x: 0,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SamplesGallery(this.app))
+                    // this.app.popScene()
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },
             })
 
-            this.diskBtn = new Button({
+            this.viewBtn = new Button({
                 parent: null,
-                style: ButtonStyles.Transparent,
+                // style: ButtonStyles.Transparent,
                 icon: "largeDisk",
-                ariaId: "load",
+                ariaId: "View",
                 x: 50,
                 y: 30,
                 onClick: () => {
-                    this.pickDiskSLot()
+                    // this.app.popScene()
+                    // this.app.pushScene(new DataViewSelect(this.app))
                 },
             })
 
-            const btns: Button[] = [this.editBtn, this.samplesBtn, this.diskBtn]
+            const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.viewBtn]
 
             this.navigator.addButtons(btns)
-            // handle menu?
-        }
-
-        private pickDiskSLot() {
-            const btns: PickerButtonDef[] = diskSlots().map(slot => {
-                return {
-                    icon: slot,
-                }
-            })
-            this.picker.setGroup(btns)
-            this.picker.show({
-                title: accessibility.ariaToTooltip("load"),
-                onClick: index => {
-                    let buf = settings.readBuffer(btns[index].icon)
-                    if (!buf) {
-                        // handles case where nothing is in slot
-                        buf = Buffer.create(6)
-                        for (let i = 0; i < 5; ++i) buf[i] = Tid.END_OF_PAGE
-                        buf[5] = Tid.END_OF_PROG
-                    }
-                    settings.writeBuffer(SAVESLOT_AUTO, buf)
-                    this.app.popScene()
-                    this.app.pushScene(new Editor(this.app))
-                },
-            })
-        }
-
-        /* override */ activate() {
-            super.activate()
-            this.color = 15
         }
 
         private drawVersion() {
             const font = simage.font5
             Screen.print(
-                microcode.VERSION,
-                Screen.RIGHT_EDGE - font.charWidth * microcode.VERSION.length,
-                Screen.BOTTOM_EDGE - font.charHeight - 1,
+                "Prototype 12",
+                Screen.RIGHT_EDGE - font.charWidth * "Prototype 12".length,
+                Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
             )
@@ -109,17 +83,18 @@ namespace microcode {
             const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0
             const margin = 2
             const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
-            const y = Screen.TOP_EDGE + OFFSET + dy
+            const y = Screen.TOP_EDGE + OFFSET //+ dy
             Screen.drawTransparentImage(
                 wordLogo,
-                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1) + dy,
+                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
+                ,
                 y + this.yOffset
             )
             Screen.drawTransparentImage(
                 microbitLogo,
                 Screen.LEFT_EDGE +
-                    ((Screen.WIDTH - microbitLogo.width) >> 1) +
-                    dy,
+                    ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
+                    ,
                 y - wordLogo.height + this.yOffset + margin
             )
             if (!this.yOffset) {
@@ -127,8 +102,9 @@ namespace microcode {
                 Screen.print(
                     tagline,
                     Screen.LEFT_EDGE +
-                        ((Screen.WIDTH + wordLogo.width) >> 1) +
-                        dy -
+                        ((Screen.WIDTH + wordLogo.width) >> 1) 
+                        + dy
+                        -
                         microcode.font.charWidth * tagline.length,
                     Screen.TOP_EDGE +
                         OFFSET +
@@ -141,9 +117,10 @@ namespace microcode {
                 )
             }
 
-            this.samplesBtn.draw()
-            this.editBtn.draw()
-            this.diskBtn.draw()
+            this.recordDataBtn.draw()
+            this.liveDataBtn.draw()
+            this.viewBtn.draw()
+
             this.drawVersion()
             super.draw()
         }

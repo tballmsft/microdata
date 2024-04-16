@@ -19,64 +19,6 @@ namespace microcode {
             extraImage = icondb.sampleRailCrossingLight
     }
 
-    function carImages(name: string) {
-        if (name == TID_ACTUATOR_CAR) return icondb.car
-        if (name == TID_MODIFIER_CAR_FORWARD) return icondb.car_forward
-        if (name == TID_MODIFIER_CAR_REVERSE) return icondb.car_reverse
-        if (name == TID_MODIFIER_CAR_TURN_LEFT) return icondb.car_left_turn
-        if (name == TID_MODIFIER_CAR_TURN_RIGHT) return icondb.car_right_turn
-        if (name == TID_MODIFIER_CAR_STOP) return icondb.car_stop
-        if (name == TID_MODIFIER_CAR_FORWARD_FAST)
-            return icondb.car_forward_fast
-        if (name == TID_MODIFIER_CAR_SPIN_LEFT) return icondb.car_left_spin
-        if (name == TID_MODIFIER_CAR_SPIN_RIGHT) return icondb.car_right_spin
-        if (name == TID_MODIFIER_CAR_LED_COLOR_1) return icondb.tile_color_red
-        if (name == TID_MODIFIER_CAR_LED_COLOR_2) return icondb.tile_color_green
-        if (name == TID_MODIFIER_CAR_LED_COLOR_3) return icondb.tile_color_blue
-        if (name == TID_MODIFIER_CAR_LED_COLOR_4) return icondb.tile_color_black
-        if (name == TID_MODIFIER_CAR_ARM_OPEN) return icondb.arm_open
-        if (name == TID_MODIFIER_CAR_ARM_CLOSE) return icondb.arm_close
-        if (name == TID_SENSOR_CAR_WALL) return icondb.car_wall
-        if (name == TID_SENSOR_LINE) return icondb.line_sensor
-        if (name == TID_FILTER_LINE_LEFT) return icondb.line_left_on
-        if (name == TID_FILTER_LINE_RIGHT) return icondb.line_right_on
-        if (name == TID_FILTER_LINE_BOTH) return icondb.line_both_on
-        if (name == TID_FILTER_LINE_NEITHER) return icondb.line_neither_on
-        if (name == TID_FILTER_LINE_NEITHER_LEFT)
-            return icondb.line_none_from_left
-        if (name == TID_FILTER_LINE_NEITHER_RIGHT)
-            return icondb.line_none_from_right
-        return null
-    }
-
-    // TODO: factor out all the jacdac stuff into separate file/class
-    // TODO: so we can generate different builds
-    function jacdacImages(name: string) {
-        if (name == TID_FILTER_KITA_KEY_1) return icondb.kita_key_1
-        if (name == TID_FILTER_KITA_KEY_2) return icondb.kita_key_2
-        if (name == TID_SENSOR_MAGNET) return icondb.magnet
-        if (name == TID_SENSOR_SLIDER) return icondb.kita_slider
-        if (name == TID_SENSOR_ROTARY) return icondb.kita_rotary
-        if (name == TID_FILTER_ROTARY_LEFT) return icondb.kita_rotary_left
-        if (name == TID_FILTER_ROTARY_RIGHT) return icondb.kita_rotary_right
-        if (name == TID_ACTUATOR_RGB_LED) return icondb.rgbLed
-        if (name == TID_MODIFIER_RGB_LED_COLOR_1) return icondb.tile_color_red
-        if (name == TID_MODIFIER_RGB_LED_COLOR_2) return icondb.tile_color_green
-        if (name == TID_MODIFIER_RGB_LED_COLOR_3) return icondb.tile_color_blue
-        if (name == TID_MODIFIER_RGB_LED_COLOR_4)
-            return icondb.tile_color_magenta
-        if (name == TID_MODIFIER_RGB_LED_COLOR_5)
-            return icondb.tile_color_yellow
-        if (name == TID_MODIFIER_RGB_LED_COLOR_6) return icondb.tile_color_black
-        if (name == TID_MODIFIER_RGB_LED_COLOR_RAINBOW)
-            return icondb.tile_rainbow
-        if (name == TID_MODIFIER_RGB_LED_COLOR_SPARKLE)
-            return icondb.tile_sparkle
-        if (name == TID_ACTUATOR_SERVO_SET_ANGLE) return icondb.servo_set_angle
-        if (name == TID_SENSOR_LIGHT) return icondb.light_sensor
-        return null
-    }
-
     export class icons {
         public static get(name: string, nullIfMissing = false): SImage {
             // editor icons
@@ -99,6 +41,7 @@ namespace microcode {
             if (name == "disk3") return icondb.disk3
             if (name == "largeDisk") return icondb.largeDiskIcon
 
+
             // basic colors led editor
             if (name == "solid_red") return icondb.solid_red
             if (name == "solid_black") return icondb.solid_black
@@ -108,116 +51,39 @@ namespace microcode {
             // sample icons
             if (name == "smiley_buttons") return icondb.sampleSmileyButtons
 
-            // pages
+            // Newly added icons for MicroData Home menu:
+            if (name == "linear_graph_1") return icondb.linearGraph1
+            if (name == "linear_graph_2") return icondb.linearGraph2
+            
 
-            if (name == TID_SENSOR_START_PAGE) return icondb.tile_start_page
-            if (name == TID_ACTUATOR_SWITCH_PAGE) return icondb.tile_switch_page
-            if (name == TID_MODIFIER_PAGE_1) return icondb.tile_page_1
-            if (name == TID_MODIFIER_PAGE_2) return icondb.tile_page_2
-            if (name == TID_MODIFIER_PAGE_3) return icondb.tile_page_3
-            if (name == TID_MODIFIER_PAGE_4) return icondb.tile_page_4
-            if (name == TID_MODIFIER_PAGE_5) return icondb.tile_page_5
+            if (name == "led_light_sensor") return icondb.led_light_sensor
+            if (name == "thermometer") return icondb.thermometer
+            if (name == "accelerometer") return icondb.accelerometer
+            if (name == "moveTiltUp") return icondb.moveTiltUp
+            if (name == "moveTiltLeft") return icondb.moveTiltLeft
+            if (name == "moveTiltRight") return icondb.moveTiltRight
+            if (name == "moveTiltDown") return icondb.moveTiltDown
+            if (name == "finger_press") return icondb.finger_press
+            if (name == "green_tick") return icondb.green_tick
 
-            // looping
-            if (name == TID_MODIFIER_LOOP) return icondb.loop
+            if (name == "magnet") return icondb.magnet
+            if (name == "pin_0") return icondb.pin_0
+            if (name == "pin_1") return icondb.pin_1
+            if (name == "pin_2") return icondb.pin_2
 
-            // variables
+            if (name == "right_turn") return icondb.car_right_turn
+            if (name == "right_spin") return icondb.car_right_spin
 
-            if (name == TID_SENSOR_CUP_X_WRITTEN) return icondb.cupXwritten
-            if (name == TID_SENSOR_CUP_Y_WRITTEN) return icondb.cupYwritten
-            if (name == TID_SENSOR_CUP_Z_WRITTEN) return icondb.cupZwritten
-            if (name == TID_FILTER_CUP_X_READ) return icondb.cupXread
-            if (name == TID_FILTER_CUP_Y_READ) return icondb.cupYread
-            if (name == TID_FILTER_CUP_Z_READ) return icondb.cupZread
-            if (name == TID_ACTUATOR_CUP_X_ASSIGN) return icondb.cupXassign
-            if (name == TID_ACTUATOR_CUP_Y_ASSIGN) return icondb.cupYassign
-            if (name == TID_ACTUATOR_CUP_Z_ASSIGN) return icondb.cupZassign
-            if (name == TID_MODIFIER_CUP_X_READ) return icondb.cupXread
-            if (name == TID_MODIFIER_CUP_Y_READ) return icondb.cupYread
-            if (name == TID_MODIFIER_CUP_Z_READ) return icondb.cupZread
+            if (name == "speaker") return icondb.speaker
 
-            // numbers
-            if (name == TID_MODIFIER_RANDOM_TOSS) return icondb.diceToss
-            if (name == TID_FILTER_COIN_1) return icondb.blocks1
-            if (name == TID_FILTER_COIN_2) return icondb.blocks2
-            if (name == TID_FILTER_COIN_3) return icondb.blocks3
-            if (name == TID_FILTER_COIN_4) return icondb.blocks4
-            if (name == TID_FILTER_COIN_5) return icondb.blocks5
-            if (name == TID_MODIFIER_COIN_1) return icondb.blocks1
-            if (name == TID_MODIFIER_COIN_2) return icondb.blocks2
-            if (name == TID_MODIFIER_COIN_3) return icondb.blocks3
-            if (name == TID_MODIFIER_COIN_4) return icondb.blocks4
-            if (name == TID_MODIFIER_COIN_5) return icondb.blocks5
+            if (name == "tile_button_a") return icondb.tile_button_a
+            if (name == "tile_button_b") return icondb.tile_button_b
+            if (name == "compass") return icondb.compass
 
-            // micro:bit sensors
-            if (name == TID_SENSOR_ACCELEROMETER) return icondb.accelerometer
-            if (name == TID_SENSOR_TIMER) return icondb.tile_timer
-            if (name == TID_SENSOR_RADIO_RECEIVE) return icondb.radio_receive
-            if (name == TID_SENSOR_PRESS) return icondb.finger_press
-            if (name == TID_SENSOR_RELEASE) return icondb.finger_release
-            if (name == TID_SENSOR_MICROPHONE) return icondb.microphone
-            if (name == TID_SENSOR_TEMP) return icondb.thermometer
-            if (name == TID_SENSOR_LED_LIGHT) return icondb.led_light_sensor
+            if (name == "settingsGear") return icondb.settingsGear
+            if (name == "largeSettingsGear") return icondb.largeSettingsGear
+            // if (name == "compass") return icondb.compass
 
-            // micro:bit filters
-            if (name == TID_FILTER_LOGO) return icondb.microbit_logo
-            if (name == TID_FILTER_PIN_0) return icondb.tile_pin_0
-            if (name == TID_FILTER_PIN_1) return icondb.tile_pin_1
-            if (name == TID_FILTER_PIN_2) return icondb.tile_pin_2
-            if (name == TID_FILTER_BUTTON_A) return icondb.tile_button_a
-            if (name == TID_FILTER_BUTTON_B) return icondb.tile_button_b
-            if (name == TID_FILTER_TIMESPAN_SHORT)
-                return icondb.tile_timespan_short
-            if (name == TID_FILTER_TIMESPAN_LONG)
-                return icondb.tile_timespan_long
-            if (name == TID_FILTER_TIMESPAN_VERY_LONG)
-                return icondb.tile_timespan_fiveSeconds
-            if (name == TID_FILTER_TIMESPAN_RANDOM)
-                return icondb.tile_timespan_random
-            if (name == TID_FILTER_LOUD) return icondb.speaker
-            if (name == TID_FILTER_TEMP_WARMER) return icondb.temp_warmer
-            if (name == TID_FILTER_TEMP_COLDER) return icondb.temp_colder
-            if (name == TID_FILTER_ACCEL_SHAKE) return icondb.moveShake
-            if (name == TID_FILTER_ACCEL_TILT_UP) return icondb.moveTiltUp
-            if (name == TID_FILTER_ACCEL_TILT_DOWN) return icondb.moveTiltDown
-            if (name == TID_FILTER_ACCEL_TILT_LEFT) return icondb.moveTiltLeft
-            if (name == TID_FILTER_ACCEL_TILT_RIGHT) return icondb.moveTiltRight
-            if (name == TID_FILTER_ACCEL_FACE_UP) return icondb.moveFaceUp
-            if (name == TID_FILTER_ACCEL_FACE_DOWN) return icondb.moveFaceDown
-
-            // micro:bit actuators
-            if (name == TID_ACTUATOR_PAINT) return icondb.showScreen
-            if (name == TID_ACTUATOR_SHOW_NUMBER) return icondb.showNumber
-            if (name == TID_ACTUATOR_RADIO_SEND) return icondb.radio_send
-            if (name == TID_ACTUATOR_RADIO_SET_GROUP)
-                return icondb.radio_set_group
-            if (name == TID_ACTUATOR_SPEAKER) return icondb.speakerFun
-            if (name == TID_ACTUATOR_MUSIC) return icondb.music
-
-            // micro:bit modifiers
-            if (name == TID_MODIFIER_ICON_EDITOR) return icondb.iconEditor
-            if (name == TID_MODIFIER_MELODY_EDITOR) return icondb.melodyEditor
-
-            if (name == TID_MODIFIER_EMOJI_GIGGLE) return icondb.soundGiggle
-            if (name == TID_MODIFIER_EMOJI_HAPPY) return icondb.soundHappy
-            if (name == TID_MODIFIER_EMOJI_HELLO) return icondb.soundHello
-            if (name == TID_MODIFIER_EMOJI_MYSTERIOUS)
-                return icondb.soundMysterious
-            if (name == TID_MODIFIER_EMOJI_SAD) return icondb.soundSad
-            if (name == TID_MODIFIER_EMOJI_SLIDE) return icondb.soundSlide
-            if (name == TID_MODIFIER_EMOJI_SOARING) return icondb.soundSoaring
-            if (name == TID_MODIFIER_EMOJI_SPRING) return icondb.soundSpring
-            if (name == TID_MODIFIER_EMOJI_TWINKLE) return icondb.soundTwinkle
-            if (name == TID_MODIFIER_EMOJI_YAWN) return icondb.soundYawn
-
-            if (name == TID_MODIFIER_TEMP_READ) return icondb.thermometer
-            if (name == TID_MODIFIER_RADIO_VALUE) return icondb.radio_value
-
-            // micro:bit car
-            const car = carImages(name)
-            if (car) return car
-            const jacdac = jacdacImages(name)
-            if (jacdac) return jacdac
             extraImage = null
             extraSamples(name) // only for web app
             if (extraImage) return extraImage
@@ -227,29 +93,30 @@ namespace microcode {
     }
 
     export const wordLogo = img` 
-    .111111.......111111...1111.......................................................1111111.................................1111..................
-    11bbbbbb.....11bbbbbb.11bbbb....................................................111bbbbbbb1..............................11bbbb.................
-    1bbbbbbbb...11bbbbbbbf1bbbbbf..................................................11bbbbbbbbbbb.............................1bbbbbf................
-    1bbbbbbbbb.11bbbbbbbbf1bbbbbf.................................................11bbbbbbbbbbbbb............................1bbbbbf................
-    1bbbbbbbbbb1bbbbbbbbbf1bbbbbf................................................11bbbbbbbbbbbbbbb...........................1bbbbbf................
-    1bbbbbbbbbbbbbbbbbbbbf.bbbbff...............................................11bbbbbbbbbbbbbbbbf..........................1bbbbbf................
-    1bbbbbbbbbbbbbbbbbbbbf..ffff.....1111111......1111...111.......1111111......1bbbbbbbbbbbbbbbbbb.....1111111.........111111bbbbbf....1111111.....
-    1bbbbbbbbbbbbbbbbbbbbf.1111....111bbbbbbb1...11bbbb.11bbb....111bbbbbbb1...11bbbbbbbfffbbbbbbbbf..111bbbbbbb1.....111bbbbbbbbbbf..111bbbbbbb1...
-    1bbbbbbbbbbbbbbbbbbbbf11bbbb..11bbbbbbbbbbb..1bbbbbb1bbbbb..11bbbbbbbbbbb..1bbbbbbbff...bbbbbbbf.11bbbbbbbbbbb...11bbbbbbbbbbbbf.11bbbbbbbbbbb..
-    1bbbbbbfbbbbbfbbbbbbbf1bbbbbf.1bbbbbbbbbbbbf.1bbbbbbbbbbbbf.1bbbbbbbbbbbbf.1bbbbbbff.....bbbbbff.1bbbbbbbbbbbbf..1bbbbbbbbbbbbbf.1bbbbbbbbbbbbf.
-    1bbbbbbf.bbbff1bbbbbbf1bbbbbf11bbbbbbbbbbbbb.1bbbbbbbbbbbbf11bbbbbbbbbbbbb.1bbbbbbf.......fffff.11bbbbbbbbbbbbb.11bbbbbbbbbbbbbf11bbbbfffbbbbbb.
-    1bbbbbbf..fff.1bbbbbbf1bbbbbf1bbbbbfffbbbbbbf1bbbbbfffbbbff1bbbbbfffbbbbbbf1bbbbbbf......11111..1bbbbbfffbbbbbbf1bbbbbfffbbbbbbf1bbbbff...bbbbbf
-    1bbbbbbf......1bbbbbbf1bbbbbf1bbbbff...bbbbff1bbbbbf...fff.1bbbbff...bbbbbf1bbbbbbb.....11bbbbb.1bbbbff...bbbbbf1bbbbff..1bbbbbf1bbbbb11111bbbbf
-    1bbbbbbf......1bbbbbbf1bbbbbf1bbbbf.....ffff.1bbbbbf.......1bbbbf....1bbbbf1bbbbbbbb...11bbbbbbf1bbbbf....1bbbbf1bbbbf...1bbbbbf1bbbbbbbbbbbbbbf
-    1bbbbbbf......1bbbbbbf1bbbbbf1bbbbf....1111..1bbbbbf.......1bbbbf....1bbbbf.bbbbbbbbb111bbbbbbbf1bbbbf....1bbbbf1bbbbf...1bbbbbf1bbbbbbbbbbbbbff
-    1bbbbbbf......1bbbbbbf1bbbbbf1bbbbb...11bbbb.1bbbbbf.......1bbbbb...11bbbbf.1bbbbbbbbbbbbbbbbbff1bbbbb...11bbbbf1bbbbb...1bbbbbf1bbbbffffffffff.
-    1bbbbbbf......1bbbbbbf1bbbbbf1bbbbbb111bbbbbf1bbbbbf.......1bbbbbb111bbbbbf..bbbbbbbbbbbbbbbbbf.1bbbbbb111bbbbbf1bbbbbb111bbbbbf1bbbbb..........
-    1bbbbbbf......1bbbbbbf1bbbbbf.bbbbbbbbbbbbbff1bbbbbf........bbbbbbbbbbbbbff...bbbbbbbbbbbbbbbff..bbbbbbbbbbbbbff.bbbbbbbbbbbbbbf.bbbbbb11111....
-    1bbbbbbf......1bbbbbbf1bbbbbf.1bbbbbbbbbbbbf.1bbbbbf........1bbbbbbbbbbbbf.....bbbbbbbbbbbbbff...1bbbbbbbbbbbbf..1bbbbbbbbbbbbbf.1bbbbbbbbbbb...
-    1bbbbbbf......1bbbbbbf1bbbbbf..bbbbbbbbbbbff.1bbbbbf.........bbbbbbbbbbbff......bbbbbbbbbbbff.....bbbbbbbbbbbff...bbbbbbbbbbbbbf..bbbbbbbbbbbf..
-    .bbbbbff.......bbbbbff.bbbbff...fbbbbbbbfff...bbbbff..........fbbbbbbbfff........fbbbbbbbfff.......fbbbbbbbfff.....fbbbbbbbbbbff...fbbbbbbbbff..
-    ..fffff.........fffff...ffff......fffffff......ffff.............fffffff............fffffff...........fffffff.........ffffffffff......ffffffff...
+    ....111111.......111111...1111................................................11111111111.........................1111.................................
+    ...11bbbbbb.....11bbbbbb.11bbbb...............................................1bbbbbbbbbbff......................11bbbb................................
+    ...1bbbbbbbb...11bbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbff.....................1bbbbbf...............................
+    ...1bbbbbbbbb.11bbbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbbbf....................1bbbbbf...............................
+    ...1bbbbbbbbbb1bbbbbbbbbf1bbbbbf..............................................1bbbbf..bbbbbbf....................1bbbbbf...............................
+    ...1bbbbbbbbbbbbbbbbbbbbf.bbbbff..............................................1bbbb....bbbbbbf...................1bbbbbf...............................
+    ...1bbbbbbbbbbbbbbbbbbbbf..ffff.....1111111......1111...111.......1111111.....1bbbb.....1bbbbf....11111111.......1bbbbbb11111111....11111111...........
+    ...1bbbbbbbbbbbbbbbbbbbbf.1111....111bbbbbbb1...11bbbb.11bbb....111bbbbbbb1...1bbbb.....1bbbbf...1bbbbbbbbbf.....1bbbbbbbbbbbbbbf..1bbbbbbbbbf.........
+    ...1bbbbbbbbbbbbbbbbbbbbf11bbbb..11bbbbbbbbbbb..1bbbbbb1bbbbb..11bbbbbbbbbbb..1bbbb.....1bbbbf..1bbbbbbbbbbbbf...1bbbbbbbbbbbbbbf.1bbbbbbbbbbbbf.......
+    ...1bbbbbbfbbbbbfbbbbbbbf1bbbbbf.1bbbbbbbbbbbbf.1bbbbbbbbbbbbf.1bbbbbbbbbbbbf.1bbbb.....1bbbbf.1bbbbbbbbbbbbbf...1bbbbbbbbbbbbbf.1bbbbbbbbbbbbbf.......
+    ...1bbbbbbf.bbbff1bbbbbbf1bbbbbf11bbbbbbbbbbbbb.1bbbbbbbbbbbbf11bbbbbbbbbbbbb.1bbbb.....1bbbbf.1bbbbbbbbbbbbbf...1bbbbbbf........1bbbbbbbbbbbbbbf......
+    ...1bbbbbbf..fff.1bbbbbbf1bbbbbf1bbbbbfffbbbbbbf1bbbbbfffbbbff1bbbbbfffbbbbbbfbbbbb.....1bbbbf.1bbbbffffbbbbbf...1bbbbbbf........1bbbbffffbbbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf1bbbbff...bbbbff1bbbbbf...fff.1bbbbff...bbbbbfbbbbb.....1bbbbf.1bbbff...1bbbbf...1bbbbbbf........1bbbbf...1bbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf1bbbbf.....ffff.1bbbbbf.......1bbbbf....1bbbbfbbbbb.....1bbbbf.1bbbbf...1bbbbf...1bbbbbbf........1bbbbf...1bbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf1bbbbf....1111..1bbbbbf.......1bbbbf....1bbbbfbbbbb.....1bbbbf.1bbbbf...1bbbbf...1bbbbbbf........1bbbbf...1bbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf1bbbbb...11bbbb.1bbbbbf.......1bbbbb...11bbbbfbbbbb....bbbbbbf.1bbbbb...1bbbbf...1bbbbbbf........1bbbbb...1bbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf1bbbbbb111bbbbbf1bbbbbf.......1bbbbbb111bbbbbfbbbbb...bbbbbbbf.1bbbbb111bbbbbf...1bbbbbbf........1bbbbbb111bbbbbf......
+    ...1bbbbbbf......1bbbbbbf1bbbbbf.bbbbbbbbbbbbbff1bbbbbf........bbbbbbbbbbbbbffbbbbbbbbbbbbbbf..bbbbbbbbbbbbb1111.bbbbbbbb11111111bbbbbbbbbbbbbbb1111...
+    ...1bbbbbbf......1bbbbbbf1bbbbbf.1bbbbbbbbbbbbf.1bbbbbf........1bbbbbbbbbbbbf.bbbbbbbbbbbbbbf..bbbbbbbbbbbbbbbbbfbbbbbbbbbbbbbbbfbbbbbbbbbbbbbbbbbbbf..
+    ...1bbbbbbf......1bbbbbbf1bbbbbf..bbbbbbbbbbbff.1bbbbbf.........bbbbbbbbbbbff.bbbbbbbbbbbbbff..bbbbbbbbbbbbbbbbbfbbbbbbbbbbbbbbbfbbbbbbbbbbbbbbbbbbff..
+    ....bbbbbff.......bbbbbff.bbbbff...fbbbbbbbfff...bbbbff..........fbbbbbbbfff..bbbbbbbbbbbff.....fbbbbbbbbbbbbbbbf.fbbbbbbbbbbbbbf.fbbbbbbbbbbbbbbbbff..
+    .....fffff.........fffff...ffff......fffffff......ffff.............fffffff....fffffffffff.........ffffffffffffff....ffffffffffff....ffffffffffffffff...
     `
+
     export const microbitLogo = img`
         ............................
         ......5555555555555555......
@@ -295,19 +162,6 @@ namespace icondb {
     f c c .
     f c c .
 `
-    export function melodyToImage(melody: microcode.Melody) {
-        const ret = simage.create(16, 16)
-        ret.fill(1)
-        for (let col = 0; col < microcode.MELODY_LENGTH; col++) {
-            if (melody.notes[col] === ".") continue
-            const row = microcode.NUM_NOTES - 1 - parseInt(melody.notes[col])
-            const color = 15
-            const ncol = col << 2,
-                nrow = row * 3 + 1
-            ret.drawTransparentImage(note4x3, ncol, nrow)
-        }
-        return ret
-    }
 
     // - upscale 5x5 image to 16 x 16, add halo
     export function renderMicrobitLEDs(led55: SImage) {
@@ -513,6 +367,42 @@ namespace icondb {
     6666b88111111111111111118f8b6666
     6666bb811111111111111111888b6666
     66666bbbbbbbbbbbbbbbbbbbbbbb6666
+    66666666666666666666666666666666
+    66666666666666666666666666666666
+    b666666666666666666666666666666b
+    .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+`
+
+export const largeMetaDataIcon = img`
+    .666666666666666666666666666666.
+    66666666666666666666666666666666
+    66666666666666666666666666666666
+    6666bbbbbbbbbbbbbbbbbbbbbb666666
+    666bb811111111111111111118b66666
+    666b88111111111111111111188b6666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    666b881111111111111111111888b666
+    6666b88ccccc111111111cccccc88b66
+    6666bcccccddb111111cbbccccc88b66
+    6666bccccdbbbbbbbbbbcccc8888b666
+    6666b8cccccddbcccbdcccc88888b666
+    6666b888dbbcc11111cbddd88888b666
+    6666bddbbbcc111111cccbbb8888b666
+    66ddddbbb11111111111bbbcccc8b666
+    66ddddbbb11111111111bbbcccc8b666
+    6666bddbbbcc111111ccbbbc8888b666
+    6666b888cbbcc11111cbbcc88888b666
+    666b888ccccddbcccbdcccc88888b666
+    666b88cccdbbbbbbbbbbcccc8888b666
+    666bcccccddb1111111cbbccccc8b666
+    666b8ccccc1111111111ccccc888b666
+    666b8811111111111111111118f8b666
+    666bb81111111111111111111888b666
+    6666bbbbbbbbbbbbbbbbbbbbbbbbb666
     66666666666666666666666666666666
     66666666666666666666666666666666
     b666666666666666666666666666666b
@@ -780,24 +670,44 @@ namespace icondb {
     d d d . . . . . . . . . . .
 `
 
-    export const showScreen = img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . 2 4 . .
-        . . . . 2 . . . . . . 2 4 4 2 .
-        . . . . 2 . . . . . 2 4 4 2 e .
-        . 2 . . 2 . . . . 2 4 4 2 e b .
-        . . 2 . 2 . . . 2 4 4 2 e b . .
-        . . . . . . . d 4 4 2 e b . . .
-        . . f f f f f d d 2 e b . . . .
-        . . f f f f f 2 d d b . . . . .
-        . . f f 2 f 2 f f b . . . . . .
-        . . f f f f f f f b . 2 2 2 2 .
-        . . f 2 f f f 2 f b . . . . . .
-        . . f f 2 2 2 f f b . 2 . . . .
-        . . f f f f f f f b . . 2 . . .
-        . . . b b b b b b b . . . . . .
-        . . . . . . . . . . . . . . . .
+export const showScreen = img`
+. . . . . . . . . . . . . . . .
+. . . . . . . . . . . . 2 4 . .
+. . . . 2 . . . . . . 2 4 4 2 .
+. . . . 2 . . . . . 2 4 4 2 e .
+. 2 . . 2 . . . . 2 4 4 2 e b .
+. . 2 . 2 . . . 2 4 4 2 e b . .
+. . . . . . . d 4 4 2 e b . . .
+. . f f f f f d d 2 e b . . . .
+. . f f f f f 2 d d b . . . . .
+. . f f 2 f 2 f f b . . . . . .
+. . f f f f f f f b . 2 2 2 2 .
+. . f 2 f f f 2 f b . . . . . .
+. . f f 2 2 2 f f b . 2 . . . .
+. . f f f f f f f b . . 2 . . .
+. . . b b b b b b b . . . . . .
+. . . . . . . . . . . . . . . .
 `
+
+
+    export const green_tick = img`
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 6 6 1
+        1 1 1 1 1 1 1 1 1 1 1 1 6 6 6 1
+        1 1 1 1 1 1 1 1 1 1 1 6 6 6 6 1
+        1 1 1 1 1 1 1 1 1 1 6 6 6 6 6 1
+        1 1 1 1 1 1 1 1 1 6 6 6 6 6 1 1
+        1 6 1 1 1 1 1 1 6 6 6 6 6 1 1 1
+        1 6 6 1 1 1 1 6 6 6 6 6 1 1 1 1
+        1 6 6 6 1 1 6 6 6 6 6 1 1 1 1 1
+        1 6 6 6 6 6 6 6 6 6 1 1 1 1 1 1
+        1 6 6 6 6 6 6 6 6 1 1 1 1 1 1 1
+        1 6 6 6 6 6 6 6 1 1 1 1 1 1 1 1
+        1 1 6 6 6 6 6 1 1 1 1 1 1 1 1 1
+        1 1 1 6 6 6 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
 
     export const showNumber = img`
     . . . . . . . . . . 4 4 4 4 4 4
@@ -1092,6 +1002,82 @@ namespace icondb {
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
     `
+    export const pin_0 = img`
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 4 4 4 4 4 1 1 1 4 4 1 1 1
+    1 4 4 4 1 1 4 4 1 4 4 4 4 1 1
+    1 4 4 4 1 1 1 4 4 4 1 1 4 4 1
+    1 4 4 4 1 1 4 4 4 4 1 1 4 4 1
+    1 4 4 4 4 4 4 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 4 4 1 1 4 4 1 
+    1 4 4 4 1 1 1 1 1 4 4 4 4 1 1 
+    1 1 4 1 1 1 1 1 1 1 4 4 1 1 1 
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
+
+    export const pin_1 = img`
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 4 4 4 4 4 1 1 4 4 4 4 1 1
+    1 4 4 4 1 1 4 4 4 4 4 4 4 1 1
+    1 4 4 4 1 1 1 4 4 4 4 4 4 1 1
+    1 4 4 4 1 1 4 4 1 1 4 4 4 1 1
+    1 4 4 4 4 4 4 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 4 4 4 4 4 4 1
+    1 1 4 1 1 1 1 4 4 4 4 4 4 4 4
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+`
+    export const pin_2 = img`
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 4 4 4 4 4 1 1 4 4 4 4 1 1
+    1 4 4 4 1 1 4 4 4 4 4 4 4 4 1
+    1 4 4 4 1 1 1 4 4 4 1 1 4 4 4
+    1 4 4 4 1 1 4 4 4 1 1 1 4 4 4
+    1 4 4 4 4 4 4 1 1 1 1 1 4 4 4
+    1 4 4 4 1 1 1 1 1 1 1 4 4 4 1
+    1 4 4 4 1 1 1 1 1 1 1 4 4 4 1
+    1 4 4 4 1 1 1 1 1 1 4 4 4 1 1
+    1 4 4 4 1 1 1 1 1 4 4 4 4 1 1
+    1 4 4 4 1 1 1 1 4 4 4 4 1 1 1
+    1 4 4 4 1 1 1 4 4 4 4 4 4 4 4
+    1 1 4 1 1 1 1 4 4 4 4 4 4 4 4
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+`
+
+    export const compass = img`
+    1 1 1 1 5 5 5 5 5 5 5 1 1 1 1
+    1 1 1 5 5 5 5 5 5 5 5 5 1 1 1
+    1 1 5 5 5 f f f f f 5 5 5 1 1
+    1 5 5 5 f f f f f f 2 5 5 5 1
+    5 5 5 f f f f f f 2 2 2 5 5 5
+    5 5 f f f f f f 2 2 2 f f 5 5
+    5 f f f f f f 2 2 2 f f f f 5
+    5 f f f f f 1 1 1 2 f f f f 5
+    5 f f f f 8 1 1 1 f f f f f 5
+    5 f f f 8 8 1 1 1 f f f f f 5
+    5 5 f 8 8 8 8 f f f f f f 5 5
+    5 5 5 8 8 8 f f f f f f 5 5 5
+    1 5 5 5 8 f f f f f f 5 5 5 1
+    1 1 5 5 5 f f f f f 5 5 5 1 1
+    1 1 1 5 5 5 5 5 5 5 5 5 1 1 1
+    1 1 1 1 5 5 5 5 5 5 5 1 1 1 1
+`
+
+
     export const tile_pin_0 = img`
         . . 4 5 4 d . . . . 4 5 4 d . .
         . . 4 5 4 d . . . . 4 5 4 d . .
@@ -1259,22 +1245,22 @@ namespace icondb {
 `
 
     export const finger_press = img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . f . f . f . . . . . .
-        . . . . . . f f f . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . 4 4 4 4 4 . . . . . .
-        . . . . 4 4 4 4 4 4 4 d . . . .
-        . . . e 4 4 4 4 4 4 4 e d . . .
-        . . . e 2 4 4 4 4 4 2 e d . . .
-        . . . e e 2 2 2 2 2 e e d . . .
-        . . . . e e e e e e e d . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 f 1 f 1 f 1 1 1 1 1 1
+    1 1 1 1 1 1 f f f 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 4 4 4 4 4 1 1 1 1 1 1
+    1 1 1 1 4 4 4 4 4 4 4 d 1 1 1 1
+    1 1 1 e 4 4 4 4 4 4 4 e d 1 1 1
+    1 1 1 e 2 4 4 4 4 4 2 e d 1 1 1
+    1 1 1 e e 2 2 2 2 2 e e d 1 1 1
+    1 1 1 1 e e e e e e e d 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
     export const finger_release = img`
         . . . . . . . . . . . . . . . .
@@ -1555,40 +1541,40 @@ namespace icondb {
 `
 
     export const magnet = img`
-    . . . . . . . . . . . . 6 . . . 
-    . . . . . . . . . . 6 . . . 6 . 
-    . . . . . . . . . . . . . . . . 
-    . . . 8 8 8 8 8 f f . . 6 . . . 
-    . . 8 8 8 8 8 8 f f . . . . . 6 
-    . 8 8 8 b b b b b b . . 6 . . . 
-    . 8 8 b . . . . . . . . . . 6 . 
-    . 8 8 . . . . . . . . 6 . . . . 
-    . 2 2 . . . . . . . . . . 6 . . 
-    . 2 2 . . . . . . . . 6 . . . . 
-    . 2 2 2 . . . . . . . . . . 6 . 
-    . b 2 2 2 2 2 2 f f . . 6 . . . 
-    . . b 2 2 2 2 2 f f . . . 5 5 5 
-    . . . b b b b b b b . . 6 5 5 5 
-    . . . . . . . . . . . . . 5 5 4 
-    . . . . . . . . . . 6 . . 4 4 .   
+1 1 1 1 1 1 1 1 1 1 1 1 6 1 1 1 
+1 1 1 1 1 1 1 1 1 1 6 1 1 1 6 1 
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+1 1 1 8 8 8 8 8 f f 1 1 6 1 1 1 
+1 1 8 8 8 8 8 8 f f 1 1 1 1 1 6 
+1 8 8 8 b b b b b b 1 1 6 1 1 1 
+1 8 8 b 1 1 1 1 1 1 1 1 1 1 6 1 
+1 8 8 1 1 1 1 1 1 1 1 6 1 1 1 1 
+1 2 2 1 1 1 1 1 1 1 1 1 1 6 1 1 
+1 2 2 1 1 1 1 1 1 1 1 6 1 1 1 1 
+1 2 2 2 1 1 1 1 1 1 1 1 1 1 6 1 
+1 b 2 2 2 2 2 2 f f 1 1 6 1 1 1 
+1 1 b 2 2 2 2 2 f f 1 1 1 5 5 5 
+1 1 1 b b b b b b b 1 1 6 5 5 5 
+1 1 1 1 1 1 1 1 1 1 1 1 1 5 5 4 
+1 1 1 1 1 1 1 1 1 1 6 1 1 4 4 1 
 `
-    export const thermometer = img`
-    . . . . . . . . . . . . . . . .
-    . . . . . . . f . . . . . . . .
-    . . . . . . f d f . . . . . . .
-    . . . . . . f d f . . . . . . .
-    . . . . . . f d f . . . . . . .
-    . . . . . . f d f . . . . . . .
-    . . . . . . f 2 f . . . . . . .
-    . . . . . . f 2 f . . . . . . .
-    . . . . . . f 2 f . . . . . . .
-    . . . . . . f 2 f . . . . . . .
-    . . . . . f 2 2 2 f . . . . . .
-    . . . . f 2 2 2 2 2 f . . . . .
-    . . . . f 2 2 2 2 2 f . . . . .
-    . . . . . f 2 2 2 f . . . . . .
-    . . . . . . f f f . . . . . . .
-    . . . . . . . . . . . . . . . .
+export const thermometer = img`
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 f d f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f d f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f d f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f d f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f 2 f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f 2 f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f 2 f 1 1 1 1 1 1 1
+1 1 1 1 1 1 f 2 f 1 1 1 1 1 1 1
+1 1 1 1 1 f 2 2 2 f 1 1 1 1 1 1
+1 1 1 1 f 2 2 2 2 2 f 1 1 1 1 1
+1 1 1 1 f 2 2 2 2 2 f 1 1 1 1 1
+1 1 1 1 1 f 2 2 2 f 1 1 1 1 1 1
+1 1 1 1 1 1 f f f 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
 
     export const temp_warmer = img`
@@ -1629,25 +1615,25 @@ namespace icondb {
     . . . . . . . . . . . . . . . .
 `
 
-export const led_light_sensor = img`
-. . . . . . . . . . . . . . . .
-. . 8 8 8 8 5 5 5 8 8 8 8 . . .
-. . 8 8 8 5 4 4 4 5 8 8 8 . . .
-. . 8 8 8 5 4 4 4 5 8 8 8 . . .
-. . 8 8 8 5 4 4 4 5 8 8 8 . . .
-. . 8 8 8 8 5 5 5 8 8 8 8 . . .
-. . 8 8 5 8 8 8 8 8 5 8 8 . . .
-. . 8 5 8 8 8 5 8 8 8 5 8 . . .
-. . 8 8 8 5 8 8 8 5 8 8 8 . . .
-. . 8 8 5 8 8 5 8 8 5 8 8 . . .
-. . 8 5 8 8 8 8 8 8 8 5 8 . . .
-. . 8 8 8 8 8 5 8 8 8 8 8 . . .
-. . 8 8 8 8 8 8 8 8 8 8 8 . . .
-. . 8 8 8 2 2 2 2 2 8 8 8 . . .
-. . 8 f f f f f f f f f 8 . . .
-. . . . . . . . . . . . . . . .
+    export const led_light_sensor = img`
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 8 8 8 8 5 5 5 8 8 8 8 1 1 1
+    1 1 8 8 8 5 4 4 4 5 8 8 8 1 1 1
+    1 1 8 8 8 5 4 4 4 5 8 8 8 1 1 1
+    1 1 8 8 8 5 4 4 4 5 8 8 8 1 1 1
+    1 1 8 8 8 8 5 5 5 8 8 8 8 1 1 1
+    1 1 8 8 5 8 8 8 8 8 5 8 8 1 1 1
+    1 1 8 5 8 8 8 5 8 8 8 5 8 1 1 1
+    1 1 8 8 8 5 8 8 8 5 8 8 8 1 1 1
+    1 1 8 8 5 8 8 5 8 8 5 8 8 1 1 1
+    1 1 8 5 8 8 8 8 8 8 8 5 8 1 1 1
+    1 1 8 8 8 8 8 5 8 8 8 8 8 1 1 1
+    1 1 8 8 8 8 8 8 8 8 8 8 8 1 1 1
+    1 1 8 8 8 2 2 2 2 2 8 8 8 1 1 1
+    1 1 8 f f f f f f f f f 8 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
-    
+
     export const light_sensor = img`
 . . . . . . . . . . . . . . . .
 . . 8 8 8 8 5 5 5 8 8 8 8 . . .
@@ -1687,23 +1673,23 @@ export const led_light_sensor = img`
 `
 
     export const speaker = img`
-. . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-. . . . . c . . . . . . . . . .
-. . . . c b . . . . . 8 . . . .
-. . . c b c . . . 8 . . 8 . . .
-. c c b c c . 8 . . 8 . 8 . . .
-. b b c c c . . 8 . 8 . 8 . . .
-. c c c c c . . 8 . 8 . 8 . . .
-. c c c c c . 8 . . 8 . 8 . . .
-. . . c c c . . . 8 . . 8 . . .
-. . . . c c . . . . . 8 . . . .
-. . . . . c . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-`
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 c 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 c b 1 1 1 1 1 8 1 1 1 1
+    1 1 1 c b c 1 1 1 8 1 1 8 1 1 1
+    1 c c b c c 1 8 1 1 8 1 8 1 1 1
+    1 b b c c c 1 1 8 1 8 1 8 1 1 1
+    1 c c c c c 1 1 8 1 8 1 8 1 1 1
+    1 c c c c c 1 8 1 1 8 1 8 1 1 1
+    1 1 1 c c c 1 1 1 8 1 1 8 1 1 1
+    1 1 1 1 c c 1 1 1 1 1 8 1 1 1 1
+    1 1 1 1 1 c 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
 
     export const speakerFun = img`
     . . . . . . . . . . . . . . . .
@@ -1743,61 +1729,61 @@ export const led_light_sensor = img`
     . . . . . . . . . . . . . . . . 
 `
     export const note_on = img`
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 c c c c 1 1 1 1 1
-1 1 1 1 1 1 c f f f f c 1 1 1 1
-1 1 1 1 1 c f f f f f f c 1 1 1
-1 1 1 1 c f f f f f f f f c 1 1
-1 1 1 1 c f f f f f f f f c 1 1
-1 1 1 c f f f f f f f f f c 1 1
-1 1 1 c f f f f f f f f f c 1 1
-1 1 1 c f f f f f f f f f c 1 1
-1 1 1 c f f f f f f f f f c 1 1
-1 1 1 c f f f f f f f f c 1 1 1
-1 1 1 c f f f f f f f f c 1 1 1
-1 1 1 1 c f f f f f f c 1 1 1 1
-1 1 1 1 1 c f f f f c 1 1 1 1 1
-1 1 1 1 1 1 c c c c 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-`
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 c c c c 1 1 1 1 1
+        1 1 1 1 1 1 c f f f f c 1 1 1 1
+        1 1 1 1 1 c f f f f f f c 1 1 1
+        1 1 1 1 c f f f f f f f f c 1 1
+        1 1 1 1 c f f f f f f f f c 1 1
+        1 1 1 c f f f f f f f f f c 1 1
+        1 1 1 c f f f f f f f f f c 1 1
+        1 1 1 c f f f f f f f f f c 1 1
+        1 1 1 c f f f f f f f f f c 1 1
+        1 1 1 c f f f f f f f f c 1 1 1
+        1 1 1 c f f f f f f f f c 1 1 1
+        1 1 1 1 c f f f f f f c 1 1 1 1
+        1 1 1 1 1 c f f f f c 1 1 1 1 1
+        1 1 1 1 1 1 c c c c 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
 
-    export const note_off = img`
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 f 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-`
+        export const note_off = img`
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 f 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
 
     export const accelerometer = img`
-. . . . . . . . . . . . . . . .
-. . . . . . . . 8 . . . . . . .
-. . . . . . . 8 8 8 . . . . . .
-. . . . . . 8 8 8 8 8 . . . . .
-. . . . . . 6 6 8 6 6 . . . . .
-. . . . . . . . 8 . . . . . . .
-. . 8 6 . . f f f f f . . . . .
-. 8 8 6 . f . . . . . f . . . .
-8 8 8 8 8 f . f . f . f . . . .
-. 8 8 6 . f . . . . . f . . . .
-. . 8 6 . . f f f f f 8 . . 6 .
-. . . . . . . . . . . . 8 6 8 .
-. . . . . . . . . . . . 6 8 8 .
-. . . . . . . . . . . 6 8 8 8 .
-. . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . .
-`
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 8 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 8 8 8 1 1 1 1 1 1
+        1 1 1 1 1 1 8 8 8 8 8 1 1 1 1 1
+        1 1 1 1 1 1 6 6 8 6 6 1 1 1 1 1
+        1 1 1 1 1 1 1 1 8 1 1 1 1 1 1 1
+        1 1 8 6 1 1 f f f f f 1 1 1 1 1
+        1 8 8 6 1 f 1 1 1 1 1 f 1 1 1 1
+        8 8 8 8 8 f 1 f 1 f 1 f 1 1 1 1
+        1 8 8 6 1 f 1 1 1 1 1 f 1 1 1 1
+        1 1 8 6 1 1 f f f f f 8 1 1 6 1
+        1 1 1 1 1 1 1 1 1 1 1 1 8 6 8 1
+        1 1 1 1 1 1 1 1 1 1 1 1 6 8 8 1
+        1 1 1 1 1 1 1 1 1 1 1 6 8 8 8 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    `
 
     export const soundGiggle = img`
         . . . . . . . . . . . . . . . .
@@ -2018,40 +2004,40 @@ export const led_light_sensor = img`
     . . . . . . . . . . . . . . . .
 `
     export const moveTiltUp = img`
-. . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . .
-    . . . . . . 8 8 8 8 . . . . . .
-    . . . . . . . . . . 8 . . . . .
-    . . . . . . . . . . . 8 . . . .
-    . . . . . . . . . 8 8 8 8 8 . .
-    . . 9 9 9 9 9 9 9 9 8 8 8 . . .
-    . . 9 9 9 9 9 9 9 9 9 8 . . . .
-    . . 9 9 9 9 9 9 9 9 9 . . . . .
-    . . 9 9 9 9 8 8 8 8 8 f f f . .
-    . . 9 9 9 8 6 6 6 6 6 5 f . . .
-    . . 9 9 8 6 6 6 6 6 6 f . . . .
-    . . 9 8 6 6 6 6 6 6 8 . . . . .
-    . . 8 8 8 8 8 8 8 8 9 . . . . .
-    . . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . .
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 8 8 8 8 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 8 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 8 1 1 1 1
+    1 1 1 1 1 1 1 1 1 8 8 8 8 8 1 1
+    1 1 9 9 9 9 9 9 9 9 8 8 8 1 1 1
+    1 1 9 9 9 9 9 9 9 9 9 8 1 1 1 1
+    1 1 9 9 9 9 9 9 9 9 9 1 1 1 1 1
+    1 1 9 9 9 9 8 8 8 8 8 f f f 1 1
+    1 1 9 9 9 8 6 6 6 6 6 5 f 1 1 1
+    1 1 9 9 8 6 6 6 6 6 6 f 1 1 1 1
+    1 1 9 8 6 6 6 6 6 6 8 1 1 1 1 1
+    1 1 8 8 8 8 8 8 8 8 9 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
     export const moveTiltLeft = img`
-. . . . . . . . . . . . . . . .
-    . . . . . . . . . . 8 . . . . .
-    . . . . . . f f . 8 8 . . . . .
-    . . . . . f 5 f 8 8 8 8 8 . . .
-    . . 9 9 8 5 5 f 9 8 8 . . 8 . .
-    . . 9 8 6 5 5 f 9 9 8 . . . 8 .
-    . . 9 8 6 5 5 f 9 9 9 . . . 8 .
-    . . 9 8 6 5 5 f 9 9 9 . . . 8 .
-    . . 9 8 6 5 5 f 9 9 9 . . 8 . .
-    . . 9 8 6 5 5 f 9 9 9 . . . . .
-    . . 9 8 6 5 5 f 9 9 9 . . . . .
-    . . 9 9 8 5 5 f 9 9 9 . . . . .
-    . . . . . f 5 f . . . . . . . .
-    . . . . . . f f . . . . . . . .
-    . . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . .
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 8 1 1 1 1 1
+    1 1 1 1 1 1 f f 1 8 8 1 1 1 1 1
+    1 1 1 1 1 f 5 f 8 8 8 8 8 1 1 1
+    1 1 9 9 8 5 5 f 9 8 8 1 1 8 1 1
+    1 1 9 8 6 5 5 f 9 9 8 1 1 1 8 1
+    1 1 9 8 6 5 5 f 9 9 9 1 1 1 8 1
+    1 1 9 8 6 5 5 f 9 9 9 1 1 1 8 1
+    1 1 9 8 6 5 5 f 9 9 9 1 1 8 1 1
+    1 1 9 8 6 5 5 f 9 9 9 1 1 1 1 1
+    1 1 9 8 6 5 5 f 9 9 9 1 1 1 1 1
+    1 1 9 9 8 5 5 f 9 9 9 1 1 1 1 1
+    1 1 1 1 1 f 5 f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 f f 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
     export const moveTiltRight = img`
     . . . . . . . . . . . . . . . .
@@ -2071,8 +2057,8 @@ export const led_light_sensor = img`
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
 `
-    
-export const moveFaceUp = img`
+
+    export const moveFaceUp = img`
 . . . . . . . . . . . . . . . .
 . . . . . . . 8 . . . . . . . .
 . . . . . . 8 8 8 . . . . . . .
@@ -2090,7 +2076,7 @@ f f f f f f f f f f f f f f f .
 . . . . . . . . . . . . . . . .
 . . . . . . . . . . . . . . . .
 `
-export const moveFaceDown = img`
+    export const moveFaceDown = img`
 . . . . . . . . . . . . . . . .
 . . . . . . . . . . . . . . . .
 . . . . . . . . . . . . . . . .
@@ -2108,7 +2094,7 @@ export const moveFaceDown = img`
 . . . . . . . . 8 . . . . . . .
 . . . . . . . . . . . . . . . .
 `
-    
+
     export const diceToss = img`
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
@@ -2326,6 +2312,43 @@ export const moveFaceDown = img`
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
 `
 
+
+
+export const largeSettingsGear = img`
+66666666666666666666666666666666
+66666666666666666666666666666666
+666666666666666dd666666666666666
+66666666666666dddd66666666666666
+66666dddd666ddbbbbcc666dddd66666
+66666dddd666ddbbbbcc666dddd66666
+666dddbbbb66ddbbbbcc66dbbbccc666
+666dddbbbbccddbbbbccdddbbbccc666
+6666ddbbbbbbbbbbbbbbbbbbbbcc6666
+66666dbbbbbbbbbbbbbbbbbbbbc66666
+666666ccbbddbbccccbbddbbcc666666
+666666ccbbddbbc66cbbddbbcc666666
+66666dddbbbbcc6666ccbbbbdddd6666
+6666ddddbbbbc666666cbbbbdddd6666
+666dbbbbbbcc66666666ccbbbbbbc666
+6dddbbbbbbc6666666666cbbbbbbccc6
+6dddbbbbbbc6666666666cbbbbbbccc6
+6dddbbbbbbcc66666666ccbbbbbbccc6
+666cccccbbbbc6666666cbbbbcccc666
+6666ccccbbbbcc66666ccbbbbccc6666
+666666ddbbddbbc66cbbddbbcc666666
+666666ddbbddbbccccbbddbbcc666666
+66666dbbbbbbbbbbbbbbbbbbbbc66666
+6666ddbbbbbbbbbbbbbbbbbbbbcc6666
+6666ddbbbbccccbbbbccccbbbbcc6666
+6666ddbbbb66ccbbbbcc66bbbbcc6666
+66666cccc666ccbbbbcc666cccc66666
+66666cccc666ccbbbbcc666cccc66666
+66666666666666cccc66666666666666
+666666666666666cc666666666666666
+66666666666666666666666666666666
+66666666666666666666666666666666
+`
+
     export const largeNewProgramIcon = img`
     .11111111..............11111111.
     1bbbbbbbb..............bbbbbbbb1
@@ -2468,6 +2491,79 @@ export const moveFaceDown = img`
     b111111111111111111111111111111b
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
 `*/
+
+
+export const linearGraph1 = img`
+.111111111111111111111111111111.
+11111111111111111111111111111111
+11ff1111111111111111111111111111
+11ff1111111111111111111111114111
+11ff1111111111111111111111144111
+11ff1111111111111111111111441111
+11ff1111111111111111111114411111
+11ff1111111111111111111144111111
+11ff1111111111111111111441111111
+11ff1111111111111111114411111111
+11ff1111111111111111144111111111
+11ff1111111111111111441111111111
+11ff1111111111111114411111111111
+11ff1111111111111144111111111111
+11ff1111111111111441111111111111
+11ff1111111111114411111111111111
+11ff1111111111144111111111111111
+11ff1111111111441111111111111111
+11ff1111111114411111111111111111
+11ff1111111144111111111111111111
+11ff1111111441111111111111111111
+11ff1111114411111111111111111111
+11ff1111144111111111111111111111
+11ff1111441111111111111111111111
+11ff1114411111111111111111111111
+11ff1144111111111111111111111111
+11ff1441111111111111111111111111
+11ff4411111111111111111111111111
+11ff4111111111111111111111111111
+11ffffffffffffffffffffffffffff11
+11ffffffffffffffffffffffffffff11
+1111111111111111111111111111111b
+.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+`
+
+export const linearGraph2 = img`
+.111111111111111111111111111111.
+11111111111111111111111111111111
+11ff1111111111111111111111111111
+11ff1111111111111111111111141111
+11ff1111111111111111111111441111
+11ff1111111111111111111114411888
+11ff1111111111111111111144188881
+11ff1111111111111111111448881111
+11ff1111111111111111114888111111
+11ff1111111111111111888111111111
+11ff1111111111111188441111111111
+11ff1111111111118884411111111111
+11ff1111111111188144111111111111
+11ff1111111118811441111111111111
+11ff1111111188114411111111111111
+11ff1111111881144111111111111111
+11ff1111118811441111111111111111
+11ff1111188114411111111111111111
+11ff1111881144111111111111111111
+11ff1118811441111111111111111111
+11ff1188114411111111111111111111
+11ff1881144111111111111111111111
+11ff1811441111111111111111111111
+11ff8814411111111111111111111111
+11ff8844111111111111111111111111
+11ff8441111111111111111111111111
+11ff8441111111111111111111111111
+11ff4411111111111111111111111111
+11ff4111111111111111111111111111
+11ffffffffffffffffffffffffffff11
+11ffffffffffffffffffffffffffff11
+1111111111111111111111111111111b
+.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+`
 
     export const sampleFirefly = img`
 .ffffffffffffffffffffffffffffff.
@@ -3194,41 +3290,41 @@ bffffffffffffffffffffffffffffffb
     `
 
     export const car_right_turn = img`
-    . . . . . . . . . . . . . . . .
-    . . . . . . . . c c c . . . . .
-    . . . . . . . . c 7 7 c . . . .
-    . . . . . c c c c 7 7 7 c . . .
-    . . . . c 7 7 7 7 7 7 7 7 c . .
-    . . . c 7 7 7 7 7 7 7 7 7 7 c .
-    . . c 7 7 7 7 7 7 7 7 7 7 c . .
-    . c 7 7 7 7 7 c c 7 7 7 c . . .
-    . c 7 7 7 7 c . c 7 7 c . . . .
-    . c 7 7 7 c d . c c c . . . . .
-    . c 7 7 7 c d . . . . . . . . .
-    . c 7 7 7 c d . . . . . . . . .
-    . c 7 7 7 c d . . . . . . . . .
-    . c 7 7 7 c d . . . . . . . . .
-    . c c c c c . . . . . . . . . .
-    . . . . . . . . . . . . . . . .
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 c c c 1 1 1 1 1
+    1 1 1 1 1 1 1 1 c 7 7 c 1 1 1 1
+    1 1 1 1 1 c c c c 7 7 7 c 1 1 1
+    1 1 1 1 c 7 7 7 7 7 7 7 7 c 1 1
+    1 1 1 c 7 7 7 7 7 7 7 7 7 7 c 1
+    1 1 c 7 7 7 7 7 7 7 7 7 7 c 1 1
+    1 c 7 7 7 7 7 c c 7 7 7 c 1 1 1
+    1 c 7 7 7 7 c 1 c 7 7 c 1 1 1 1
+    1 c 7 7 7 c d 1 c c c 1 1 1 1 1
+    1 c 7 7 7 c d 1 1 1 1 1 1 1 1 1
+    1 c 7 7 7 c d 1 1 1 1 1 1 1 1 1
+    1 c 7 7 7 c d 1 1 1 1 1 1 1 1 1
+    1 c 7 7 7 c d 1 1 1 1 1 1 1 1 1
+    1 c c c c c 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
 
     export const car_right_spin = img`
-    . . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . .
-    . . . . . c c c c c . . . . . .
-    . . . . c 7 7 7 7 7 c . . . . .
-    . . . c 7 7 7 7 7 7 7 c . . . .
-    . . c 7 7 7 7 7 7 7 7 7 c . . .
-    . c 7 7 7 7 7 c c 7 7 7 c . . .
-    c 7 7 7 7 7 c c c 7 7 7 c c c .
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 c c c c c 1 1 1 1 1 1
+    1 1 1 1 c 7 7 7 7 7 c 1 1 1 1 1
+    1 1 1 c 7 7 7 7 7 7 7 c 1 1 1 1
+    1 1 c 7 7 7 7 7 7 7 7 7 c 1 1 1
+    1 c 7 7 7 7 7 c c 7 7 7 c 1 1 1
+    c 7 7 7 7 7 c c c 7 7 7 c c c 1
     c 7 7 7 7 c c 7 7 7 7 7 7 7 c d
     c 7 7 7 c d c 7 7 7 7 7 7 7 c d
-    c 7 7 7 c d . c 7 7 7 7 7 c d .
-    c 7 7 7 c d . . c 7 7 7 c d . .
-    c 7 7 7 c d . . . c 7 c d . . .
-    c 7 7 7 c . . . . . c d . . . .
-    c c c c c . . . . . . . . . . .
-    . . . . . . . . . . . . . . . .    
+    c 7 7 7 c d 1 c 7 7 7 7 7 c d 1
+    c 7 7 7 c d 1 1 c 7 7 7 c d 1 1
+    c 7 7 7 c d 1 1 1 c 7 c d 1 1 1
+    c 7 7 7 c 1 1 1 1 1 c d 1 1 1 1
+    c c c c c 1 1 1 1 1 1 1 1 1 1 1
+    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1    
     `
 
     export const car_stop = img`

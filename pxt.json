@@ -6,7 +6,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1"
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
+        "datalogger": "*"
     },
     "files": [
         "protocol.ts",
@@ -23,8 +24,6 @@
         "tiles.ts",
         "app.ts",
         "sprite.ts",
-        "editor.ts",
-        "ruleeditor.ts",
         "cursor.ts",
         "home.ts",
         "bounds.ts",
@@ -37,12 +36,24 @@
         "navigator.ts",
         "cursorscene.ts",
         "options.ts",
-        "samples.ts",
-        "gallery.ts",
-        "pointerevents.ts",
         "tooltips.ts",
         "utils.ts",
-        "jacs.ts"
+        "jacs.ts",
+        "ruleEditor.ts",
+        "editor.ts",
+        "samples.ts",
+        
+        "liveDataViewer.ts",
+        "tabularDataViewer.ts",
+        "sensorSelect.ts",
+        "dataViewSelect.ts",
+        "recordingConfig.ts",
+        "recordingConfigSelection.ts",
+        "sensors.ts",
+        "fauxDataLogger.ts",
+        "dataRecorder.ts",
+        "generateGraph.ts",
+        "sensorEvent.ts"
     ],
     "testFiles": [],
     "targetVersions": {

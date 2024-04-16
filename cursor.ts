@@ -27,11 +27,14 @@ namespace microcode {
         size: Bounds
         visible = true
 
+        private cursorOutlineColour: number
+
         constructor() {
             this.xfrm = new Affine()
             this.cancelHandlerStack = []
             this.moveDest = new Vec2()
             this.setSize()
+            this.cursorOutlineColour = 9
         }
 
         public moveTo(pos: Vec2, ariaId: string, sizeHint: Bounds) {
@@ -63,6 +66,10 @@ namespace microcode {
             else this.size = size.clone()
         }
 
+        public setOutlineColour(colour: number) {
+            this.cursorOutlineColour = colour
+        }
+
         public saveState(): CursorState {
             return {
                 navigator: this.navigator,
@@ -87,6 +94,7 @@ namespace microcode {
         public click(): boolean {
             let target = this.navigator.getCurrent() //.sort((a, b) => a.z - b.z);
             if (target) {
+                target.toggleSelected()
                 target.click()
                 profile()
                 return true
@@ -109,18 +117,14 @@ namespace microcode {
         draw() {
             if (!this.visible) return
 
-            Screen.outlineBoundsXfrm(
-                this.xfrm,
-                this.size,
-                1,
-                6
-            )
-            Screen.outlineBoundsXfrm(
-                this.xfrm,
-                this.size,
-                2,
-                9
-            )
+            for (let dist = 1; dist <= 3; dist++) {
+                Screen.outlineBoundsXfrm(
+                    this.xfrm,
+                    this.size,
+                    dist,
+                    this.cursorOutlineColour
+                )
+            }
 
             const text = accessibility.ariaToTooltip(this.ariaId)
             if (text) {

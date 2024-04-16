@@ -23,7 +23,7 @@ namespace microcode {
         else if (id === "S9A") res = "variable X set";
         else if (id === "S9B") res = "variable Y set";
         else if (id === "S9C") res = "variable Z set";
-        else if (id === "S10") res = "magnet";
+        else if (id === "S10") res = "Magnet";
         else if (id === "S11") res = "slider";
         else if (id === "S12") res = "dial";
         else if (id === "rule") res = "rule";
@@ -147,7 +147,40 @@ namespace microcode {
         else if (id === "F23B") res = "both";
         else if (id === "F23N") res = "none";
         else if (id === "F23NL") res = "lost left";
-        else if (id === "F23NR") res = "lost right";        
+        else if (id === "F23NR") res = "lost right";   
+
+        else if (id === "linear_graph") res = "Live"
+        else if (id == "led_light_sensor") res = "Light Sensor"
+        else if (id == "thermometer") res = "Thermometer"
+        else if (id == "accelerometer") res = "Accelerometer"
+        else if (id == "accelerometer X") res = "Accelerometer X"
+        else if (id == "accelerometer Y") res = "Accelerometer Y"
+        else if (id == "accelerometer Z") res = "Accelerometer Z"
+
+        else if (id == "Roll") res = "Roll"
+        else if (id == "Pitch") res = "Pitch"
+        else if (id == "Logo Press") res = "Logo Press"
+        else if (id == "Pin Press") res = "Pin Press"
+
+        // icons do not yet exist:
+        else if (id == "Record") res = "Record"
+        else if (id == "View") res = "View"
+        else if (id == "Done") res = "Done"
+        else if (id == "Pins") res = "Pins"
+        else if (id == "Pin 0") res = "Pin 0"
+        else if (id == "Pin 1") res = "Pin 1"
+        else if (id == "Pin 2") res = "Pin 2"
+        else if (id == "Volume") res = "Volume"
+        else if (id == "Compass") res = "Compass"
+        else if (id == "Oscilloscope") res = "Oscilloscope"
+
+        else if (id == "Meta Data") res = "Meta Data"
+        else if (id == "View Data") res = "View Data"
+        else if (id == "View Graph") res = "View Graph"
+        else if (id == "Measurement Mode") res = "Measurement Mode"
+        else if (id == "Event Mode") res = "Event Mode"
+        
+        
         return res
     }
 }

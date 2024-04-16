@@ -1,12 +1,20 @@
 namespace microcode {
+    export enum CursorSceneEnum {
+        LiveDataViewer,
+        SensorSelect,
+        MeasurementConfigSelect,
+        RecordData,
+    }
+    
     export class CursorScene extends Scene {
         navigator: INavigator
         public cursor: Cursor
         public picker: Picker
 
-        constructor(app: App) {
+        constructor(app: App, navigator?: INavigator) {
             super(app, "scene")
             this.color = 11
+            this.navigator = navigator
         }
 
         protected moveCursor(dir: CursorDir) {
@@ -35,22 +43,22 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => this.moveCursor(CursorDir.Right)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => this.moveCursor(CursorDir.Up)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => this.moveCursor(CursorDir.Down)
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => this.moveCursor(CursorDir.Left)
@@ -58,17 +66,17 @@ namespace microcode {
 
             // click
             const click = () => this.cursor.click()
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 click
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id + keymap.PLAYER_OFFSET,
                 click
             )
-            context.onEvent(
+            control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => this.back()
@@ -130,6 +138,33 @@ namespace microcode {
         /* override */ draw() {
             this.picker.draw()
             this.cursor.draw()
+        }
+    }
+
+    
+    export class CursorSceneWithPriorPage extends CursorScene {
+        private goBack1PageFn: () => void;
+
+        constructor(app: App, goBack1PageFn: () => void) {
+            super(app)
+            this.color = 11
+
+            this.goBack1PageFn = goBack1PageFn
+        }
+
+        /* override */ startup() {
+            super.startup()
+        
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => this.goBack1PageFn()
+            )
+
+            this.cursor = new Cursor()
+            this.picker = new Picker(this.cursor)
+            this.navigator = new RowNavigator()
+            this.cursor.navigator = this.navigator
         }
     }
 }
