@@ -78,51 +78,51 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-            this.yOffset = Math.min(0, this.yOffset + 2)
-            const t = control.millis()
-            const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0
-            const margin = 2
-            const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
-            const y = Screen.TOP_EDGE + OFFSET //+ dy
-            Screen.drawTransparentImage(
-                wordLogo,
-                Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
-                ,
-                y + this.yOffset
-            )
-            Screen.drawTransparentImage(
-                microbitLogo,
-                Screen.LEFT_EDGE +
-                    ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
-                    ,
-                y - wordLogo.height + this.yOffset + margin
-            )
-            if (!this.yOffset) {
-                const tagline = resolveTooltip("tagline")
-                Screen.print(
-                    tagline,
-                    Screen.LEFT_EDGE +
-                        ((Screen.WIDTH + wordLogo.width) >> 1) 
-                        + dy
-                        -
-                        microcode.font.charWidth * tagline.length,
-                    Screen.TOP_EDGE +
-                        OFFSET +
-                        wordLogo.height +
-                        dy +
-                        this.yOffset +
-                        1,
-                    0xb,
-                    microcode.font
-                )
-            }
+            // this.yOffset = Math.min(0, this.yOffset + 2)
+            // const t = control.millis()
+            // const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0
+            // const margin = 2
+            // const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
+            // const y = Screen.TOP_EDGE + OFFSET //+ dy
+            // Screen.drawTransparentImage(
+            //     wordLogo,
+            //     Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
+            //     ,
+            //     y + this.yOffset
+            // )
+            // Screen.drawTransparentImage(
+            //     microbitLogo,
+            //     Screen.LEFT_EDGE +
+            //         ((Screen.WIDTH - microbitLogo.width) >> 1) + dy
+            //         ,
+            //     y - wordLogo.height + this.yOffset + margin
+            // )
+            // if (!this.yOffset) {
+            //     const tagline = resolveTooltip("tagline")
+            //     Screen.print(
+            //         tagline,
+            //         Screen.LEFT_EDGE +
+            //             ((Screen.WIDTH + wordLogo.width) >> 1) 
+            //             + dy
+            //             -
+            //             microcode.font.charWidth * tagline.length,
+            //         Screen.TOP_EDGE +
+            //             OFFSET +
+            //             wordLogo.height +
+            //             dy +
+            //             this.yOffset +
+            //             1,
+            //         0xb,
+            //         microcode.font
+            //     )
+            // }
 
-            this.recordDataBtn.draw()
-            this.liveDataBtn.draw()
-            this.viewBtn.draw()
+            // this.recordDataBtn.draw()
+            // this.liveDataBtn.draw()
+            // this.viewBtn.draw()
 
-            this.drawVersion()
-            super.draw()
+            // this.drawVersion()
+            // super.draw()
         }
     }
 }
