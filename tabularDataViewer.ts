@@ -256,7 +256,7 @@ namespace microcode {
 
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
-                            const value = data[colID].slice(0, 5) // Precision
+                            const value = data[colID].slice(0, 7) // Precision
                             const colOffset = (font.charWidth * filteredData[colID].length) + 2
         
                             if (cumulativeColOffset + colOffset > Screen.WIDTH) {
@@ -287,7 +287,7 @@ namespace microcode {
                         let cumulativeColOffset = 0
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
-                            const value = data[colID].slice(0, 5) // Precision
+                            const value = data[colID].slice(0, 7) // Precision
                             const colOffset = (font.charWidth * value.length) + 2
         
                             if (cumulativeColOffset + colOffset > Screen.WIDTH) {
