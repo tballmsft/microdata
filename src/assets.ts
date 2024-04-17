@@ -236,12 +236,6 @@ namespace icondb {
         console.log(`\nimg\`\n${r}\``)
     }
 
-    /*
-    export const melodyEditor = melodyToImage({
-        notes: "0240",
-        tempo: 0,
-    })
-    */
     export const melodyEditor = img`
     1111111111111111
     111111111ff11111
