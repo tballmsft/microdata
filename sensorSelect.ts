@@ -15,7 +15,9 @@ namespace microcode {
         "Volume": new VolumeSensor(),
         "Compass": new CompassHeadingSensor(),
         "F3": new ButtonPressSensor(),
-        "Jacdac": new JacdacSensor()
+        "JacdacLight": new JacdacLightSensor(),
+        "JacdacSoilMoisture": new JacdacSoilMoistureSensor(),
+        "JacdacDistance": new JacdacDistanceSensor()
     }
 
     /**
@@ -336,16 +338,54 @@ namespace microcode {
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac",
-                x: 30,
+                ariaId: "Jacdac Light",
+                x: -30,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jacdac")
+                    const index = this.selectedSensorNames.indexOf("JacdacLight")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("Jacdac")
+                        this.selectedSensorNames.push("JacdacLight")
+                    }
+                },
+                dynamicBoundaryColorsOn: true,
+            }))
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "microbitLogoWhiteBackground",
+                ariaId: "Jacdac Moisture",
+                x: 0,
+                y: 44,
+                onClick: () => {
+                    const index = this.selectedSensorNames.indexOf("JacdacSoilMoisture")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("JacdacSoilMoisture")
+                    }
+                },
+                dynamicBoundaryColorsOn: true,
+            }))
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "microbitLogoWhiteBackground",
+                ariaId: "Jacdac Distance",
+                x: 30,
+                y: 44,
+                onClick: () => {
+                    const index = this.selectedSensorNames.indexOf("JacdacDistance")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("JacdacDistance")
                     }
                 },
                 dynamicBoundaryColorsOn: true,

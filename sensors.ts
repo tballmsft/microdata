@@ -309,19 +309,49 @@ namespace microcode {
     }
 
     /**
-     * Early Jacdac implementation.
-     *      Only supports modules.lightLevel1.lightLevel() at the moment.
-     *      Need to work on generalisation, maximum and minimum reading detection.
+     * modules.lightLevel1.lightLevel Sensor from pxt-jacdac/jacdac-light-level
      */
-    export class JacdacSensor extends Sensor {
+    export class JacdacLightSensor extends Sensor {
         constructor() {
             super(
                 function () {return modules.lightLevel1.lightLevel()}, 
-                "Jacdac", 
+                "Jacdac Light", 
                 0, 
                 100,
                 "microbitLogo", 
-                "Jacdac"
+                "Jacdac Light"
+            )
+        }
+    }
+
+    /**
+     * modules.distance1.distance Sensor from pxt-jacdac/jacdac-distance
+     */
+    export class JacdacDistanceSensor extends Sensor {
+        constructor() {
+            super(
+                function () {return modules.distance1.distance()}, 
+                "Jacdac Dist", 
+                0, 
+                100,
+                "microbitLogo", 
+                "Jacdac Dist."
+            )
+        }
+    }
+
+    /**
+     * modules.soilMoisture1.moisture Sensor from pxt-jacdac/jacdac-soil-moisture
+     */
+    export class JacdacSoilMoistureSensor extends Sensor {
+        constructor() {
+            super(
+                function () {return modules.soilMoisture1.moisture()}, 
+                "Jacdac Moist.", 
+                0, 
+                100,
+                "microbitLogo", 
+                "Jacdac Moist."
             )
         }
     }
