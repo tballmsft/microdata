@@ -11,45 +11,42 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // MicroData loading test:
-            basic.showString("Home")
-
             this.liveDataBtn = new Button({
                 parent: null,
-                // style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    // this.app.popScene()
-                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                 },
             })
 
             this.recordDataBtn = new Button({
                 parent: null,
-                // style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "edit_program",
                 ariaId: "Record",
                 x: 0,
                 y: 30,
                 onClick: () => {
-                    // this.app.popScene()
-                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },
             })
 
             this.viewBtn = new Button({
                 parent: null,
-                // style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "largeDisk",
                 ariaId: "View",
                 x: 50,
                 y: 30,
                 onClick: () => {
-                    // this.app.popScene()
-                    // this.app.pushScene(new DataViewSelect(this.app))
+                    this.app.popScene()
+                    this.app.pushScene(new DataViewSelect(this.app))
                 },
             })
 

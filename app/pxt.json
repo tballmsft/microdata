@@ -1,0 +1,19 @@
+{
+    "name": "MicroData App",
+    "version": "1.0.0",
+    "dependencies": {
+        "core": "*",
+        "radio": "*",
+        "microphone": "*",
+        "microdata": "file:../",
+        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
+        "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28"
+    },
+    "files": [
+        "main.ts"
+    ],
+    "testDependencies": {},
+    "supportedTargets": [
+        "microbit"
+    ]
+}

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "pxt-microbit": "^7.0.6"
+  }
+}
