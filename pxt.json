@@ -42,7 +42,6 @@
         "ruleEditor.ts",
         "editor.ts",
         "samples.ts",
-        
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
         "sensorSelect.ts",
