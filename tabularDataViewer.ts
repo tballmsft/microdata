@@ -256,6 +256,7 @@ namespace microcode {
 
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
+                            const value = data[colID].slice(0, 5) // Precision
                             const colOffset = (font.charWidth * filteredData[colID].length) + 2
         
                             if (cumulativeColOffset + colOffset > Screen.WIDTH) {
@@ -263,8 +264,8 @@ namespace microcode {
                             }
         
                             Screen.print(
-                                data[colID],
-                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
+                                value,
+                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                                 Screen.TOP_EDGE + (row * filteredRowBufferSize) + (filteredRowBufferSize / 2) - 4,
                                 0xb,
                                 simage.font8
@@ -286,15 +287,16 @@ namespace microcode {
                         let cumulativeColOffset = 0
                         for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
                             const colID = col + this.xScrollOffset
-                            const colOffset = (font.charWidth * data[colID].length) + 2
+                            const value = data[colID].slice(0, 5) // Precision
+                            const colOffset = (font.charWidth * value.length) + 2
         
                             if (cumulativeColOffset + colOffset > Screen.WIDTH) {
                                 break
                             }
         
                             Screen.print(
-                                data[colID],
-                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
+                                value,
+                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                                 Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                                 0xb,
                                 simage.font8
