@@ -161,6 +161,7 @@ namespace microcode {
         else if (id == "Pitch") res = "Pitch"
         else if (id == "Logo Press") res = "Logo Press"
         else if (id == "Pin Press") res = "Pin Press"
+        else if (id == "Jacdac") res = "Jacdac"
 
         // icons do not yet exist:
         else if (id == "Record") res = "Record"
@@ -179,7 +180,6 @@ namespace microcode {
         else if (id == "View Graph") res = "View Graph"
         else if (id == "Measurement Mode") res = "Measurement Mode"
         else if (id == "Event Mode") res = "Event Mode"
-        
         
         return res
     }

@@ -82,7 +82,7 @@ namespace microcode {
 
             if (name == "settingsGear") return icondb.settingsGear
             if (name == "largeSettingsGear") return icondb.largeSettingsGear
-            // if (name == "compass") return icondb.compass
+            if (name == "microbitLogoWhiteBackground") return icondb.microbitLogoWhiteBackground
 
             extraImage = null
             extraSamples(name) // only for web app
@@ -96,9 +96,9 @@ namespace microcode {
     ....111111.......111111...1111................................................11111111111.........................1111.................................
     ...11bbbbbb.....11bbbbbb.11bbbb...............................................1bbbbbbbbbbff......................11bbbb................................
     ...1bbbbbbbb...11bbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbff.....................1bbbbbf...............................
-    ...1bbbbbbbbb.11bbbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbbbf....................1bbbbbf...............................
+    ...1bbbbbbbbb.11bbbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbbff....................1bbbbbf...............................
     ...1bbbbbbbbbb1bbbbbbbbbf1bbbbbf..............................................1bbbbf..bbbbbbf....................1bbbbbf...............................
-    ...1bbbbbbbbbbbbbbbbbbbbf.bbbbff..............................................1bbbb....bbbbbbf...................1bbbbbf...............................
+    ...1bbbbbbbbbbbbbbbbbbbbf.bbbbff..............................................1bbbb....bbbbbff...................1bbbbbf...............................
     ...1bbbbbbbbbbbbbbbbbbbbf..ffff.....1111111......1111...111.......1111111.....1bbbb.....1bbbbf....11111111.......1bbbbbb11111111....11111111...........
     ...1bbbbbbbbbbbbbbbbbbbbf.1111....111bbbbbbb1...11bbbb.11bbb....111bbbbbbb1...1bbbb.....1bbbbf...1bbbbbbbbbf.....1bbbbbbbbbbbbbbf..1bbbbbbbbbf.........
     ...1bbbbbbbbbbbbbbbbbbbbf11bbbb..11bbbbbbbbbbb..1bbbbbb1bbbbb..11bbbbbbbbbbb..1bbbb.....1bbbbf..1bbbbbbbbbbbbf...1bbbbbbbbbbbbbbf.1bbbbbbbbbbbbf.......
@@ -260,6 +260,25 @@ namespace icondb {
     fcc111111111fcc1
     fcc111111111fcc1    
     `
+
+    export const microbitLogoWhiteBackground = img`
+    11111111111111111
+    11115555555551111
+    11155555555555111
+    11544444444444111
+    15541111111114511
+    15511111111111541
+    55415511115511554
+    55155551155551554
+    55155554155554554
+    55115544115544554
+    15511441111441544
+    15511111111111541
+    11551111111114441
+    11155555555555411
+    11155555555555111
+    11111444444441111
+`
 
     export const disk = img`
     . . . . . . . . . . . . . . . .

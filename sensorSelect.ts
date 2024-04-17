@@ -14,7 +14,8 @@ namespace microcode {
         "Logo Press": new LogoPressSensor(),
         "Volume": new VolumeSensor(),
         "Compass": new CompassHeadingSensor(),
-        "F3": new ButtonPressSensor()
+        "F3": new ButtonPressSensor(),
+        "Jacdac": new JacdacSensor()
     }
 
     /**
@@ -330,6 +331,25 @@ namespace microcode {
             }))
 
             //-----------
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "microbitLogoWhiteBackground",
+                ariaId: "Jacdac",
+                x: 30,
+                y: 44,
+                onClick: () => {
+                    const index = this.selectedSensorNames.indexOf("Jacdac")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("Jacdac")
+                    }
+                },
+                dynamicBoundaryColorsOn: true,
+            }))
 
             this.btns.push(new Button({
                 parent: null,

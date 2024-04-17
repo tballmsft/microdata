@@ -309,6 +309,24 @@ namespace microcode {
     }
 
     /**
+     * Early Jacdac implementation.
+     *      Only supports modules.lightLevel1.lightLevel() at the moment.
+     *      Need to work on generalisation, maximum and minimum reading detection.
+     */
+    export class JacdacSensor extends Sensor {
+        constructor() {
+            super(
+                function () {return modules.lightLevel1.lightLevel()}, 
+                "Jacdac", 
+                0, 
+                100,
+                "microbitLogo", 
+                "Jacdac"
+            )
+        }
+    }
+
+    /**
      * Sensor for Microbit A & B Buttons
      * Need to be transformed into an event based system
      */
