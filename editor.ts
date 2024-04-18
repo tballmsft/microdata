@@ -471,7 +471,7 @@ namespace microcode {
         private drawBackground() {
             let x = Screen.LEFT_EDGE - (this.currPage << 4)
             while (x < Screen.RIGHT_EDGE) {
-                Screen.drawTransparentImage(
+                Screen.drawTransparentBitmap(
                     editorBackground,
                     x,
                     Screen.TOP_EDGE

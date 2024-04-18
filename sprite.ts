@@ -1,7 +1,7 @@
 namespace microcode {
     export class Sprite implements IComponent, IPlaceable, ISizable {
         private xfrm_: Affine
-        image: SImage
+        image: Bitmap
         invisible: boolean
 
         public get xfrm() {
@@ -29,16 +29,16 @@ namespace microcode {
             )
         }
 
-        constructor(opts: { parent?: IPlaceable; img: SImage }) {
+        constructor(opts: { parent?: IPlaceable; bmp: Bitmap }) {
             this.xfrm_ = new Affine()
             this.xfrm_.parent = opts.parent && opts.parent.xfrm
-            this.image = opts.img
+            this.image = opts.bmp
         }
 
         update() { }
 
-        public setImage(img: SImage) {
-            this.image = img
+        public setImage(bmp: Bitmap) {
+            this.image = bmp
         }
 
         public bindXfrm(xfrm: Affine) {
@@ -60,7 +60,7 @@ namespace microcode {
             if (this.invisible) {
                 return
             }
-            Screen.drawTransparentImageXfrm(
+            Screen.drawTransparentBitmapXfrm(
                 this.xfrm,
                 this.image,
                 -(this.image.width >> 1),

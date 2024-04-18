@@ -223,7 +223,7 @@ namespace microcode {
                             Screen.LEFT_EDGE + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col1.length) / 2),
                             Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
                             0xb,
-                            simage.font8
+                            bitmap.font8
                         )
                         
                         Screen.print(
@@ -231,7 +231,7 @@ namespace microcode {
                             Screen.LEFT_EDGE + metadataColSize + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col2.length) / 2),
                             Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
                             0xb,
-                            simage.font8
+                            bitmap.font8
                         )
                     }
                     break;
@@ -267,7 +267,7 @@ namespace microcode {
                                 Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
                                 Screen.TOP_EDGE + (row * filteredRowBufferSize) + (filteredRowBufferSize / 2) - 4,
                                 0xb,
-                                simage.font8
+                                bitmap.font8
                             )
         
                             cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
@@ -297,7 +297,7 @@ namespace microcode {
                                 Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
                                 Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                                 0xb,
-                                simage.font8
+                                bitmap.font8
                             )
         
                             cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]

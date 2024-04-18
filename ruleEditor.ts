@@ -41,7 +41,7 @@ namespace microcode {
             })
             this.arrow = new Sprite({
                 parent: this,
-                img: icons.get("rule_arrow"),
+                bmp: icons.get("rule_arrow"),
             })
             this.ruleButtons = {
                 sensors: [],

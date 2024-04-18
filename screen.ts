@@ -1,6 +1,6 @@
 namespace microcode {
     export class Screen {
-        private static image_: SImage
+        private static image_: Bitmap
 
         public static WIDTH = screen.width
         public static HEIGHT = screen.height
@@ -43,7 +43,7 @@ namespace microcode {
         public static pos(v: Vec2) {
             return new Vec2(Screen.x(v.x), Screen.y(v.y))
         }
-        public static get image(): SImage {
+        public static get image(): Bitmap {
             if (!Screen.image_) {
                 Screen.image_ = screen
                 Screen.updateBounds()
@@ -56,22 +56,22 @@ namespace microcode {
         }
 
         public static setImageSize(width: number, height: number) {
-            Screen.image_ = simage.create(width, height)
+            Screen.image_ = bitmap.create(width, height)
             Screen.updateBounds()
         }
 
-        public static drawTransparentImage(from: SImage, x: number, y: number) {
-            Screen.image.drawTransparentImage(from, Screen.x(x), Screen.y(y))
+        public static drawTransparentBitmap(from: Bitmap, x: number, y: number) {
+            Screen.image.drawTransparentBitmap(from, Screen.x(x), Screen.y(y))
         }
 
-        public static drawTransparentImageXfrm(
+        public static drawTransparentBitmapXfrm(
             xfrm: Affine,
-            from: SImage,
+            from: Bitmap,
             x: number,
             y: number
         ) {
             const w = xfrm.worldPos
-            Screen.image.drawTransparentImage(
+            Screen.image.drawTransparentBitmap(
                 from,
                 Screen.x(x + w.x),
                 Screen.y(y + w.y)
@@ -341,7 +341,7 @@ namespace microcode {
             x: number,
             y: number,
             color?: number,
-            font?: simage.Font,
+            font?: bitmap.Font,
             offsets?: texteffects.TextEffectState[]
         ) {
             Screen.image.print(

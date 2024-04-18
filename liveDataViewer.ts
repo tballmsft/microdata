@@ -300,7 +300,7 @@ namespace microcode {
                     this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y + 5,
                     color,
-                    simage.font5,
+                    bitmap.font5,
                 )
 
                 screen.print(
@@ -308,7 +308,7 @@ namespace microcode {
                     this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y + 15,
                     color,
-                    simage.font5,
+                    bitmap.font5,
                 )
             }
 
@@ -328,7 +328,7 @@ namespace microcode {
                             Screen.WIDTH + this.xScrollOffset - 25,
                             y - 2,
                             color,
-                            simage.font5,
+                            bitmap.font5,
                         )
                     }
                     color = (color + 3) % 15

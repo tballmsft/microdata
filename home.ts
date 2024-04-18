@@ -11,9 +11,6 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // MicroData loading test:
-            basic.showString("Home")
-
             this.liveDataBtn = new Button({
                 parent: null,
                 // style: ButtonStyles.Transparent,
@@ -59,7 +56,7 @@ namespace microcode {
         }
 
         private drawVersion() {
-            const font = simage.font5
+            const font = bitmap.font5
             Screen.print(
                 "Prototype 12",
                 Screen.RIGHT_EDGE - font.charWidth * "Prototype 12".length,
@@ -84,13 +81,13 @@ namespace microcode {
             const margin = 2
             const OFFSET = (Screen.HEIGHT >> 1) - wordLogo.height - margin
             const y = Screen.TOP_EDGE + OFFSET //+ dy
-            Screen.drawTransparentImage(
+            Screen.drawTransparentBitmap(
                 wordLogo,
                 Screen.LEFT_EDGE + ((Screen.WIDTH - wordLogo.width) >> 1)// + dy
                 ,
                 y + this.yOffset
             )
-            Screen.drawTransparentImage(
+            Screen.drawTransparentBitmap(
                 microbitLogo,
                 Screen.LEFT_EDGE +
                     ((Screen.WIDTH - microbitLogo.width) >> 1) + dy

@@ -17,7 +17,7 @@ namespace microcode {
             onHide: () => void,
             onDelete?: () => void
         ): void {}
-        toImage(field: any): SImage {
+        toImage(field: any): Bitmap {
             return undefined
         }
         toBuffer(field: any): Buffer {
@@ -37,7 +37,7 @@ namespace microcode {
         getField(): any {
             return null
         }
-        getIcon(): string | SImage {
+        getIcon(): string | Bitmap {
             return null
         }
         getNewInstance(field: any = null): ModifierEditor {
@@ -50,7 +50,7 @@ namespace microcode {
 
     class IconFieldEditor extends FieldEditor {
         init() {
-            return img`
+            return bmp`
         . . . . .
         . 1 . 1 .
         . . . . . 
@@ -58,8 +58,8 @@ namespace microcode {
         . 1 1 1 .
         `
         }
-        clone(img: SImage) {
-            return img.clone()
+        clone(bmp: Bitmap) {
+            return bmp.clone()
         }
         editor(
             field: any,
@@ -72,34 +72,34 @@ namespace microcode {
         toImage(field: any) {
             return icondb.renderMicrobitLEDs(field)
         }
-        toBuffer(img: SImage) {
+        toBuffer(bmp: Bitmap) {
             const ret = Buffer.create(4)
             for (let index = 0; index < 25; index++) {
                 let byte = index >> 3
                 let bit = index & 7
                 let col = index % 5
                 let row = Math.idiv(index, 5)
-                ret[byte] |= img.getPixel(col, row) << bit
+                ret[byte] |= bmp.getPixel(col, row) << bit
             }
             return ret
         }
         fromBuffer(br: BufferReader) {
             const buf = br.readBuffer(4)
-            const img = simage.create(5, 5)
+            const bmp = bitmap.create(5, 5)
             for (let index = 0; index < 25; index++) {
                 let byte = index >> 3
                 let bit = index & 7
                 let col = index % 5
                 let row = Math.idiv(index, 5)
-                img.setPixel(col, row, (buf[byte] >> bit) & 1)
+                bmp.setPixel(col, row, (buf[byte] >> bit) & 1)
             }
-            return img
+            return bmp
         }
     }
 
     export class IconEditor extends ModifierEditor {
-        field: SImage
-        constructor(field: SImage = null) {
+        field: Bitmap
+        constructor(field: Bitmap = null) {
             super(Tid.TID_MODIFIER_ICON_EDITOR)
             this.fieldEditor = new IconFieldEditor()
             this.field = this.fieldEditor.clone(
@@ -111,7 +111,7 @@ namespace microcode {
             return this.field
         }
 
-        getIcon(): string | SImage {
+        getIcon(): string | Bitmap {
             return this.firstInstance
                 ? getIcon(Tid.TID_MODIFIER_ICON_EDITOR)
                 : this.fieldEditor.toImage(this.field)
@@ -184,12 +184,12 @@ namespace microcode {
             // Original code:
             // return icondb.melodyToImage(field)
             
-            const note4x3 = img`
+            const note4x3 = bmp`
             . f f .
             f c c .
             f c c .
             `
-            const ret = simage.create(16, 16)
+            const ret = bitmap.create(16, 16)
             ret.fill(1)
             for (let col = 0; col < microcode.MELODY_LENGTH; col++) {
                 if (field.notes[col] === ".") continue
@@ -197,7 +197,7 @@ namespace microcode {
                 const color = 15
                 const ncol = col << 2,
                     nrow = row * 3 + 1
-                ret.drawTransparentImage(note4x3, ncol, nrow)
+                ret.drawTransparentBitmap(note4x3, ncol, nrow)
             }
             return ret
         }
@@ -250,7 +250,7 @@ namespace microcode {
             return this.field
         }
 
-        getIcon(): string | SImage {
+        getIcon(): string | Bitmap {
             return this.firstInstance
                 ? getIcon(Tid.TID_MODIFIER_MELODY_EDITOR)
                 : this.fieldEditor.toImage(this.field)
@@ -291,7 +291,7 @@ namespace microcode {
     }
 
     function iconEditor(
-        image5x5: SImage,
+        image5x5: Bitmap,
         picker: Picker,
         onHide: () => void,
         onDelete?: () => void
