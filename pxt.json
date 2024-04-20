@@ -35,7 +35,6 @@
         "options.ts",
         "tooltips.ts",
         "utils.ts",
-        "jacs.ts",
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
         "sensorSelect.ts",
