@@ -46,7 +46,7 @@ namespace microcode {
 
         public static getNumberOfMetadataRows(): number {
             return 5 + FauxDataLogger.headers.length
-        }
+        } 
         
         public static getMetadata() {
             let metadata = [
@@ -57,7 +57,7 @@ namespace microcode {
             
             for (let i = 0; i < FauxDataLogger.headers.length; i++) {
                 metadata.push({col1: "Col " + (i + 1).toString(), col2: FauxDataLogger.headers[i]})
-            } 
+            }
          
             return metadata
         }
@@ -68,6 +68,11 @@ namespace microcode {
                 id: this.entries.length, 
                 data
             })
+
+            for (let i = 0; i < data.length; i++) {
+                datalogger.log(datalogger.createCV(i.toString(), data[i]))
+            }
+            
             FauxDataLogger.numberOfRows += 1
         }
     }

@@ -161,7 +161,9 @@ namespace microcode {
         else if (id == "Pitch") res = "Pitch"
         else if (id == "Logo Press") res = "Logo Press"
         else if (id == "Pin Press") res = "Pin Press"
-        else if (id == "Jacdac") res = "Jacdac"
+        else if (id == "Jacdac Light") res = "Jacdac Light"
+        else if (id == "Jacdac Moisture") res = "Jacdac Moisture"
+        else if (id == "Jacdac Distance") res = "Jacdac Distance"
 
         // icons do not yet exist:
         else if (id == "Record") res = "Record"

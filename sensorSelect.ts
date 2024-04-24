@@ -14,7 +14,8 @@ namespace microcode {
         "Logo Press": new LogoPressSensor(),
         "Volume": new VolumeSensor(),
         "Compass": new CompassHeadingSensor(),
-        "F3": new ButtonPressSensor(),
+        "F3": new ButtonAPressSensor(),
+        "F4": new ButtonBPressSensor(),
         "JacdacLight": new JacdacLightSensor(),
         "JacdacSoilMoisture": new JacdacSoilMoistureSensor(),
         "JacdacDistance": new JacdacDistanceSensor()
@@ -333,6 +334,25 @@ namespace microcode {
             }))
 
             //-----------
+
+            this.btns.push(new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "tile_button_b",
+                ariaId: "F4",
+                x: -60,
+                y: 44,
+                onClick: () => {
+                    const index = this.selectedSensorNames.indexOf("F4")
+                    if (index != -1) {
+                        this.selectedSensorNames.splice(index, 1)
+                    }
+                    else {
+                        this.selectedSensorNames.push("F4")
+                    }
+                },
+                dynamicBoundaryColorsOn: true,     
+            }))
 
             this.btns.push(new Button({
                 parent: null,

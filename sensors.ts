@@ -350,21 +350,60 @@ namespace microcode {
                 "Jacdac Moist.", 
                 0, 
                 100,
-                "microbitLogo", 
+                "microbitLogo",
                 "Jacdac Moist."
             )
         }
     }
 
     /**
-     * Sensor for Microbit A & B Buttons
-     * Need to be transformed into an event based system
+     * Sensor for the A button of the Microbit (not arcade shield)
      */
-    export class ButtonPressSensor extends Sensor {
+    export class ButtonAPressSensor extends Sensor {
+        private buttonPressed: boolean
         constructor() {
-            super(function () {return 1}, "Button ", 0, 1, "tile_button_a", "F3")
+            super(
+                function () {
+                    let output = 0
+                    if (this.buttonPressed) {
+                        output =  1
+                    }
+                    return output
+                }, 
+                "Button A", 
+                0, 
+                1,
+                "tile_button_a", 
+                "F3"
+            )
 
+            this.buttonPressed = false
             control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
+                this.buttonPressed = false
+            })
+
+            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_A, () => {
+                this.buttonPressed = true
+            })
+        }
+    }
+
+    /**
+     * Sensor for the A button of the Microbit (not arcade shield)
+     */
+    export class ButtonBPressSensor extends Sensor {
+        constructor() {
+            super(function () {
+                let output = 0
+                if (this.buttonPressed) {
+                    output =  1
+                }
+                
+                this.buttonPressed = false
+                return output
+            }, "Button B", 0, 1, "tile_button_b", "F4")
+
+            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_B, () => {
                 return 1
             })
         }

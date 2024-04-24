@@ -279,32 +279,38 @@ namespace microcode {
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
                     const tabularRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
-                    this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
+                    // this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
+
+                    const data: string = datalogger.getRow(0)
+                    screen.printCenter(
+                        data,
+                        Screen.HALF_HEIGHT,
+                    )
                     
-                    for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
-                        const data = FauxDataLogger.entries[row + this.yScrollOffset].data;
+                    // for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
+                        // const data = FauxDataLogger.entries[row + this.yScrollOffset].data
         
-                        let cumulativeColOffset = 0
-                        for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
-                            const colID = col + this.xScrollOffset
-                            const value = data[colID].slice(0, 9) // Precision
-                            const colOffset = (font.charWidth * value.length) + 2
+                        // let cumulativeColOffset = 0
+                        // for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
+                        //     const colID = col + this.xScrollOffset
+                        //     const value = data[colID].slice(0, 9) // Precision
+                        //     const colOffset = (font.charWidth * value.length) + 2
         
-                            if (cumulativeColOffset + colOffset > Screen.WIDTH) {
-                                break
-                            }
+                        //     if (cumulativeColOffset + colOffset > Screen.WIDTH) {
+                        //         break
+                        //     }
         
-                            Screen.print(
-                                value,
-                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
-                                Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
-                                0xb,
-                                simage.font8
-                            )
+                        //     Screen.print(
+                        //         value,
+                        //         Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
+                        //         Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
+                        //         0xb,
+                        //         simage.font8
+                        //     )
         
-                            cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
-                        }
-                    }
+                        //     cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
+                        // }
+                    // }
 
                     break;
             

@@ -54,7 +54,6 @@ namespace microcode {
             // Newly added icons for MicroData Home menu:
             if (name == "linear_graph_1") return icondb.linearGraph1
             if (name == "linear_graph_2") return icondb.linearGraph2
-            
 
             if (name == "led_light_sensor") return icondb.led_light_sensor
             if (name == "thermometer") return icondb.thermometer
