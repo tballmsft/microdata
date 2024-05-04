@@ -13,7 +13,12 @@ namespace microcode {
         constructor(app: App, sensors: Sensor[]) {
             super(app, "dataRecorder")
 
-            new FauxDataLogger(sensors)
+            datalogger.setColumns([
+                "Sensor",
+                "Time (ms)",
+                "Reading",
+                "Event"
+            ])
 
             this.sensors = sensors
             this.sensorIndexOffset = 0

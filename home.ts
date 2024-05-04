@@ -11,6 +11,20 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            datalogger.setColumns([
+                "Sensor",
+                "Time (ms)",
+                "Reading",
+                "Event"
+            ])
+
+            datalogger.log(
+                datalogger.createCV("Sensor", " "),
+                datalogger.createCV("Time (ms)", " "),
+                datalogger.createCV("Reading", " "),
+                datalogger.createCV("Event", " ")
+            )
+
             this.liveDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
@@ -51,15 +65,14 @@ namespace microcode {
             })
 
             const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.viewBtn]
-
             this.navigator.addButtons(btns)
         }
 
         private drawVersion() {
             const font = simage.font5
             Screen.print(
-                "Prototype 12",
-                Screen.RIGHT_EDGE - font.charWidth * "Prototype 12".length,
+                "Prototype 13",
+                Screen.RIGHT_EDGE - font.charWidth * "Prototype 13".length,
                 Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
@@ -75,6 +88,7 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
+
             this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()
             const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0

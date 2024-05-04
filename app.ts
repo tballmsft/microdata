@@ -16,7 +16,6 @@ namespace microcode {
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
             this.pushScene(new Home(this))
-            // this.pushScene(new SensorSelect(this, CursorSceneEnum.LiveDataViewer))
         }
 
         public saveBuffer(slot: string, buf: Buffer) {

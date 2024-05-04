@@ -31,7 +31,7 @@ namespace microcode {
         private btns: Button[]
         private selectedSensorNames: string[]
         private nextSceneEnum: CursorSceneEnum
-
+        
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
@@ -41,6 +41,10 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
+
+            //---------
+            // Control:
+            //---------
 
             this.btns.push(new Button({
                 parent: null,
@@ -445,14 +449,13 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-            
+
             screen.printCenter("Sensor Selection", 2)
 
             for (let i = 0; i < this.btns.length; ++i) {
                 this.btns[i].draw()
             }
-
-            super.draw()
+            super.draw() 
         }
     }
 }

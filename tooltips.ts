@@ -182,6 +182,7 @@ namespace microcode {
         else if (id == "View Graph") res = "View Graph"
         else if (id == "Measurement Mode") res = "Measurement Mode"
         else if (id == "Event Mode") res = "Event Mode"
+        else if (id == "Reset Datalogger") res = "Reset Datalogger"
         
         return res
     }

@@ -53,9 +53,7 @@
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
         "sensors.ts",
-        "fauxDataLogger.ts",
         "dataRecorder.ts",
-        "generateGraph.ts",
         "sensorEvent.ts"
     ],
     "testFiles": [],

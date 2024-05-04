@@ -101,15 +101,14 @@ namespace microcode {
         }
 
         private logData(config: RecordingConfig) {
-            // datalogger.
-            
             while (config.measurements > 0)  {
-                FauxDataLogger.log([
-                    this.name, 
-                    (input.runningTime() - this.startTime).toString(),
-                    this.getReading().toString(),
-                    "N/A"
-                ])
+                datalogger.log(
+                    datalogger.createCV("Sensor", this.name),
+                    datalogger.createCV("Time (ms)", (input.runningTime() - this.startTime).toString()),
+                    datalogger.createCV("Reading", this.getReading()),
+                    datalogger.createCV("Event", "N/A")
+                )
+
                 basic.pause(config.period)
                 config.measurements -= 1
             }
@@ -122,12 +121,12 @@ namespace microcode {
                 const reading = this.getReading()
 
                 if (sensorEventFunction(reading, config.comparator)) {
-                    FauxDataLogger.log([
-                        this.name, 
-                        (input.runningTime() - this.startTime).toString(),
-                        reading.toString(),
-                        reading + " " + config.inequality + " " + config.comparator
-                    ])
+                    datalogger.log(
+                        datalogger.createCV("Sensor", this.name),
+                        datalogger.createCV("Time (ms)", (input.runningTime() - this.startTime).toString()),
+                        datalogger.createCV("Reading", reading.toString()),
+                        datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
+                    )
                     config.measurements -= 1
                 }
 

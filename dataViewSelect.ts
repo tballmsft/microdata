@@ -1,14 +1,15 @@
 namespace microcode {
     /**
-     * Choose between viewing:
-     *      Metadata of the recoreded data
+     * Choose between:
+     *      Resetting Datalogger
      *      A tabular view of the recorded data
      *      A graph of the recorded data
      */
     export class DataViewSelect extends CursorSceneWithPriorPage {
-        private metaDataBtn: Button
+        private resetDataLoggerBtn: Button
         private dataViewBtn: Button
         private graphViewBtn: Button
+        private numberOfRows: number
 
         constructor(app: App) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
@@ -16,12 +17,22 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
+            this.numberOfRows = 0
+
+            const data = datalogger.getData().split("\n")
+            // Sensor record exists:
+            for (let row = 0; row < data.length; row++) {
+                if (data[row].split(",")[1] != " " && data[row].split(",")[1] != "" && data[row].split(",")[1] != undefined) {
+                    this.numberOfRows += 1;
+                }
+            }
 
             //---------
             // Control:
             //---------
 
-            if (FauxDataLogger.isEmpty) {
+            // No data in log (first row are headers)
+            if (this.numberOfRows <= 1) {
                 control.onEvent(
                     ControllerButtonEvent.Pressed,
                     controller.A.id,
@@ -32,16 +43,25 @@ namespace microcode {
                 )
             }
 
-            this.metaDataBtn = new Button({
+            this.resetDataLoggerBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "largeSettingsGear",
-                ariaId: "Meta Data",
+                ariaId: "Reset Datalogger",
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new TabularDataViewer(this.app, DATA_VIEW_DISPLAY_MODE.METADATA_VIEW))
+                    datalogger.deleteLog()
+                    this.numberOfRows = 0
+                    
+                    control.onEvent(
+                        ControllerButtonEvent.Pressed,
+                        controller.A.id,
+                        () => {
+                            this.app.popScene()
+                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                        }
+                    )
                 },
                 boundaryColor: 7,
             })
@@ -69,12 +89,12 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new GraphGenerator(this.app))
+                    // this.app.pushScene(new GraphGenerator(this.app))
                 },
                 boundaryColor: 7,
             })
 
-            this.navigator.addButtons([this.metaDataBtn, this.dataViewBtn, this.graphViewBtn])
+            this.navigator.addButtons([this.resetDataLoggerBtn, this.dataViewBtn, this.graphViewBtn])
         }
 
         draw() {
@@ -86,7 +106,7 @@ namespace microcode {
                 0xC
             )
 
-            if (FauxDataLogger.isEmpty) {
+            if (this.numberOfRows <= 1) {
                 screen.printCenter("No data has been recorded", 5)
                 screen.printCenter("Press A to Record some!", Screen.HALF_HEIGHT)
                 return;
@@ -94,7 +114,7 @@ namespace microcode {
 
             else {
                 screen.printCenter("Recorded Data Options", 5)
-                this.metaDataBtn.draw()
+                this.resetDataLoggerBtn.draw()
                 this.dataViewBtn.draw()
                 this.graphViewBtn.draw()
             }
