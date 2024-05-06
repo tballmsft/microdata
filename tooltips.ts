@@ -36,8 +36,8 @@ namespace microcode {
         else if (id === "F0") res = "touch pin 0";
         else if (id === "F1") res = "touch pin 1";
         else if (id === "F2") res = "touch pin 2";
-        else if (id === "F3") res = "button A";
-        else if (id === "F4") res = "button B";
+        else if (id === "F3") res = "A Button";
+        else if (id === "F4") res = "B Button";
         else if (id === "F5") res = "key 1";
         else if (id === "F6") res = "key 2";
         else if (id === "F7") res = "logo";
@@ -183,6 +183,8 @@ namespace microcode {
         else if (id == "Measurement Mode") res = "Measurement Mode"
         else if (id == "Event Mode") res = "Event Mode"
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
+        else if (id == "Yes") res = "Yes"
+        else if (id == "No") res = "No"
         
         return res
     }
