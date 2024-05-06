@@ -17,16 +17,11 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            this.numberOfRows = 0
 
-            const data = datalogger.getData().split("\n")
-            // Sensor record exists:
-            for (let row = 0; row < data.length; row++) {
-                if (data[row].split(",")[1] != " " && data[row].split(",")[1] != "" && data[row].split(",")[1] != undefined) {
-                    this.numberOfRows += 1;
-                }
-            }
-
+            // Includes the header:
+            this.numberOfRows = datalogger.getData().split("_").length - 1
+            basic.showNumber(this.numberOfRows)
+            
             //---------
             // Control:
             //---------

@@ -14,7 +14,7 @@ namespace microcode {
      * Used to view the recorded data & its meta data
      */
     export class TabularDataViewer extends Scene {
-        private dataRows: string[];
+        private dataRows: string[][];
         private numberOfCols: number;
         private numberOfSensors: number;
         private headerStringLengths: number[];
@@ -38,29 +38,35 @@ namespace microcode {
             super.startup()
 
             this.dataRows = []
-            const rawDataRows = datalogger.getData().split("\n")
-
-            // Filter rows with blank sensors:
-            for (let row = 0; row < rawDataRows.length; row++) {
-                if (rawDataRows[row].split(",")[1] != " " && rawDataRows[row].split(",")[1] != "" && rawDataRows[row].split(",")[1] != undefined) {
-                    this.dataRows.push(rawDataRows[row])
-                }
+            this.headerStringLengths = []
+            const tokens = datalogger.getData().split("_")
+            this.numberOfCols = 5
+            
+            // Skip the first column of each row (Time (Seconds)):
+            for (let i = 0; i < tokens.length - 5; i += this.numberOfCols) {
+                this.dataRows[i / this.numberOfCols] = tokens.slice(i + 1, i + 5);
             }
 
-            const headers = this.dataRows[0].split(",")
-            this.numberOfCols = headers.length;
-            this.headerStringLengths = headers.map((header: string) => ((header.length + 3) * font.charWidth))
+            this.numberOfCols = 4
+            this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             // Count until sensor name is repeated:
-            this.numberOfSensors = 0
-            const firstSensor = this.dataRows[0].split(",", 2)[1]
-            for (let rowID = 1; rowID < this.dataRows.length; rowID++) {
+            const firstSensor = this.dataRows[1][0] // Skip first row (headers)
+            this.numberOfSensors = 1
+
+            // Go from second sensor onward (3rd row):
+            for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
                 // First element in row is the sensor:
-                if (this.dataRows[rowID].split(",", 2)[1] == firstSensor) {
-                    this.numberOfSensors = rowID
+                if (this.dataRows[rowID][0] != firstSensor) {
+                    this.numberOfSensors += 1
+                }
+
+                else {
                     break
                 }
             }
+
+            // basic.showNumber(this.numberOfSensors)
 
             //----------
             // Controls:
@@ -71,6 +77,8 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     if(this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        this.currentRowIndex = 0
+                        this.yScrollOffset = 0
                         this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
                     }
                     else {
@@ -111,7 +119,7 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        const limit = Math.min(this.dataRows.length - 2, TABULAR_MAX_ROWS - 1)
+                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
                         if (this.currentRowIndex < limit) {
                             this.currentRowIndex = Math.min(this.currentRowIndex + 1, this.dataRows.length - 1)
                         }
@@ -135,7 +143,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.xScrollOffset + 1 < this.numberOfCols - 2) {
+                    if (this.xScrollOffset + 1 < this.numberOfCols - 1) {
                         this.xScrollOffset += 1
                     }
                 }
@@ -153,7 +161,7 @@ namespace microcode {
             let cumulativeColOffset = 0
 
             // Skip the first column: Time (Seconds):
-            for (let col = 1; col < colBufferSizes.length; col++) {
+            for (let col = 0; col < colBufferSizes.length; col++) {
                 if (cumulativeColOffset + colBufferSizes[col] > Screen.WIDTH) {
                     break
                 }
@@ -192,7 +200,7 @@ namespace microcode {
                 Screen.drawRect(
                     Screen.LEFT_EDGE,
                     Screen.TOP_EDGE + (this.currentRowIndex * rowBufferSize),
-                    colBufferSizes[1],
+                    colBufferSizes[0],
                     rowBufferSize,
                     6
                 )
@@ -209,34 +217,35 @@ namespace microcode {
             )
 
             switch (this.guiState) {
-                case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW:
-                    const filteredRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length - 1 / this.numberOfSensors, TABULAR_MAX_ROWS)
+                case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW: 
+                    const filteredRowBufferSize = Screen.HEIGHT / Math.min(((this.dataRows.length - 1) / this.numberOfSensors) + 1, TABULAR_MAX_ROWS)
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
 
-                    const filteredSensor: string = this.dataRows[this.currentRowIndex + this.yScrollOffset].split(",", 1)[0]
-                    let filteredData: string[][] = []
+                    const filteredSensor: string = this.dataRows[this.currentRowIndex + this.yScrollOffset][0]
+                    let filteredData: string[][] = [this.dataRows[0]]
 
                     this.dataRows.forEach((row) => {
-                        if (row.split(",")[0] == filteredSensor) {
-                            filteredData.push(row.split(","))
+                        if (row[0] == filteredSensor) {
+                            filteredData.push(row)
                         }
                     });
-                    
-                    for (let row = 0; row < Math.min(filteredData.length, TABULAR_MAX_ROWS); row++) {
-                        let cumulativeColOffset = 0
-                        const data = filteredData[row + 1]
 
-                        for (let col = 0; col < this.numberOfCols; col++) {
+                    // Values:
+                    for (let row = 0; row < Math.min(filteredData.length, TABULAR_MAX_ROWS); row++) {
+                        let cumulativeColOffset = 0;
+
+                        // Skip the first column: Time (Seconds)
+                        for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = data[colID]
-        
+                            let value = filteredData[row][colID]
+
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
                             }
 
-                            if (value == undefined) {
-                                value = " "
-                            }
+                            // if (value == undefined) {
+                            //     value = " "
+                            // }
 
                             // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                             // This will align the text to the center of this column space
@@ -251,34 +260,32 @@ namespace microcode {
                                 0xb,
                                 simage.font8
                             )
-        
+
                             cumulativeColOffset += this.headerStringLengths[colID]
                         }
                     }
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
-                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS)
+                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length, TABULAR_MAX_ROWS)
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
 
                     // Values:
-                    for (let row = 0; row < Math.min(this.dataRows.length - 2, TABULAR_MAX_ROWS); row++) {
-                        const rowData = this.dataRows[row + this.yScrollOffset].split(",")
-
-                        let cumulativeColOffset = 0
+                    for (let row = 0; row < Math.min(this.dataRows.length, TABULAR_MAX_ROWS); row++) {
+                        let cumulativeColOffset = 0;
 
                         // Skip the first column: Time (Seconds)
-                        for (let col = 1; col < this.numberOfCols; col++) {
+                        for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = rowData[colID] //.slice(0, 9) // Precision
+                            let value = this.dataRows[row][colID]
 
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
                             }
 
-                            if (value == undefined) {
-                                value = " "
-                            }
+                            // if (value == undefined) {
+                            //     value = " "
+                            // }
 
                             // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                             // This will align the text to the center of this column space
@@ -297,7 +304,6 @@ namespace microcode {
                             cumulativeColOffset += this.headerStringLengths[colID]
                         }
                     }
-
                     break;
             
                 default:

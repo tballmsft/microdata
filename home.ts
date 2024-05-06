@@ -18,12 +18,15 @@ namespace microcode {
                 "Event"
             ])
 
-            datalogger.log(
-                datalogger.createCV("Sensor", " "),
-                datalogger.createCV("Time (ms)", " "),
-                datalogger.createCV("Reading", " "),
-                datalogger.createCV("Event", " ")
-            )
+            // // Small write is currently needed to read all the existing data if the uBit has just been powered.
+            // // This is a high priority issue to fix.
+            // // Doing this useless write resolves the read issue though:
+            // datalogger.log(
+            //     datalogger.createCV("Sensor", " "),
+            //     datalogger.createCV("Time (ms)", " "),
+            //     datalogger.createCV("Reading", " "),
+            //     datalogger.createCV("Event", " ")
+            // )
 
             this.liveDataBtn = new Button({
                 parent: null,
@@ -88,6 +91,9 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
+
+            // screen.printCenter(this.data[0], 20)
+            // screen.printCenter(this.data[1], 30)
 
             this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()
