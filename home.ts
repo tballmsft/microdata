@@ -11,22 +11,15 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            // Small write is currently needed to read all the existing data if the uBit has just been powered.
+            // This is a high priority issue to fix.
+            // Doing this useless write resolves the read issue though:
             datalogger.setColumns([
                 "Sensor",
                 "Time (ms)",
                 "Reading",
                 "Event"
             ])
-
-            // // Small write is currently needed to read all the existing data if the uBit has just been powered.
-            // // This is a high priority issue to fix.
-            // // Doing this useless write resolves the read issue though:
-            // datalogger.log(
-            //     datalogger.createCV("Sensor", " "),
-            //     datalogger.createCV("Time (ms)", " "),
-            //     datalogger.createCV("Reading", " "),
-            //     datalogger.createCV("Event", " ")
-            // )
 
             this.liveDataBtn = new Button({
                 parent: null,
@@ -50,7 +43,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
             })
 
@@ -74,8 +67,8 @@ namespace microcode {
         private drawVersion() {
             const font = simage.font5
             Screen.print(
-                "Prototype 13",
-                Screen.RIGHT_EDGE - font.charWidth * "Prototype 13".length,
+                "Version 1.0",
+                Screen.RIGHT_EDGE - font.charWidth * "Version 1.0".length,
                 Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
@@ -91,9 +84,6 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-
-            // screen.printCenter(this.data[0], 20)
-            // screen.printCenter(this.data[1], 30)
 
             this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()

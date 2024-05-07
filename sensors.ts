@@ -308,7 +308,7 @@ namespace microcode {
     }
 
     /**
-     * modules.lightLevel1.lightLevel Sensor from pxt-jacdac/jacdac-light-level
+     * modules.lightLevel1.lightLevel sensor from pxt-jacdac/jacdac-light-level
      */
     export class JacdacLightSensor extends Sensor {
         constructor() {
@@ -324,7 +324,7 @@ namespace microcode {
     }
 
     /**
-     * modules.distance1.distance Sensor from pxt-jacdac/jacdac-distance
+     * modules.distance1.distance sensor from pxt-jacdac/jacdac-distance
      */
     export class JacdacDistanceSensor extends Sensor {
         constructor() {
@@ -340,7 +340,7 @@ namespace microcode {
     }
 
     /**
-     * modules.soilMoisture1.moisture Sensor from pxt-jacdac/jacdac-soil-moisture
+     * modules.soilMoisture1.moisture sensor from pxt-jacdac/jacdac-soil-moisture
      */
     export class JacdacSoilMoistureSensor extends Sensor {
         constructor() {
@@ -356,55 +356,50 @@ namespace microcode {
     }
 
     /**
-     * Sensor for the A button of the Microbit (not arcade shield)
+     * modules.flex1.bending sensor from pxt-jacdac/flex
      */
-    export class ButtonAPressSensor extends Sensor {
-        private buttonPressed: boolean
+    export class JacdacFlexSensor extends Sensor {
         constructor() {
             super(
-                function () {
-                    let output = 0
-                    if (this.buttonPressed) {
-                        output =  1
-                    }
-                    return output
-                }, 
-                "Button A", 
+                function () {return modules.flex1.bending()}, 
+                "Jacdac Flex.", 
                 0, 
-                1,
-                "tile_button_a", 
-                "F3"
+                100,
+                "microbitLogo",
+                "Jacdac Flex."
             )
-
-            this.buttonPressed = false
-            control.onEvent(DAL.DEVICE_BUTTON_EVT_UP, DAL.DEVICE_ID_BUTTON_A, () => {
-                this.buttonPressed = false
-            })
-
-            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_A, () => {
-                this.buttonPressed = true
-            })
         }
     }
 
     /**
-     * Sensor for the A button of the Microbit (not arcade shield)
+     * modules.temperature1.temperature sensor from pxt-jacdac/temperature
      */
-    export class ButtonBPressSensor extends Sensor {
+    export class JacdacTemperatureSensor extends Sensor {
         constructor() {
-            super(function () {
-                let output = 0
-                if (this.buttonPressed) {
-                    output =  1
-                }
-                
-                this.buttonPressed = false
-                return output
-            }, "Button B", 0, 1, "tile_button_b", "F4")
+            super(
+                function () {return modules.temperature1.temperature()}, 
+                "Jacdac Temp.", 
+                0, 
+                100,
+                "microbitLogo",
+                "Jacdac Temp."
+            )
+        }
+    }
 
-            control.onEvent(DAL.DEVICE_BUTTON_EVT_DOWN, DAL.DEVICE_ID_BUTTON_B, () => {
-                return 1
-            })
+    /**
+     * modules.humidity1.humidity sensor from pxt-jacdac/humidity
+     */
+    export class JacdacHumiditySensor extends Sensor {
+        constructor() {
+            super(
+                function () {return modules.humidity1.humidity()}, 
+                "Jacdac Temp.", 
+                0, 
+                100,
+                "microbitLogo",
+                "Jacdac Temp."
+            )
         }
     }
 }

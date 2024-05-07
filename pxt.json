@@ -11,7 +11,10 @@
         "jacdac": "github:tballmsft/pxt-jacdac",
         "jacdac-light-level": "github:tballmsft/pxt-jacdac/tree/master/light-level",
         "jacdac-soil-moisture": "github:tballmsft/pxt-jacdac/tree/master/soil-moisture",
-        "jacdac-distance": "github:tballmsft/pxt-jacdac/tree/master/distance"
+        "jacdac-distance": "github:tballmsft/pxt-jacdac/tree/master/distance",
+        "jacdac-temperature": "github:tballmsft/pxt-jacdac/tree/master/temperature",
+        "jacdac-humidity": "github:tballmsft/pxt-jacdac/tree/master/humidity",
+        "jacdac-flex": "github:tballmsft/pxt-jacdac/tree/master/flex"
     },
     "files": [
         "protocol.ts",
@@ -54,7 +57,8 @@
         "recordingConfigSelection.ts",
         "sensors.ts",
         "dataRecorder.ts",
-        "sensorEvent.ts"
+        "sensorEvent.ts",
+        "clearDataloggerScreen.ts"
     ],
     "testFiles": [],
     "supportedTargets": [

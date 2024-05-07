@@ -14,11 +14,11 @@ namespace microcode {
         "Logo Press": new LogoPressSensor(),
         "Volume": new VolumeSensor(),
         "Compass": new CompassHeadingSensor(),
-        "F3": new ButtonAPressSensor(),
-        "F4": new ButtonBPressSensor(),
         "JacdacLight": new JacdacLightSensor(),
         "JacdacSoilMoisture": new JacdacSoilMoistureSensor(),
-        "JacdacDistance": new JacdacDistanceSensor()
+        "JacdacDistance": new JacdacDistanceSensor(),
+        "JacdacFlexSensor": new JacdacFlexSensor(),
+        "JacdacTemperatureSensor": new JacdacTemperatureSensor()
     }
 
     /**
@@ -321,17 +321,17 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "tile_button_a",
-                ariaId: "F3",
+                icon: "microbitLogoWhiteBackground",
+                ariaId: "Jacdac Flex",
                 x: 60,
                 y: 18,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("F3")
+                    const index = this.selectedSensorNames.indexOf("JacdacFlexSensor")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("F3")
+                        this.selectedSensorNames.push("JacdacFlexSensor")
                     }
                 },
                 dynamicBoundaryColorsOn: true,     
@@ -342,17 +342,17 @@ namespace microcode {
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "tile_button_b",
-                ariaId: "F4",
+                icon: "microbitLogoWhiteBackground",
+                ariaId: "Jacdac Temperature",
                 x: -60,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("F4")
+                    const index = this.selectedSensorNames.indexOf("JacdacTemperatureSensor")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("F4")
+                        this.selectedSensorNames.push("JacdacTemperatureSensor")
                     }
                 },
                 dynamicBoundaryColorsOn: true,     
@@ -437,7 +437,6 @@ namespace microcode {
                     }
                 }
             }))
-
             this.navigator.addButtons(this.btns)
         }
         
@@ -452,7 +451,7 @@ namespace microcode {
 
             screen.printCenter("Sensor Selection", 2)
 
-            for (let i = 0; i < this.btns.length; ++i) {
+            for (let i = 0; i < this.btns.length; i++) {
                 this.btns[i].draw()
             }
             super.draw() 
