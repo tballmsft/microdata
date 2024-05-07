@@ -164,6 +164,9 @@ namespace microcode {
         else if (id == "Jacdac Light") res = "Jacdac Light"
         else if (id == "Jacdac Moisture") res = "Jacdac Moisture"
         else if (id == "Jacdac Distance") res = "Jacdac Distance"
+        else if (id == "Jacdac Flex") res = "Jacdac Flex"
+        else if (id == "Jacdac Temperature") res = "Jacdac Temperature"
+        else if (id == "Jacdac Humidity") res = "Jacdac Humidity"
 
         // icons do not yet exist:
         else if (id == "Record") res = "Record"

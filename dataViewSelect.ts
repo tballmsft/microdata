@@ -19,8 +19,9 @@ namespace microcode {
             super.startup()
 
             // Includes the header:
-            this.numberOfRows = datalogger.getData().split("_").length - 1
-            basic.showNumber(this.numberOfRows)
+            const numberOfColumns = 5
+            this.numberOfRows = (datalogger.getData().split("_").length - 1) / numberOfColumns
+            // basic.showNumber(this.numberOfRows)
             
             //---------
             // Control:

@@ -41,6 +41,8 @@ namespace microcode {
             this.headerStringLengths = []
             const tokens = datalogger.getData().split("_")
             this.numberOfCols = 5
+
+            // basic.showNumber(tokens.length - 1)
             
             // Skip the first column of each row (Time (Seconds)):
             for (let i = 0; i < tokens.length - 5; i += this.numberOfCols) {
@@ -65,8 +67,6 @@ namespace microcode {
                     break
                 }
             }
-
-            // basic.showNumber(this.numberOfSensors)
 
             //----------
             // Controls:
