@@ -22,10 +22,9 @@ namespace microcode {
     }
 
     /**
-     * Responsible for allowing the user to select any number of sensors.
+     * Responsible for allowing the user to select sensors to record or view live readings from.
+     *      The user may select any number of sensors to read from simultaneously.
      *      These sensors are passed to either the measurement screen or the live data view
-     * 
-     * More buttons may be added to support additional sensors
      */
     export class SensorSelect extends CursorSceneWithPriorPage {
         private btns: Button[]

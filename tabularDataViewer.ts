@@ -2,6 +2,7 @@ namespace microcode {
     /**
      * Display limits
      * Data in excess will require scrolling to view
+     * Includes header row
      */
     const TABULAR_MAX_ROWS = 8
 
@@ -11,7 +12,8 @@ namespace microcode {
     }
 
     /**
-     * Used to view the recorded data & its meta data
+     * Used to view the information stored in the data logger
+     * 
      */
     export class TabularDataViewer extends Scene {
         private dataRows: string[][];
@@ -77,7 +79,7 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     if(this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
-                        this.currentRowIndex = 0
+                        this.currentRowIndex = 1
                         this.yScrollOffset = 0
                         this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
                     }
@@ -125,9 +127,10 @@ namespace microcode {
                         }
 
                         else if (this.currentRowIndex + this.yScrollOffset < this.dataRows.length - 1) {
-                            this.yScrollOffset = Math.min(this.yScrollOffset + 1, this.dataRows.length - 1)
+                            this.yScrollOffset += 1
                         }
                     }
+                    // basic.showNumber(this.yScrollOffset)
                 }
             )
 
@@ -243,10 +246,6 @@ namespace microcode {
                                 break
                             }
 
-                            // if (value == undefined) {
-                            //     value = " "
-                            // }
-
                             // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                             // This will align the text to the center of this column space
                             if (colID == this.numberOfCols - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
@@ -271,21 +270,17 @@ namespace microcode {
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
 
                     // Values:
-                    for (let row = 0; row < Math.min(this.dataRows.length, TABULAR_MAX_ROWS); row++) {
+                    for (let row = 0; row < Math.min(this.dataRows.length - this.yScrollOffset, TABULAR_MAX_ROWS); row++) {
                         let cumulativeColOffset = 0;
 
                         // Skip the first column: Time (Seconds)
                         for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = this.dataRows[row][colID]
+                            let value = this.dataRows[row + this.yScrollOffset][colID]
 
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
                             }
-
-                            // if (value == undefined) {
-                            //     value = " "
-                            // }
 
                             // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                             // This will align the text to the center of this column space

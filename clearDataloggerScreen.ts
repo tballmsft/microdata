@@ -1,16 +1,16 @@
 namespace microcode {
     /**
-     * Responsible for allowing the user to select any number of sensors.
-     *      These sensors are passed to either the measurement screen or the live data view
-     * 
-     * More buttons may be added to support additional sensors
+     * Grant the user the option to clear the contents stored on the data logger.
+     * Inbetween Home and SensorSelect
      */
     export class ClearDataLoggerScreen extends CursorSceneWithPriorPage {
         private btns: Button[]
+        private currentlyDeleting: boolean
         
         constructor(app: App) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
+            this.currentlyDeleting = false
         }
 
         /* override */ startup() {
@@ -29,6 +29,7 @@ namespace microcode {
                 x: -30,
                 y: 20,
                 onClick: () => {
+                    this.currentlyDeleting = true
                     datalogger.deleteLog()
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
@@ -99,6 +100,10 @@ namespace microcode {
                 2,
                 15 // Black
             )
+
+            if (this.currentlyDeleting) {
+                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 10)
+            }
 
             for (let i = 0; i < this.btns.length; i++) {
                 this.btns[i].draw()
