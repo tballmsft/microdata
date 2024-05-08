@@ -4,8 +4,7 @@ namespace microcode {
         EVENTS
     }
 
-
-    const EVENT_POLLING_PERIOD_MS = 100
+    export const EVENT_POLLING_PERIOD_MS = 100
 
     /**
      * Abstraction for all available sensors,
@@ -23,6 +22,13 @@ namespace microcode {
         public config: RecordingConfig | EventConfig
         public loggingMode: SensorLoggingMode
 
+        /**
+         * Normally the time between sensor readings is greater than the period
+         * This is because of operations that happen inbetween readings
+         * Calculate the average difference and subtract that from the periods
+         */
+        public lastReadingDelay: number
+
         // Reading Statistics:
         public minimum: number
         public maximum: number
@@ -30,7 +36,7 @@ namespace microcode {
         public lastLoggedEventDescription: string
 
         private dataBuffer: number[]
-        private logWriteBuffer: string[][]
+        private totalMeasurements: number
 
         constructor(sensorFn: () => number, 
             name: string,
@@ -43,6 +49,7 @@ namespace microcode {
             this.sensorFn = sensorFn
             this.iconName = iconName
             this.startTime = 0 // This value will be set upon the first reading
+            this.lastReadingDelay = 0
 
             this.config = config
             this.loggingMode = null
@@ -53,17 +60,18 @@ namespace microcode {
             this.lastLoggedEventDescription = ""
 
             this.dataBuffer = []
-            this.logWriteBuffer = []
         }
 
         setRecordingConfig(config: RecordingConfig) {
             this.config = config
             this.loggingMode = SensorLoggingMode.RECORDING
+            this.totalMeasurements = config.measurements
         }
 
         setEventConfig(config: EventConfig) {
             this.config = config
             this.loggingMode = SensorLoggingMode.EVENTS
+            this.totalMeasurements = config.measurements
         }
 
         getBufferSize(): number {return this.dataBuffer.length}
@@ -83,68 +91,60 @@ namespace microcode {
         /**
          * Spawns an independent background fiber to log sensor data according to its .config
          */
-        log() {
-            control.inBackground(() => {
-                if (this.loggingMode == SensorLoggingMode.EVENTS) {
-                    this.logEvent(this.config as EventConfig)
-                }
-
-                else {
-                    this.logData(this.config as RecordingConfig)
-                }
-            })
-        }
-
-        private handleLogQueue() {
-            while (this.logWriteBuffer.length > 0) {
-                const entry: string[] = this.logWriteBuffer.shift()
-
-                datalogger.log(
-                    datalogger.createCV("Sensor", entry[0]),
-                    datalogger.createCV("Time (ms)", entry[1]),
-                    datalogger.createCV("Reading", entry[2]),
-                    datalogger.createCV("Event", entry[3])
-                )
-                basic.pause(1)
+        log(): boolean {
+            if (this.startTime == 0) {
+                this.startTime = input.runningTime()
             }
-        }
-
-        private logData(config: RecordingConfig) {
-            this.startTime = input.runningTime()
-            while (config.measurements > 0) {
-                this.logWriteBuffer.push([
-                    this.name, 
-                    (input.runningTime() - this.startTime).toString(), 
-                    this.getReading().toString(),
-                    "N/A"
-                ])
-
-                // control.waitForEvent(this.writingToDatalogger, 0)
-                basic.pause(config.period)
-                config.measurements -= 1
+            if (this.loggingMode == SensorLoggingMode.EVENTS) {
+                return this.logEvent(this.config as EventConfig)
             }
-            this.handleLogQueue()
+
+            return this.logData(this.config as RecordingConfig)
         }
 
-        private logEvent(config: EventConfig) {
+        logData(config: RecordingConfig): boolean {
+            if (config.measurements <= 0) {
+                return false
+            }
+
+            const reading = this.getReading()
+            const time = input.runningTime() - this.startTime
+
+            datalogger.log(
+                datalogger.createCV("Sensor", this.name),
+                datalogger.createCV("Time (ms)", time.toString()),
+                datalogger.createCV("Reading", reading.toString()),
+                datalogger.createCV("Event", "N/A")
+            )
+
+            this.lastReadingDelay = time - ((this.totalMeasurements - config.measurements) * config.period)
+
+            // basic.pause(config.period)
+            config.measurements -= 1
+            return true
+        }
+
+        logEvent(config: EventConfig): boolean {
             let sensorEventFunction = sensorEventFunctionLookup[config.inequality]
 
-            this.startTime = input.runningTime()
-            while (config.measurements > 0)  {
-                const reading = this.getReading()
-
-                if (sensorEventFunction(reading, config.comparator)) {
-                    datalogger.log(
-                        datalogger.createCV("Sensor", this.name),
-                        datalogger.createCV("Time (ms)", (input.runningTime() - this.startTime).toString()),
-                        datalogger.createCV("Reading", reading.toString()),
-                        datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
-                    )
-                    config.measurements -= 1
-                }
-
-                basic.pause(EVENT_POLLING_PERIOD_MS)
+            if (config.measurements <= 0) {
+                return false
             }
+
+            const reading = this.getReading()
+
+            if (sensorEventFunction(reading, config.comparator)) {
+                datalogger.log(
+                    datalogger.createCV("Sensor", this.name),
+                    datalogger.createCV("Time (ms)", (input.runningTime() - this.startTime).toString()),
+                    datalogger.createCV("Reading", reading.toString()),
+                    datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
+                )
+                config.measurements -= 1
+            }
+
+            // basic.pause(EVENT_POLLING_PERIOD_MS)
+            return true
         }
 
         /**

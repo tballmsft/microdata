@@ -3,6 +3,10 @@ namespace microcode {
     const MAX_Y_SCOLL = -75
 
     export class GraphGenerator extends Scene {
+        private dataRows: string[][];
+        private numberOfCols: number;
+        private headerStringLengths: number[];
+
         private windowWidth: number
         private windowHeight: number
 
@@ -24,6 +28,18 @@ namespace microcode {
             this.windowBotBuffer = 20
 
             this.yScrollOffset = 0
+
+            this.dataRows = []
+            this.headerStringLengths = []
+            const tokens = datalogger.getData().split("_")
+            this.numberOfCols = 4
+            
+            // Skip the first column of each row (Time (Seconds)):
+            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
+                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
+            }
+
+            this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,

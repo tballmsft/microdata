@@ -4,6 +4,7 @@ namespace microcode {
 
     export class DataRecorder extends Scene {
         private sensors: Sensor[]
+        private sensorWaitTimes: number[]
 
         // UI:
         private currentSensorIndex: number
@@ -21,14 +22,57 @@ namespace microcode {
             ])
 
             this.sensors = sensors
+            this.sensorWaitTimes = []
             this.sensorIndexOffset = 0
             this.currentSensorIndex = 0
             this.sensorBoxColor = 16
 
-            // Start logging:
-            this.sensors.forEach((sensor) => {
-                sensor.log()
+
+            /**
+             * There are more efficient methods of intialising this.
+             * It only occurs once and typically the number of sensors is small
+             *      So the cost is minimal
+             * But improvements are possible
+             */
+
+            // Order the sensors by period ascending - events have period of sensors.ts/EVENT_POLLING_PERIOD_MS
+            this.sensors.sort((a, b) => {
+                let aPeriod = EVENT_POLLING_PERIOD_MS
+                let bPeriod = EVENT_POLLING_PERIOD_MS
+
+                if (a.loggingMode == SensorLoggingMode.RECORDING) {
+                    const config: RecordingConfig = a.config as RecordingConfig;
+                    aPeriod = config.period
+                }
+
+                if (b.loggingMode == SensorLoggingMode.RECORDING) {
+                    const config: RecordingConfig = b.config as RecordingConfig;
+                    bPeriod = config.period
+                }
+                return aPeriod - bPeriod;
             })
+
+            for (let i = 0; i < this.sensors.length - 1; i++) {
+                const aSensor = this.sensors[i]
+                const bSensor = this.sensors[(i + 1) % this.sensors.length]
+
+                let aPeriod = EVENT_POLLING_PERIOD_MS
+                let bPeriod = EVENT_POLLING_PERIOD_MS
+
+                if (aSensor.loggingMode == SensorLoggingMode.RECORDING) {
+                    aPeriod = (aSensor.config as RecordingConfig).period
+                }
+
+                if (bSensor.loggingMode == SensorLoggingMode.RECORDING) {
+                    bPeriod = (bSensor.config as RecordingConfig).period
+                }
+
+                if (i == 0) {
+                    this.sensorWaitTimes.push(aPeriod)
+                }
+
+                this.sensorWaitTimes.push(bPeriod - aPeriod)
+            }
 
             //---------------
             // User Controls:
@@ -73,6 +117,27 @@ namespace microcode {
                     this.update()
                 }
             )
+
+            this.log()
+        }
+
+
+        log() {
+            control.inBackground(() => {
+                let loggingStates = this.sensors.map((_) => true)
+                const loggingCompleteState = this.sensors.map((_) => false)
+
+                // Log all sensors once:
+                this.sensors.forEach((sensor) => sensor.log())
+                let i = 0
+
+                while (loggingStates[0] != loggingCompleteState[0]) {
+                    const index = i % this.sensorWaitTimes.length
+                    basic.pause(this.sensorWaitTimes[index]) // - this.sensors[index].lastReadingDelay)
+                    loggingStates[index] = this.sensors[index].log()
+                    i += 1
+                }
+            })
         }
 
         update(): void {

@@ -11,7 +11,6 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
             
             // Small write is currently needed to read all the existing data if the uBit has just been powered.
