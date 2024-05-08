@@ -5,6 +5,7 @@ namespace microcode {
     export class GraphGenerator extends Scene {
         private dataRows: string[][];
         private numberOfCols: number;
+        private numberOfSensors: number;
         private headerStringLengths: number[];
 
         private windowWidth: number
@@ -40,6 +41,22 @@ namespace microcode {
             }
 
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
+
+            // Count until sensor name is repeated:
+            const firstSensor = this.dataRows[1][0] // Skip first row (headers)
+            this.numberOfSensors = 1
+
+            // Go from second sensor onward (3rd row):
+            for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
+                // First element in row is the sensor:
+                if (this.dataRows[rowID][0] != firstSensor) {
+                    this.numberOfSensors += 1
+                }
+
+                else {
+                    break
+                }
+            }
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -82,15 +99,17 @@ namespace microcode {
             this.draw_axes()
 
             // Draw data lines:
-            const fromY = this.windowBotBuffer - 2 * this.yScrollOffset
+            const fromY = (this.windowBotBuffer - 2) * this.yScrollOffset
             const fromX = this.windowWidthBuffer + 2
 
-            for (let row = 1; row < FauxDataLogger.numberOfRows - FauxDataLogger.sensors.length; row++) {
-                const minimum = FauxDataLogger.sensors[(row - 1) % FauxDataLogger.sensors.length].minimum
-                const maximum = FauxDataLogger.sensors[(row - 1) % FauxDataLogger.sensors.length].maximum
+            for (let row = 1; row < this.dataRows.length - this.numberOfSensors; row++) {
+                const sensorName = this.dataRows[row][0];
+                const sensor = SENSOR_LOOKUP_TABLE[sensorName];
+                const minimum = sensor.minimum
+                const maximum = sensor.maximum
 
-                const norm1 = ((+FauxDataLogger.entries[row].data[2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
-                const norm2 = ((+FauxDataLogger.entries[row + FauxDataLogger.sensors.length].data[2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+                const norm1 = ((+this.dataRows[row][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+                const norm2 = ((+this.dataRows[row + this.numberOfSensors][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
             
                 const y1 = Math.round(screen.height - norm1) - fromY  
                 const y2 = Math.round(screen.height - norm2) - fromY
@@ -102,15 +121,21 @@ namespace microcode {
 
                 screen.drawLine(fromX + row, y1, fromX + row - 1, y2, color);
 
-                color = 8 + (((row - 1) % FauxDataLogger.sensors.length) % 15)
+                color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
 
+            screen.print(
+                ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
+                fromX + this.dataRows.length + 1,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 2,
+                1
+            )
 
             const yStart = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
             let y = yStart
             
             // Write Sensor information, displayed below the plot:
-            for (let i = 0; i < FauxDataLogger.sensors.length; i++) {
+            for (let i = 0; i < this.numberOfSensors; i++) {
                 // Colour used to represent this sensor, same colour as plotted & ticker:
                 y += (i * 12)
 
@@ -124,18 +149,8 @@ namespace microcode {
 
                 // Name, reading / maximum
                 screen.print(
-                    // FauxDataLogger.sensors[i].name + " " + FauxDataLogger.sensors[i].getReading() + "/" + FauxDataLogger.sensors[i].maximum,
-                    FauxDataLogger.sensors[i].name,
+                    this.dataRows[i + 1][0],
                     14,
-                    y,
-                    color
-                )
-
-                // Write the peak reading just below and with a slight xOffset from the above:
-                y += 12
-                screen.print(
-                    "Peak " + FauxDataLogger.sensors[i].peakDataPoint[1], 
-                    44,
                     y,
                     color
                 )

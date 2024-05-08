@@ -52,6 +52,13 @@ namespace microcode {
                 return aPeriod - bPeriod;
             })
 
+
+            let aPeriod = EVENT_POLLING_PERIOD_MS
+            if (this.sensors[0].loggingMode == SensorLoggingMode.RECORDING) {
+                aPeriod = (this.sensors[0].config as RecordingConfig).period
+            }
+            this.sensorWaitTimes.push(aPeriod)
+
             for (let i = 0; i < this.sensors.length - 1; i++) {
                 const aSensor = this.sensors[i]
                 const bSensor = this.sensors[(i + 1) % this.sensors.length]
@@ -67,12 +74,9 @@ namespace microcode {
                     bPeriod = (bSensor.config as RecordingConfig).period
                 }
 
-                if (i == 0) {
-                    this.sensorWaitTimes.push(aPeriod)
-                }
-
                 this.sensorWaitTimes.push(bPeriod - aPeriod)
             }
+
 
             //---------------
             // User Controls:

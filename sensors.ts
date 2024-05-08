@@ -396,7 +396,7 @@ namespace microcode {
         constructor() {
             super(
                 function () {return modules.humidity1.humidity()}, 
-                "Jac Temp", 
+                "Jac Humid", 
                 0, 
                 100,
                 "microbitLogo"

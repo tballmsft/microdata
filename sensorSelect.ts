@@ -1,25 +1,26 @@
 namespace microcode {
-    const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
-        "accelerometer X": new AccelerometerSensor(Dimension.X),
-        "accelerometer Y": new AccelerometerSensor(Dimension.Y),
-        "accelerometer Z": new AccelerometerSensor(Dimension.Z),
+    export const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
+        "Accel. X": new AccelerometerSensor(Dimension.X),
+        "Accel. Y": new AccelerometerSensor(Dimension.Y),
+        "Accel. Z": new AccelerometerSensor(Dimension.Z),
         "Pitch": new RotationSensor(Rotation.Pitch),
         "Roll": new RotationSensor(Rotation.Roll),
         "Pin 0": new PinSensor(TouchPin.P0),
         "Pin 1": new PinSensor(TouchPin.P1),
         "Pin 2": new PinSensor(TouchPin.P2),
-        "led_light_sensor": new LightSensor(),
-        "thermometer": new TemperatureSensor(),
-        "S10": new MagnetSensor(Dimension.X),
-        "Logo Press": new LogoPressSensor(),
+        "Light": new LightSensor(),
+        "Temp.": new TemperatureSensor(),
+        "Magnet X": new MagnetSensor(Dimension.X),
+        "Logo Pressed": new LogoPressSensor(),
         "Volume": new VolumeSensor(),
         "Compass": new CompassHeadingSensor(),
-        "JacdacLight": new JacdacLightSensor(),
-        "JacdacSoilMoisture": new JacdacSoilMoistureSensor(),
-        "JacdacDistance": new JacdacDistanceSensor(),
-        "JacdacFlexSensor": new JacdacFlexSensor(),
-        "JacdacTemperatureSensor": new JacdacTemperatureSensor()
+        "Jac Light": new JacdacLightSensor(),
+        "Jac Moist": new JacdacSoilMoistureSensor(),
+        "Jac Dist": new JacdacDistanceSensor(),
+        "Jac Flex": new JacdacFlexSensor(),
+        "Jac Temp": new JacdacTemperatureSensor()
     }
+
 
     /**
      * Responsible for allowing the user to select sensors to record or view live readings from.
@@ -53,12 +54,12 @@ namespace microcode {
                 x: -60,
                 y: -40,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("accelerometer X")
+                    const index = this.selectedSensorNames.indexOf("Accel. X")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("accelerometer X")
+                        this.selectedSensorNames.push("Accel. X")
                     }
                 },          
                 dynamicBoundaryColorsOn: true,
@@ -72,12 +73,12 @@ namespace microcode {
                 x: -30,
                 y: -40,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("accelerometer Y")
+                    const index = this.selectedSensorNames.indexOf("Accel. Y")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("accelerometer Y")
+                        this.selectedSensorNames.push("Accel. Y")
                     }
                 },          
                 dynamicBoundaryColorsOn: true,
@@ -91,12 +92,12 @@ namespace microcode {
                 x: 0,
                 y: -40,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("accelerometer Z")
+                    const index = this.selectedSensorNames.indexOf("Accel. Z")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("accelerometer Z")
+                        this.selectedSensorNames.push("Accel. Z")
                     }
                 },          
                 dynamicBoundaryColorsOn: true,
@@ -209,12 +210,12 @@ namespace microcode {
                 x: 30,
                 y: -11,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("led_light_sensor")
+                    const index = this.selectedSensorNames.indexOf("Light")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("led_light_sensor")
+                        this.selectedSensorNames.push("Light")
                     }
                 },
                 dynamicBoundaryColorsOn: true,  
@@ -228,12 +229,12 @@ namespace microcode {
                 x: 60,
                 y: -11,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("thermometer")
+                    const index = this.selectedSensorNames.indexOf("Temp.")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("thermometer")
+                        this.selectedSensorNames.push("Temp.")
                     }
                 },
                 dynamicBoundaryColorsOn: true,
@@ -249,12 +250,12 @@ namespace microcode {
                 x: -60,
                 y: 18,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("S10")
+                    const index = this.selectedSensorNames.indexOf("Magnet X")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("S10")
+                        this.selectedSensorNames.push("Magnet X")
                     }
                 },          
                 dynamicBoundaryColorsOn: true,
@@ -268,12 +269,12 @@ namespace microcode {
                 x: -30,
                 y: 18,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Logo Press")
+                    const index = this.selectedSensorNames.indexOf("Logo Pressed")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("Logo Press")
+                        this.selectedSensorNames.push("Logo Pressed")
                     }
                 },          
                 dynamicBoundaryColorsOn: true, 
@@ -325,12 +326,12 @@ namespace microcode {
                 x: 60,
                 y: 18,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("JacdacFlexSensor")
+                    const index = this.selectedSensorNames.indexOf("Jac Flex")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("JacdacFlexSensor")
+                        this.selectedSensorNames.push("Jac Flex")
                     }
                 },
                 dynamicBoundaryColorsOn: true,     
@@ -346,12 +347,12 @@ namespace microcode {
                 x: -60,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("JacdacTemperatureSensor")
+                    const index = this.selectedSensorNames.indexOf("Jac Temp")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("JacdacTemperatureSensor")
+                        this.selectedSensorNames.push("Jac Temp")
                     }
                 },
                 dynamicBoundaryColorsOn: true,     
@@ -365,12 +366,12 @@ namespace microcode {
                 x: -30,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("JacdacLight")
+                    const index = this.selectedSensorNames.indexOf("Jac Light")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("JacdacLight")
+                        this.selectedSensorNames.push("Jac Light")
                     }
                 },
                 dynamicBoundaryColorsOn: true,
@@ -384,12 +385,12 @@ namespace microcode {
                 x: 0,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("JacdacSoilMoisture")
+                    const index = this.selectedSensorNames.indexOf("Jac Moist")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("JacdacSoilMoisture")
+                        this.selectedSensorNames.push("Jac Moist")
                     }
                 },
                 dynamicBoundaryColorsOn: true,
@@ -403,12 +404,12 @@ namespace microcode {
                 x: 30,
                 y: 44,
                 onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("JacdacDistance")
+                    const index = this.selectedSensorNames.indexOf("Jac Dist")
                     if (index != -1) {
                         this.selectedSensorNames.splice(index, 1)
                     }
                     else {
-                        this.selectedSensorNames.push("JacdacDistance")
+                        this.selectedSensorNames.push("Jac Dist")
                     }
                 },
                 dynamicBoundaryColorsOn: true,

@@ -84,7 +84,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // this.app.pushScene(new GraphGenerator(this.app))
+                    this.app.pushScene(new GraphGenerator(this.app))
                 },
                 boundaryColor: 7,
             })
