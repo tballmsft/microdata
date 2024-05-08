@@ -16,11 +16,6 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // Log has data in it
-            // const numberOfColumns = 5
-            // basic.showNumber(datalogger.getData().split("_").length - 1)
-            // (datalogger.getData().split("_").length - 1) / numberOfColumns <= 1
-
             this.btns.push(new Button({
                 parent: null,
                 style: ButtonStyles.FlatWhite,

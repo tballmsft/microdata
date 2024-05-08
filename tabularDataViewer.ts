@@ -23,35 +23,38 @@ namespace microcode {
 
         private guiState: DATA_VIEW_DISPLAY_MODE
         private xScrollOffset: number
-        private yScrollOffset: number
 
-        private currentRowIndex: number
+        private tabularYScrollOffset: number
+        private filteredYScrollOffset: number
+
+        private tabularRowIndex: number
+        private filteredRowIndex: number
 
         constructor(app: App, guiState: DATA_VIEW_DISPLAY_MODE) {
             super(app, "recordedDataViewer")
             this.guiState = guiState
 
             this.xScrollOffset = 0
-            this.yScrollOffset = 0
-            this.currentRowIndex = 1
-        }
+            this.tabularYScrollOffset = 0
+            this.filteredYScrollOffset = 0
 
+            this.tabularRowIndex = 1
+            this.filteredRowIndex = 1
+        }
+        
         /* override */ startup() {
             super.startup()
 
             this.dataRows = []
             this.headerStringLengths = []
             const tokens = datalogger.getData().split("_")
-            this.numberOfCols = 5
-
-            // basic.showNumber(tokens.length - 1)
+            this.numberOfCols = 4
             
             // Skip the first column of each row (Time (Seconds)):
-            for (let i = 0; i < tokens.length - 5; i += this.numberOfCols) {
-                this.dataRows[i / this.numberOfCols] = tokens.slice(i + 1, i + 5);
+            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
+                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
 
-            this.numberOfCols = 4
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             // Count until sensor name is repeated:
@@ -79,8 +82,8 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     if(this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
-                        this.currentRowIndex = 1
-                        this.yScrollOffset = 0
+                        this.filteredRowIndex = 1
+                        this.filteredYScrollOffset = 0
                         this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
                     }
                     else {
@@ -105,12 +108,22 @@ namespace microcode {
                 controller.up.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        if (this.currentRowIndex > 1) {
-                            this.currentRowIndex = Math.max(this.currentRowIndex - 1, 1)
+                        if (this.tabularRowIndex > 1) {
+                            this.tabularRowIndex = Math.max(this.tabularRowIndex - 1, 1)
                         }
 
                         else {
-                            this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
+                            this.tabularYScrollOffset = Math.max(this.tabularYScrollOffset - 1, 0)
+                        }
+                    }
+
+                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        if (this.filteredRowIndex > 1) {
+                            this.filteredRowIndex = Math.max(this.filteredRowIndex - 1, 1)
+                        }
+
+                        else {
+                            this.filteredYScrollOffset = Math.max(this.filteredYScrollOffset - 1, 0)
                         }
                     }
                 }
@@ -121,16 +134,27 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
-                        if (this.currentRowIndex < limit) {
-                            this.currentRowIndex = Math.min(this.currentRowIndex + 1, this.dataRows.length - 1)
+                        const limit = Math.min((this.dataRows.length / this.numberOfSensors) - 1, TABULAR_MAX_ROWS - 1)
+                        if (this.tabularRowIndex < limit) {
+                            this.tabularRowIndex = Math.min(this.tabularRowIndex + 1, this.dataRows.length - 1)
                         }
-
-                        else if (this.currentRowIndex + this.yScrollOffset < this.dataRows.length - 1) {
-                            this.yScrollOffset += 1
+    
+                        else if (this.tabularRowIndex + this.tabularYScrollOffset < this.dataRows.length - 1) {
+                            this.tabularYScrollOffset += 1
                         }
                     }
-                    // basic.showNumber(this.yScrollOffset)
+
+                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
+
+                        if (this.filteredRowIndex < limit) {
+                            this.filteredRowIndex = Math.min(this.filteredRowIndex + 1, this.dataRows.length - 1)
+                        }
+    
+                        else if (this.filteredRowIndex + this.filteredYScrollOffset < this.dataRows.length - 1) {
+                            this.filteredYScrollOffset += 1
+                        }
+                    }
                 }
             )
 
@@ -154,7 +178,6 @@ namespace microcode {
         }
 
         /**
-         *         
          * Each header and its corresopnding rows of data have variable lengths,
          *      The small screen sizes exaggerates these differences, hence variable column sizing.
          * @param colBufferSizes this.headerStringLengths spliced by this.xScrollOffset
@@ -197,17 +220,20 @@ namespace microcode {
                     0x0
                 )
             }
-            
-            if (this.guiState == DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                // Draw selected box:
-                Screen.drawRect(
-                    Screen.LEFT_EDGE,
-                    Screen.TOP_EDGE + (this.currentRowIndex * rowBufferSize),
-                    colBufferSizes[0],
-                    rowBufferSize,
-                    6
-                )
+
+            let row = this.tabularRowIndex
+            if (this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                row = this.filteredRowIndex
             }
+            
+            // Draw selected box:
+            Screen.drawRect(
+                Screen.LEFT_EDGE,
+                Screen.TOP_EDGE + (row * rowBufferSize),
+                colBufferSizes[0],
+                rowBufferSize,
+                6
+            )
         }
 
         draw() {
@@ -221,26 +247,26 @@ namespace microcode {
 
             switch (this.guiState) {
                 case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW: 
-                    const filteredRowBufferSize = Screen.HEIGHT / Math.min(((this.dataRows.length - 1) / this.numberOfSensors) + 1, TABULAR_MAX_ROWS)
+                    const filteredRowBufferSize = Screen.HEIGHT / Math.min((this.dataRows.length / this.numberOfSensors) - 1, TABULAR_MAX_ROWS)
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
 
-                    const filteredSensor: string = this.dataRows[this.currentRowIndex + this.yScrollOffset][0]
+                    const filteredSensor: string = this.dataRows[this.tabularRowIndex + this.tabularYScrollOffset][0]
                     let filteredData: string[][] = [this.dataRows[0]]
 
                     this.dataRows.forEach((row) => {
                         if (row[0] == filteredSensor) {
                             filteredData.push(row)
                         }
-                    });
+                    })
 
                     // Values:
-                    for (let row = 0; row < Math.min(filteredData.length, TABULAR_MAX_ROWS); row++) {
+                    for (let row = 0; row < Math.min(filteredData.length - this.filteredYScrollOffset, TABULAR_MAX_ROWS); row++) {
                         let cumulativeColOffset = 0;
 
                         // Skip the first column: Time (Seconds)
                         for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = filteredData[row][colID]
+                            let value = filteredData[row + this.filteredYScrollOffset][colID]
 
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
@@ -270,13 +296,13 @@ namespace microcode {
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
 
                     // Values:
-                    for (let row = 0; row < Math.min(this.dataRows.length - this.yScrollOffset, TABULAR_MAX_ROWS); row++) {
+                    for (let row = 0; row < Math.min(this.dataRows.length - this.tabularYScrollOffset, TABULAR_MAX_ROWS); row++) {
                         let cumulativeColOffset = 0;
 
                         // Skip the first column: Time (Seconds)
                         for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = this.dataRows[row + this.yScrollOffset][colID]
+                            let value = this.dataRows[row + this.tabularYScrollOffset][colID]
 
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break

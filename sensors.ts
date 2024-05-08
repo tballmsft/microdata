@@ -105,6 +105,7 @@ namespace microcode {
                     datalogger.createCV("Reading", entry[2]),
                     datalogger.createCV("Event", entry[3])
                 )
+                basic.pause(1)
             }
         }
 

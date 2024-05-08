@@ -2,9 +2,6 @@ namespace microcode {
     /** No information beyond this Y coordinate */
     const MAX_Y_SCOLL = -75
 
-    // //% promise
-    // export function downloadData(url:string) {basic.showString("hi :)")}
-
     export class GraphGenerator extends Scene {
         private windowWidth: number
         private windowHeight: number
