@@ -6,7 +6,6 @@ namespace microcode {
         private dataRows: string[][];
         private numberOfCols: number;
         private numberOfSensors: number;
-        private headerStringLengths: number[];
 
         private windowWidth: number
         private windowHeight: number
@@ -16,6 +15,7 @@ namespace microcode {
         private windowBotBuffer: number
 
         private yScrollOffset: number
+        private xCoordinateScalar: number;
 
         constructor(app: App) {
             super(app, "graphGeneration")
@@ -31,7 +31,6 @@ namespace microcode {
             this.yScrollOffset = 0
 
             this.dataRows = []
-            this.headerStringLengths = []
             const tokens = datalogger.getData().split("_")
             this.numberOfCols = 4
             
@@ -39,8 +38,6 @@ namespace microcode {
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
-
-            this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             // Count until sensor name is repeated:
             const firstSensor = this.dataRows[1][0] // Skip first row (headers)
@@ -56,6 +53,11 @@ namespace microcode {
                 else {
                     break
                 }
+            }
+
+            this.xCoordinateScalar = 1
+            if (this.dataRows.length < Screen.WIDTH) {
+                this.xCoordinateScalar = Math.round((Screen.WIDTH - (2 * this.windowWidthBuffer)) / this.dataRows.length)
             }
 
             control.onEvent(
@@ -75,8 +77,6 @@ namespace microcode {
                     this.update() // For fast response to the above change
                 }
             )
-
-            // microcode.downloadData("a")
         }
 
         /**
@@ -85,18 +85,9 @@ namespace microcode {
          */
         update() {
             screen.fill(this.color);
-
-            this.plot()
-            basic.pause(100);
-        }
-
-        /**
-         * Display mode for plotting all incoming data on y axis
-         */
-        private plot() {            
-            let color = 8
-
             this.draw_axes()
+
+            let color = 8
 
             // Draw data lines:
             const fromY = (this.windowBotBuffer - 2) * this.yScrollOffset
@@ -116,10 +107,9 @@ namespace microcode {
 
                 // Minimal data smoothing:
                 if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
-                    screen.drawLine(fromX + row, y1, fromX + row - 1, y1, color);
+                    screen.drawLine(fromX + (row * this.xCoordinateScalar), y1, fromX + ((row - 1) * this.xCoordinateScalar), y1, color);
                 }
-
-                screen.drawLine(fromX + row, y1, fromX + row - 1, y2, color);
+                screen.drawLine(fromX + (row * this.xCoordinateScalar), y1, fromX + ((row - 1) * this.xCoordinateScalar), y2, color);
 
                 color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
