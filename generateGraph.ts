@@ -24,7 +24,7 @@ namespace microcode {
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
 
-            this.windowWidthBuffer = 18 
+            this.windowWidthBuffer = 18
             this.windowTopBuffer = 5
             this.windowBotBuffer = 20
 
@@ -34,7 +34,6 @@ namespace microcode {
             const tokens = datalogger.getData().split("_")
             this.numberOfCols = 4
             
-            // Skip the first column of each row (Time (Seconds)):
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
@@ -55,9 +54,11 @@ namespace microcode {
                 }
             }
 
+            basic.showNumber(this.numberOfSensors)
+
             this.xCoordinateScalar = 1
             if (this.dataRows.length < Screen.WIDTH) {
-                this.xCoordinateScalar = Math.round((Screen.WIDTH - (2 * this.windowWidthBuffer)) / this.dataRows.length)
+                this.xCoordinateScalar = Math.round((Screen.WIDTH - (2 * this.windowWidthBuffer)) / (this.dataRows.length / this.numberOfSensors))
             }
 
             control.onEvent(
@@ -93,6 +94,8 @@ namespace microcode {
             const fromY = (this.windowBotBuffer - 2) * this.yScrollOffset
             const fromX = this.windowWidthBuffer + 2
 
+            let priorXOffset = 0
+            let xOffset = 0
             for (let row = 1; row < this.dataRows.length - this.numberOfSensors; row++) {
                 const sensorName = this.dataRows[row][0];
                 const sensor = SENSOR_LOOKUP_TABLE[sensorName];
@@ -106,18 +109,50 @@ namespace microcode {
                 const y2 = Math.round(screen.height - norm2) - fromY
 
                 // Minimal data smoothing:
-                if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
-                    screen.drawLine(fromX + (row * this.xCoordinateScalar), y1, fromX + ((row - 1) * this.xCoordinateScalar), y1, color);
+                // if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
+                //     screen.drawLine(
+                //         fromX + (row - 1) * xOffset,
+                //         y1,
+                //         fromX + (row - 1) * xOffset,
+                //         y1,
+                //         color
+                //     );
+                // }
+
+                if ((row % this.numberOfSensors) == 0) {
+                    priorXOffset = xOffset
+                    xOffset += this.xCoordinateScalar
                 }
-                screen.drawLine(fromX + (row * this.xCoordinateScalar), y1, fromX + ((row - 1) * this.xCoordinateScalar), y2, color);
+
+                screen.drawLine(
+                    fromX + priorXOffset,
+                    y1,
+                    fromX + xOffset,
+                    y2,
+                    color
+                );
 
                 color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
 
             screen.print(
+                "0",
+                fromX - 2,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                1
+            )
+
+            screen.print(
+                "1",
+                fromX + this.xCoordinateScalar + 1,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                1
+            )
+
+            screen.print(
                 ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
-                fromX + this.dataRows.length + 1,
-                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 2,
+                fromX + xOffset,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 1
             )
 
@@ -130,7 +165,7 @@ namespace microcode {
                 y += (i * 12)
 
                 screen.fillRect(
-                    2,
+                    0,
                     y,
                     7,
                     7,
@@ -140,7 +175,7 @@ namespace microcode {
                 // Name, reading / maximum
                 screen.print(
                     this.dataRows[i + 1][0],
-                    14,
+                    12,
                     y,
                     color
                 )
