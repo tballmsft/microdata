@@ -6,11 +6,14 @@ namespace microcode {
         private dataRows: string[][];
         private numberOfCols: number;
         private numberOfSensors: number;
+        private lowestSensorMinimum: number;
+        private highestSensorMaximum: number;
 
         private windowWidth: number
         private windowHeight: number
 
-        private windowWidthBuffer: number
+        private windowLeftBuffer: number
+        private windowRightBuffer: number
         private windowTopBuffer: number
         private windowBotBuffer: number
 
@@ -19,12 +22,13 @@ namespace microcode {
 
         constructor(app: App) {
             super(app, "graphGeneration")
-            this.color = 0
+            this.color = 3
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
 
-            this.windowWidthBuffer = 18
+            this.windowLeftBuffer = 38
+            this.windowRightBuffer = 10
             this.windowTopBuffer = 5
             this.windowBotBuffer = 20
 
@@ -41,12 +45,22 @@ namespace microcode {
             // Count until sensor name is repeated:
             const firstSensor = this.dataRows[1][0] // Skip first row (headers)
             this.numberOfSensors = 1
+            this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[firstSensor].minimum
+            this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[firstSensor].maximum
 
             // Go from second sensor onward (3rd row):
             for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
                 // First element in row is the sensor:
                 if (this.dataRows[rowID][0] != firstSensor) {
                     this.numberOfSensors += 1
+
+                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].minimum < this.lowestSensorMinimum) {
+                        this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].minimum
+                    }
+
+                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].maximum > this.highestSensorMaximum) {
+                        this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].maximum
+                    }
                 }
 
                 else {
@@ -54,11 +68,9 @@ namespace microcode {
                 }
             }
 
-            basic.showNumber(this.numberOfSensors)
-
             this.xCoordinateScalar = 1
             if (this.dataRows.length < Screen.WIDTH) {
-                this.xCoordinateScalar = Math.round((Screen.WIDTH - (2 * this.windowWidthBuffer)) / (this.dataRows.length / this.numberOfSensors))
+                this.xCoordinateScalar = Math.round((Screen.WIDTH - this.windowLeftBuffer + this.windowRightBuffer) / (this.dataRows.length / this.numberOfSensors))
             }
 
             control.onEvent(
@@ -78,6 +90,72 @@ namespace microcode {
                     this.update() // For fast response to the above change
                 }
             )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.left.id,
+                () => {
+                    this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
+                    this.update() // For fast response to the above change
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.right.id,
+                () => {
+                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
+                    this.update() // For fast response to the above change
+                }
+            )
+
+            // // Zoom in:
+            // control.onEvent(
+            //     ControllerButtonEvent.Pressed,
+            //     controller.A.id,
+            //     () => {
+            //         if (this.selectedXCoordinate == null || this.selectedYCoordinate == null) {
+            //             this.selectedXCoordinate = Math.round(this.sensors[this.selectedSensorIndex].getDataBufferLength() / 2)
+            //             this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
+            //         }
+
+            //         this.xScrollOffset = Math.round(Screen.HALF_WIDTH - this.selectedXCoordinate)
+
+            //         this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
+            //         this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
+
+            //         this.windowLeftBuffer = this.windowLeftBuffer - (18 * 0.5)
+            //         this.windowTopBuffer = this.windowTopBuffer - (5 * 0.5)
+            //         this.windowBotBuffer = this.windowBotBuffer - (20 * 0.5)
+
+            //         this.currentZoomDepth += 1
+            //     }
+            // )
+
+            // // Zoom out, if at default zoom (none), then go back to home
+            // control.onEvent(
+            //     ControllerButtonEvent.Pressed,
+            //     controller.B.id,
+            //     () => {
+            //         if (this.windowHeight <= Screen.HEIGHT && this.windowWidth <= Screen.WIDTH) {
+            //             this.app.popScene()
+            //             this.app.pushScene(new Home(this.app))
+            //         }
+                    
+            //         else {
+            //             this.xScrollOffset = 0
+
+            //             this.windowHeight = this.windowHeight - (Screen.HEIGHT * 0.5)
+            //             this.windowWidth = this.windowWidth - (Screen.WIDTH * 0.5)
+
+            //             this.windowLeftBuffer = this.windowLeftBuffer + (18 * 0.5)
+            //             this.windowTopBuffer = this.windowTopBuffer + (5 * 0.5)
+            //             this.windowBotBuffer = this.windowBotBuffer + (20 * 0.5)    
+                        
+            //             this.currentZoomDepth -= 1
+            //         }
+            //     }
+            // )
         }
 
         /**
@@ -86,17 +164,26 @@ namespace microcode {
          */
         update() {
             screen.fill(this.color);
-            this.draw_axes()
+            // screen.fill(0);
+            
+            // Make graph region black:
+            screen.fillRect(
+                this.windowLeftBuffer,
+                this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
+                Screen.WIDTH - this.windowLeftBuffer - this.windowRightBuffer,
+                this.windowHeight - this.windowBotBuffer - 4,
+                0
+            );
 
             let color = 8
 
             // Draw data lines:
-            const fromY = (this.windowBotBuffer - 2) * this.yScrollOffset
-            const fromX = this.windowWidthBuffer + 2
+            const fromY = this.windowBotBuffer - (2 * this.yScrollOffset)
+            const fromX = this.windowLeftBuffer
 
             let priorXOffset = 0
             let xOffset = 0
-            for (let row = 1; row < this.dataRows.length - this.numberOfSensors; row++) {
+            for (let row = 1; row < this.dataRows.length - this.numberOfSensors - 1; row++) {
                 const sensorName = this.dataRows[row][0];
                 const sensor = SENSOR_LOOKUP_TABLE[sensorName];
                 const minimum = sensor.minimum
@@ -107,17 +194,6 @@ namespace microcode {
             
                 const y1 = Math.round(screen.height - norm1) - fromY  
                 const y2 = Math.round(screen.height - norm2) - fromY
-
-                // Minimal data smoothing:
-                // if (Math.abs(y1 - y2) <= Sensor.PLOT_SMOOTHING_CONSTANT) {
-                //     screen.drawLine(
-                //         fromX + (row - 1) * xOffset,
-                //         y1,
-                //         fromX + (row - 1) * xOffset,
-                //         y1,
-                //         color
-                //     );
-                // }
 
                 if ((row % this.numberOfSensors) == 0) {
                     priorXOffset = xOffset
@@ -134,27 +210,6 @@ namespace microcode {
 
                 color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
-
-            screen.print(
-                "0",
-                fromX - 2,
-                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
-                1
-            )
-
-            screen.print(
-                "1",
-                fromX + this.xCoordinateScalar + 1,
-                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
-                1
-            )
-
-            screen.print(
-                ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
-                fromX + xOffset,
-                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
-                1
-            )
 
             const yStart = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
             let y = yStart
@@ -182,6 +237,39 @@ namespace microcode {
 
                 color = (color + 3) % 15
             }
+
+            // Markers & axes:
+            this.draw_axes()
+
+            // Y axis:
+            screen.print(
+                this.lowestSensorMinimum.toString(),
+                (6 * font.charWidth) - (this.lowestSensorMinimum.toString().length * font.charWidth),
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
+                15
+            )
+
+            screen.print(
+                this.highestSensorMaximum.toString(),
+                (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
+                this.windowTopBuffer - this.yScrollOffset,
+                15
+            )
+
+            // X axis:
+            screen.print(
+                "0",
+                fromX - 2,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                15
+            )
+
+            screen.print(
+                ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
+                fromX + xOffset - 3,
+                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                15
+            )
         }
 
         /**
@@ -190,16 +278,16 @@ namespace microcode {
         draw_axes() {
             for (let i = 0; i < 2; i++) {
                 screen.drawLine(
-                    this.windowWidthBuffer,
+                    this.windowLeftBuffer,
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidth - this.windowWidthBuffer, 
+                    this.windowWidth - this.windowRightBuffer, 
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
                 screen.drawLine(
-                    this.windowWidthBuffer + i, 
+                    this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidthBuffer + i, 
+                    this.windowLeftBuffer + i, 
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
