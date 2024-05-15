@@ -241,7 +241,7 @@ namespace microcode {
                     color
                 )
 
-                color = 8 + ((i % this.numberOfSensors) % 15)
+                color = 8 + ((i + 1 % this.numberOfSensors) % 15)
             }
 
             // Markers & axes:
