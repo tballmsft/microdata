@@ -61,34 +61,6 @@ namespace microcode {
                 }
             })
 
-
-            // let aPeriod = EVENT_POLLING_PERIOD_MS
-            // if (this.sensors[0].loggingMode == SensorLoggingMode.RECORDING) {
-            //     aPeriod = (this.sensors[0].config as RecordingConfig).period
-            // }
-            // this.sensorWaitTimes.push(aPeriod)
-
-            // for (let i = 0; i < this.sensors.length - 1; i++) {
-            //     const aSensor = this.sensors[i]
-            //     const bSensor = this.sensors[(i + 1) % this.sensors.length]
-
-            //     let aPeriod = EVENT_POLLING_PERIOD_MS
-            //     let bPeriod = EVENT_POLLING_PERIOD_MS
-
-            //     if (aSensor.loggingMode == SensorLoggingMode.RECORDING) {
-            //         aPeriod = (aSensor.config as RecordingConfig).period
-            //     }
-
-            //     if (bSensor.loggingMode == SensorLoggingMode.RECORDING) {
-            //         bPeriod = (bSensor.config as RecordingConfig).period
-            //     }
-
-            //     this.sensorWaitTimes.push(bPeriod - aPeriod)
-            // }
-
-            // basic.showString(this.sensors[0].name)
-            // basic.showNumber(this.sensorWaitTimes[0])
-
             //---------------
             // User Controls:
             //---------------
@@ -150,7 +122,12 @@ namespace microcode {
             control.inBackground(() => {
                 let loggingStates = this.sensors.map((_) => true)
                 let remainingSensorCount = this.sensors.length
+
+                // [1000, 1100] will have a period gap of 100, so after waiting 100ms to measure, wait 900ms to account for this
+                // If this happens then do not wait the normal period of 1000ms durring each round (since 100ms + 900ms = 1000ms)
+                let periodAlreadyCounted = false
                 let timePassed = 0
+                let loops = 1
 
                 // Log all sensors once:
                 for (let i = 0; i < this.sensors.length; i++) {
@@ -165,8 +142,6 @@ namespace microcode {
                 // Waiting 3 seconds after the 11th measurement (measure once at 0) for sensors of period [100, 1003] for example
                 // Is modified only if there is 1 sensor remaining
                 let timeUntilNextLog = this.sensorWaitTimes[0] // Acts as the scheduling period
-                let loops = 1
-                let periodAlreadyCounted = false
 
                 // Some sensors still have more measurements:
                 while (remainingSensorCount > 0) {
@@ -184,12 +159,13 @@ namespace microcode {
                             }
                         }
 
-                        // Resolve logging:
+                        // Wait if there wasn't a period gap last time (and thus the period is already accounted for):
                         if (!periodAlreadyCounted) {
                             timePassed += timeUntilNextLog;
                             basic.pause(timeUntilNextLog)
                         }
 
+                        // Resolve logging:
                         for (let j = 0; j < sensorsToLog.length; j++) {
                             const measurementsRemaining = sensorsToLog[j].log();
                             loggingStates[indexOfLoggedSensor[j]] = measurementsRemaining
@@ -201,7 +177,6 @@ namespace microcode {
                                     timeUntilNextLog = this.sensorWaitTimes[indexOfLoggedSensor[j]]
                                 }
                             }
-                            // basic.showString("A4")
                         }
 
                         // The last logged sensor is neccessarily modulo with timePassed:
@@ -218,26 +193,18 @@ namespace microcode {
                         let totalIntraTimePassed = 0
                         periodAlreadyCounted = false
                         for (let k = indexOfLastLoggedSensor + 1; k < this.sensors.length; k++) {
-                            // Period gap too small:
-                            // basic.showNumber(timePassed + timeUntilNextLog)
-                            // basic.showNumber((loops * this.sensorWaitTimes[k]))
                             const currentSensorPeriod = loops * this.sensorWaitTimes[k]
+
+                            // Period gap too small:
                             if (timePassed + timeUntilNextLog > currentSensorPeriod) {
                                 totalIntraTimePassed += this.sensorWaitTimes[k] - timeUntilNextLog;
-                                // basic.showNumber(totalIntraTimePassed)
                                 timePassed += totalIntraTimePassed;
-                                // basic.showNumber(timePassed)
                                     
                                 // Compile a list of the sensors that need to be logged next:
                                 let sensorsToLog = [];
                                 let indexOfLoggedSensor = [];
                                 for (let j = k; j < this.sensors.length; j++) {
-                                    // if (timePassed % ((loops * timeUntilNextLog) + totalIntraTimePassed) == 0) {
-
-                                    // basic.showNumber(currentSensorPeriod)
-                                    // basic.showNumber(loops * this.sensorWaitTimes[j])
                                     if (loggingStates[j] && currentSensorPeriod == (loops * this.sensorWaitTimes[j])) {
-                                        
                                         sensorsToLog.push(this.sensors[j]);
                                         indexOfLoggedSensor.push(j);
                                     }
@@ -246,11 +213,7 @@ namespace microcode {
                                     }
                                 }
 
-                                // if (loggingStates[k]) {
-                                //     sensorsToLog.push(this.sensors[k]);
-                                //     indexOfLoggedSensor.push(k);
-                                // }
-
+                                // Period gap between the normal logging period and this one:
                                 basic.pause(this.sensorWaitTimes[k] - timeUntilNextLog);
 
                                 // Invoke the logs:
@@ -271,9 +234,12 @@ namespace microcode {
                             else {
                                 break;
                             }
+
+                            // Account for the difference between the totalIntraTimePassed and the timeUntilNextLog
+                            // [1000, 1100] will have a totalIntraTimePassed of 100, so after waiting 100ms to measure, wait 900ms to account for this
                             timePassed += timeUntilNextLog - totalIntraTimePassed
                             basic.pause(timeUntilNextLog - totalIntraTimePassed)
-                            periodAlreadyCounted = true
+                            periodAlreadyCounted = true // Don't basic.pause(timeUntilNextLog) next time - since its accounted for here
                             loops += 1
                         }
                     }
@@ -283,22 +249,6 @@ namespace microcode {
                     loops = 1
                 }
             })
-
-            // control.inBackground(() => {
-            //     let loggingStates = this.sensors.map((_) => true)
-            //     const loggingCompleteState = this.sensors.map((_) => false)
-
-            //     // Log all sensors once:
-            //     this.sensors.forEach((sensor) => sensor.log())
-            //     let i = 0
-
-            //     while (loggingStates[0] != loggingCompleteState[0]) {
-            //         const index = i % this.sensorWaitTimes.length
-            //         basic.pause(this.sensorWaitTimes[index]) // - this.sensors[index].lastReadingDelay)
-            //         loggingStates[index] = this.sensors[index].log()
-            //         i += 1
-            //     }
-            // })
         }
 
         update(): void {
