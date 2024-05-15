@@ -9,7 +9,7 @@ namespace microcode {
         private resetDataLoggerBtn: Button
         private dataViewBtn: Button
         private graphViewBtn: Button
-        private numberOfRows: number
+        private dataloggerEmpty: boolean
 
         constructor(app: App) {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
@@ -20,14 +20,18 @@ namespace microcode {
 
             // Includes the header:
             const numberOfColumns = 4
-            this.numberOfRows = (datalogger.getData().split("_").length - 1) / numberOfColumns
+            this.dataloggerEmpty = true
+
+            if (datalogger.getNRows(0, 2).split("_").length / numberOfColumns >= 1) {
+                this.dataloggerEmpty = false
+            }
             
             //---------
             // Control:
             //---------
 
             // No data in log (first row are headers)
-            if (this.numberOfRows <= 1) {
+            if (this.dataloggerEmpty) {
                 control.onEvent(
                     ControllerButtonEvent.Pressed,
                     controller.A.id,
@@ -47,7 +51,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     datalogger.deleteLog()
-                    this.numberOfRows = 0
+                    this.dataloggerEmpty = true
                     
                     control.onEvent(
                         ControllerButtonEvent.Pressed,
@@ -101,7 +105,7 @@ namespace microcode {
                 0xC
             )
 
-            if (this.numberOfRows <= 1) {
+            if (this.dataloggerEmpty) {
                 screen.printCenter("No data has been recorded", 5)
                 screen.printCenter("Press A to Record some!", Screen.HALF_HEIGHT)
                 return;

@@ -47,13 +47,15 @@ namespace microcode {
 
             this.dataRows = []
             this.headerStringLengths = []
-            const tokens = datalogger.getData().split("_")
-            this.numberOfCols = 4
             
-            // Skip the first column of each row (Time (Seconds)):
-            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
-                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
-            }
+            this.numberOfCols = 4;
+            this.getNextDataChunk();
+
+            // const tokens = datalogger.getNRows(this.tabularRowIndex - 1, TABULAR_MAX_ROWS).split("_")
+            // // Skip the first column of each row (Time (Seconds)):
+            // for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
+            //     this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
+            // }
 
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
@@ -114,6 +116,7 @@ namespace microcode {
 
                         else {
                             this.tabularYScrollOffset = Math.max(this.tabularYScrollOffset - 1, 0)
+                            this.getNextDataChunk();
                         }
                     }
 
@@ -134,13 +137,14 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        const limit = Math.min((this.dataRows.length / this.numberOfSensors) - 1, TABULAR_MAX_ROWS - 1)
+                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
                         if (this.tabularRowIndex < limit) {
                             this.tabularRowIndex = Math.min(this.tabularRowIndex + 1, this.dataRows.length - 1)
+                            
                         }
-    
                         else if (this.tabularRowIndex + this.tabularYScrollOffset < this.dataRows.length - 1) {
                             this.tabularYScrollOffset += 1
+                            this.getNextDataChunk();
                         }
                     }
 
@@ -175,6 +179,16 @@ namespace microcode {
                     }
                 }
             )
+        }
+
+        private getNextDataChunk() {
+            const tokens = datalogger.getNRows(this.tabularRowIndex - 1, this.tabularRowIndex + TABULAR_MAX_ROWS).split("_");
+            // const tokens = datalogger.getData().split("_");
+            
+            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
+                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
+            }
+            // basic.showNumber(this.dataRows.length)
         }
 
         /**

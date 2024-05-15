@@ -12,7 +12,8 @@ namespace microcode {
         private windowWidth: number
         private windowHeight: number
 
-        private windowWidthBuffer: number
+        private windowLeftBuffer: number
+        private windowRightBuffer: number
         private windowTopBuffer: number
         private windowBotBuffer: number
 
@@ -44,7 +45,8 @@ namespace microcode {
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
 
-            this.windowWidthBuffer = 18
+            this.windowLeftBuffer = 25
+            this.windowRightBuffer = 5
             this.windowTopBuffer = 5
             this.windowBotBuffer = 20
 
@@ -98,7 +100,7 @@ namespace microcode {
                     this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
                     this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
 
-                    this.windowWidthBuffer = this.windowWidthBuffer - (18 * 0.5)
+                    this.windowLeftBuffer = this.windowLeftBuffer - (18 * 0.5)
                     this.windowTopBuffer = this.windowTopBuffer - (5 * 0.5)
                     this.windowBotBuffer = this.windowBotBuffer - (20 * 0.5)
 
@@ -122,7 +124,7 @@ namespace microcode {
                         this.windowHeight = this.windowHeight - (Screen.HEIGHT * 0.5)
                         this.windowWidth = this.windowWidth - (Screen.WIDTH * 0.5)
     
-                        this.windowWidthBuffer = this.windowWidthBuffer + (18 * 0.5)
+                        this.windowLeftBuffer = this.windowLeftBuffer + (18 * 0.5)
                         this.windowTopBuffer = this.windowTopBuffer + (5 * 0.5)
                         this.windowBotBuffer = this.windowBotBuffer + (20 * 0.5)    
                         
@@ -289,7 +291,7 @@ namespace microcode {
                 const y = Math.round(Screen.HEIGHT - (((this.selectedYCoordinate - this.sensors[this.selectedSensorIndex].minimum) / sensorRange) * (Screen.HEIGHT - fromY))) - fromY
 
                 screen.drawCircle(
-                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset,
+                    this.windowLeftBuffer + this.selectedXCoordinate + this.xScrollOffset,
                     y,
                     5,
                     1
@@ -297,7 +299,7 @@ namespace microcode {
 
                 screen.print(
                     "x =" + this.selectedXCoordinate.toString(),
-                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
+                    this.windowLeftBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y + 5,
                     color,
                     simage.font5,
@@ -305,7 +307,7 @@ namespace microcode {
 
                 screen.print(
                     "y =" + this.sensors[this.selectedSensorIndex].getReading().toString(),
-                    this.windowWidthBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
+                    this.windowLeftBuffer + this.selectedXCoordinate + this.xScrollOffset + 10,
                     y + 15,
                     color,
                     simage.font5,
@@ -353,16 +355,16 @@ namespace microcode {
         draw_axes() {
             for (let i = 0; i < 2; i++) {
                 screen.drawLine(
-                    this.windowWidthBuffer + this.xScrollOffset,
+                    this.windowLeftBuffer + this.xScrollOffset,
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidth - this.windowWidthBuffer + this.xScrollOffset, 
+                    this.windowWidth - this.windowLeftBuffer + this.xScrollOffset, 
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
                 screen.drawLine(
-                    this.windowWidthBuffer + i + this.xScrollOffset, 
+                    this.windowLeftBuffer + i + this.xScrollOffset, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidthBuffer + i + this.xScrollOffset, 
+                    this.windowLeftBuffer + i + this.xScrollOffset, 
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );

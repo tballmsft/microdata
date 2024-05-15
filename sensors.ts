@@ -89,7 +89,8 @@ namespace microcode {
         }
 
         /**
-         * Spawns an independent background fiber to log sensor data according to its .config
+         * Invokes logData() if this is a RecordingSensor, logEvent() if logging events
+         * @returns Has measurements left
          */
         log(): boolean {
             if (this.startTime == 0) {
@@ -102,13 +103,19 @@ namespace microcode {
             return this.logData(this.config as RecordingConfig)
         }
 
-        logData(config: RecordingConfig): boolean {
+        /**
+         * 
+         * @param config 
+         * @returns Has measurements left
+         */
+        private logData(config: RecordingConfig): boolean {
             if (config.measurements <= 0) {
                 return false
             }
 
             const reading = this.getReading()
             const time = input.runningTime() - this.startTime
+            // const time = (this.totalMeasurements - config.measurements) * config.period
 
             datalogger.log(
                 datalogger.createCV("Sensor", this.name),
@@ -117,14 +124,17 @@ namespace microcode {
                 datalogger.createCV("Event", "N/A")
             )
 
-            this.lastReadingDelay = time - ((this.totalMeasurements - config.measurements) * config.period)
-
-            // basic.pause(config.period)
+            // this.lastReadingDelay = time - ((this.totalMeasurements - config.measurements) * config.period)
             config.measurements -= 1
             return true
         }
 
-        logEvent(config: EventConfig): boolean {
+        /**
+         * 
+         * @param config 
+         * @returns Has measurements left
+         */
+        private logEvent(config: EventConfig): boolean {
             let sensorEventFunction = sensorEventFunctionLookup[config.inequality]
 
             if (config.measurements <= 0) {
@@ -143,7 +153,6 @@ namespace microcode {
                 config.measurements -= 1
             }
 
-            // basic.pause(EVENT_POLLING_PERIOD_MS)
             return true
         }
 
@@ -201,7 +210,7 @@ namespace microcode {
         constructor(dim: Dimension) {
             super(function () {return input.acceleration(dim)}, 
                 "Accel. " + ['X', 'Y', 'Z'][dim], 
-                -1023, 
+                -1023,
                 1023, 
                 "accelerometer"
             )

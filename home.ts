@@ -3,6 +3,7 @@ namespace microcode {
         private recordDataBtn: Button
         private liveDataBtn: Button
         private viewBtn: Button
+        private dataRows: string[][];
 
         constructor(app: App) {
             super(app)
@@ -22,6 +23,28 @@ namespace microcode {
                 "Reading",
                 "Event"
             ])
+
+
+            // for (let i = 0; i < 10; i++) {
+            //     datalogger.log(
+            //         datalogger.createCV("Sensor", "test"),
+            //         datalogger.createCV("Time (ms)", "1000"),
+            //         datalogger.createCV("Reading", +i),
+            //         datalogger.createCV("Event", "N/A")
+            //     )
+            // }
+
+            this.dataRows = []
+            // const tokens = datalogger.getData().split("_")
+            // const tokens = datalogger.getNRows(0, 10).split("_")
+
+            // basic.showString(tokens.length)
+            // const numberOfCols = 4
+            
+            // Skip the first column of each row (Time (Seconds)):
+            // for (let i = 0; i < tokens.length - numberOfCols; i += numberOfCols) {
+            //     this.dataRows[i / numberOfCols] = tokens.slice(i, i + numberOfCols);
+            // }
 
             this.liveDataBtn = new Button({
                 parent: null,
@@ -69,8 +92,8 @@ namespace microcode {
         private drawVersion() {
             const font = simage.font5
             Screen.print(
-                "v1.0",
-                Screen.RIGHT_EDGE - font.charWidth * "v1.0".length,
+                "v1.1",
+                Screen.RIGHT_EDGE - font.charWidth * "v1.1".length,
                 Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
@@ -125,6 +148,22 @@ namespace microcode {
                     microcode.font
                 )
             }
+
+
+            // for (let i = 0; i < this.dataRows.length; i++) {
+            //     Screen.fillRect(
+            //         Screen.LEFT_EDGE,
+            //         Screen.TOP_EDGE,
+            //         Screen.WIDTH,
+            //         Screen.HEIGHT,
+            //         0xc
+            //     )
+            //     screen.printCenter(this.dataRows[i][0], 10)
+            //     screen.printCenter(this.dataRows[i][1], 20)
+            //     screen.printCenter(this.dataRows[i][2], 30)
+            //     screen.printCenter(this.dataRows[i][3], 40)
+            //     basic.pause(1000)
+            // }
 
             this.recordDataBtn.draw()
             this.liveDataBtn.draw()

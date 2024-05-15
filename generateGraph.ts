@@ -252,7 +252,7 @@ namespace microcode {
             screen.print(
                 this.highestSensorMaximum.toString(),
                 (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
-                this.windowTopBuffer - this.yScrollOffset,
+                Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - (0.5 * this.yScrollOffset),
                 15
             )
 
