@@ -292,7 +292,7 @@ namespace microcode {
                                     break;
 
                                 case 1:
-                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].maximum
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
 
                                 case 2:
@@ -345,7 +345,7 @@ namespace microcode {
                                     break;
                                 case 1:
                                     // May be negative:
-                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].minimum
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
                                 case 2:
                                     // Non-negative modulo is required for the 3rd column - since you cannot have negative event counts:

@@ -254,17 +254,8 @@ namespace microcode {
 
                 // Name, reading / maximum
                 screen.print(
-                    this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].maximum,
+                    this.sensors[i].name + " " + this.sensors[i].getReading() + "/" + this.sensors[i].getMaximum(),
                     14,
-                    y,
-                    color
-                )
-
-                // Write the peak reading just below and with a slight xOffset from the above:
-                y += 12
-                screen.print(
-                    "Peak " + this.sensors[i].peakDataPoint[1], 
-                    44,
                     y,
                     color
                 )
@@ -287,8 +278,8 @@ namespace microcode {
             if (this.selectedXCoordinate != null && this.selectedYCoordinate != null) {
                 const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset
 
-                const sensorRange = Math.abs(this.sensors[this.selectedSensorIndex].minimum) + this.sensors[this.selectedSensorIndex].maximum
-                const y = Math.round(Screen.HEIGHT - (((this.selectedYCoordinate - this.sensors[this.selectedSensorIndex].minimum) / sensorRange) * (Screen.HEIGHT - fromY))) - fromY
+                const sensorRange = Math.abs(this.sensors[this.selectedSensorIndex].getMinimum()) + this.sensors[this.selectedSensorIndex].getMaximum()
+                const y = Math.round(Screen.HEIGHT - (((this.selectedYCoordinate - this.sensors[this.selectedSensorIndex].getMinimum()) / sensorRange) * (Screen.HEIGHT - fromY))) - fromY
 
                 screen.drawCircle(
                     this.windowLeftBuffer + this.selectedXCoordinate + this.xScrollOffset,
@@ -317,7 +308,7 @@ namespace microcode {
             // Draw the latest reading on the right-hand side as a Ticker if at no-zoom:
             color = 8;
             if (this.currentZoomDepth == 0) {
-                const latestReadings = this.sensors.map(function(sensor) {return [sensor.getReading(), sensor.minimum, Math.abs(sensor.minimum) + sensor.maximum]})
+                const latestReadings = this.sensors.map(function(sensor) {return [sensor.getReading(), sensor.getMinimum(), Math.abs(sensor.getMinimum()) + sensor.getMaximum()]})
 
                 latestReadings.forEach(function(reading) {
                     const fromY = this.windowBotBuffer - this.yScrollOffset - this.yScrollOffset

@@ -107,13 +107,13 @@ namespace microcode {
 
             const reading = this.getReading()
             // const time = input.runningTime() - this.startTime
-            const time = (this.totalMeasurements - config.measurements) * config.period
+            
 
             if (this.loggingMode == SensorLoggingMode.EVENTS) {
                 const config = this.config as EventConfig
                 const reading = this.getReading()
 
-                if (sensorEventFunction(reading, config.comparator)) {
+                if (sensorEventFunctionLookup[config.inequality](reading, config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.name),
                         datalogger.createCV("Time (ms)", EVENT_POLLING_PERIOD_MS),
@@ -124,6 +124,9 @@ namespace microcode {
             }
 
             else {
+                const config = this.config as RecordingConfig
+                const time = (this.totalMeasurements - config.measurements) * config.period
+
                 datalogger.log(
                     datalogger.createCV("Sensor", this.name),
                     datalogger.createCV("Time (ms)", time.toString()),
@@ -200,7 +203,6 @@ namespace microcode {
                 return res
             },
             "Pin " + (pin % 100),
-            "pin_" + (pin % 100)
             )
         }
 

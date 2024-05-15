@@ -32,9 +32,9 @@ namespace microcode {
         private tabularRowIndex: number
         private filteredRowIndex: number
 
-        constructor(app: App, guiState: DATA_VIEW_DISPLAY_MODE) {
+        constructor(app: App) {
             super(app, "recordedDataViewer")
-            this.guiState = guiState
+            this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
 
             this.xScrollOffset = 0
             this.tabularYScrollOffset = 0

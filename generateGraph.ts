@@ -52,8 +52,8 @@ namespace microcode {
             // Count until sensor name is repeated:
             const firstSensor = this.dataRows[1][0] // Skip first row (headers)
             this.numberOfSensors = 1
-            this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[firstSensor].minimum
-            this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[firstSensor].maximum
+            this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[firstSensor].getMinimum()
+            this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[firstSensor].getMaximum()
 
             // Go from second sensor onward (3rd row):
             for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
@@ -61,12 +61,12 @@ namespace microcode {
                 if (this.dataRows[rowID][0] != firstSensor) {
                     this.numberOfSensors += 1
 
-                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].minimum < this.lowestSensorMinimum) {
-                        this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].minimum
+                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].getMinimum() < this.lowestSensorMinimum) {
+                        this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].getMinimum()
                     }
 
-                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].maximum > this.highestSensorMaximum) {
-                        this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].maximum
+                    if (SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].getMaximum() > this.highestSensorMaximum) {
+                        this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[this.dataRows[rowID][0]].getMaximum()
                     }
                 }
 
@@ -192,8 +192,8 @@ namespace microcode {
             for (let row = 1; row < this.dataRows.length - this.numberOfSensors - 1; row++) {
                 const sensorName = this.dataRows[row][0];
                 const sensor = SENSOR_LOOKUP_TABLE[sensorName];
-                const minimum = sensor.minimum
-                const maximum = sensor.maximum
+                const minimum = sensor.getMinimum()
+                const maximum = sensor.getMaximum()
 
                 const norm1 = ((+this.dataRows[row][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
                 const norm2 = ((+this.dataRows[row + this.numberOfSensors][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
@@ -218,6 +218,7 @@ namespace microcode {
             }
 
             let y = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
+            color = 8
             
             // Write Sensor information, displayed below the plot:
             for (let i = 0; i < this.numberOfSensors; i++) {
