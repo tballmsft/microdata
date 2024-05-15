@@ -4,19 +4,34 @@ namespace microcode {
         EVENTS
     }
 
+    /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const EVENT_POLLING_PERIOD_MS = 100
+    const DEFAULT_SENSOR_MINIMUM = 0
+    const DEFAULT_SENSOR_MAXIMUM = 100
+
+    interface Sensorable {
+        getReading(): number;
+        getMinimum(): number;
+        getMaximum(): number;
+
+        getBufferSize(): number;
+        getNthReading(n: number): number;
+        getDataBufferLength(): number;
+        getNormalisedReading(): number;
+        log(): boolean;
+    }
 
     /**
      * Abstraction for all available sensors,
-     * Methods are seldom overidden
      */
-    export abstract class Sensor {
+    export abstract class Sensor implements Sensorable {
         public static readonly BUFFER_LIMIT: number = 100;
         public static readonly PLOT_SMOOTHING_CONSTANT: number = 4
 
         public readonly name: string
         public sensorFn: () => number
-        public iconName: string
+
+        /** Set upon the first reading */
         public startTime: number
 
         public config: RecordingConfig | EventConfig
@@ -30,36 +45,39 @@ namespace microcode {
         public lastReadingDelay: number
 
         // Reading Statistics:
-        public minimum: number
-        public maximum: number
-        public peakDataPoint: number[]
         public lastLoggedEventDescription: string
-
         private dataBuffer: number[]
-        private totalMeasurements: number
+        private totalMeasurements: number;
 
-        constructor(sensorFn: () => number, 
-            name: string,
-            sensorMinReading: number,
-            sensorMaxReading: number,
-            iconName: string,
-            config?: RecordingConfig
-        ) {
+        constructor(sensorFn: () => number, name: string, config?: RecordingConfig) {
             this.name = name
             this.sensorFn = sensorFn
-            this.iconName = iconName
-            this.startTime = 0 // This value will be set upon the first reading
+            this.startTime = 0
             this.lastReadingDelay = 0
 
             this.config = config
             this.loggingMode = null
 
-            this.minimum = sensorMinReading
-            this.maximum = sensorMaxReading
-            this.peakDataPoint = [0, this.minimum] // [x, y]
             this.lastLoggedEventDescription = ""
-
             this.dataBuffer = []
+            this.totalMeasurements = 0
+        }
+
+        getReading(): number {return this.sensorFn()}
+        getMinimum(): number {return DEFAULT_SENSOR_MINIMUM;}
+        getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
+
+        getBufferSize(): number {return this.dataBuffer.length}
+        
+        getNthReading(n: number): number {return this.dataBuffer[n]}
+        getDataBufferLength(): number {return this.dataBuffer.length}
+        getNormalisedReading(): number{return this.sensorFn() / this.getMaximum()}
+
+        readIntoBufferOnce(): void {
+            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
+                this.dataBuffer.shift();
+            }
+            this.dataBuffer.push(this.getReading());
         }
 
         setRecordingConfig(config: RecordingConfig) {
@@ -74,85 +92,46 @@ namespace microcode {
             this.totalMeasurements = config.measurements
         }
 
-        getBufferSize(): number {return this.dataBuffer.length}
-        getReading(): number {return this.sensorFn()}
-        getNthReading(n: number): number {return this.dataBuffer[n]}
-        getDataBufferLength(): number {return this.dataBuffer.length}
-        getNormalisedReading(): number{return this.sensorFn() / this.maximum}
-
-        readIntoBufferOnce(): void {
-            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
-                this.dataBuffer.shift();
-                this.peakDataPoint[0] -= 1
-            }
-            this.dataBuffer.push(this.getReading());
-        }
-
         /**
          * Invokes logData() if this is a RecordingSensor, logEvent() if logging events
          * @returns Has measurements left
          */
         log(): boolean {
-            if (this.startTime == 0) {
-                this.startTime = input.runningTime()
+            // if (this.startTime == 0) {
+            //     this.startTime = input.runningTime()
+            // }
+
+            if (this.config.measurements <= 0) {
+                return false
             }
+
+            const reading = this.getReading()
+            // const time = input.runningTime() - this.startTime
+            const time = (this.totalMeasurements - config.measurements) * config.period
+
             if (this.loggingMode == SensorLoggingMode.EVENTS) {
-                return this.logEvent(this.config as EventConfig)
+                const config = this.config as EventConfig
+                const reading = this.getReading()
+
+                if (sensorEventFunction(reading, config.comparator)) {
+                    datalogger.log(
+                        datalogger.createCV("Sensor", this.name),
+                        datalogger.createCV("Time (ms)", EVENT_POLLING_PERIOD_MS),
+                        datalogger.createCV("Reading", reading.toString()),
+                        datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
+                    )
+                }
             }
 
-            return this.logData(this.config as RecordingConfig)
-        }
-
-        /**
-         * 
-         * @param config 
-         * @returns Has measurements left
-         */
-        private logData(config: RecordingConfig): boolean {
-            if (config.measurements <= 0) {
-                return false
-            }
-
-            const reading = this.getReading()
-            const time = input.runningTime() - this.startTime
-            // const time = (this.totalMeasurements - config.measurements) * config.period
-
-            datalogger.log(
-                datalogger.createCV("Sensor", this.name),
-                datalogger.createCV("Time (ms)", time.toString()),
-                datalogger.createCV("Reading", reading.toString()),
-                datalogger.createCV("Event", "N/A")
-            )
-
-            // this.lastReadingDelay = time - ((this.totalMeasurements - config.measurements) * config.period)
-            config.measurements -= 1
-            return true
-        }
-
-        /**
-         * 
-         * @param config 
-         * @returns Has measurements left
-         */
-        private logEvent(config: EventConfig): boolean {
-            let sensorEventFunction = sensorEventFunctionLookup[config.inequality]
-
-            if (config.measurements <= 0) {
-                return false
-            }
-
-            const reading = this.getReading()
-
-            if (sensorEventFunction(reading, config.comparator)) {
+            else {
                 datalogger.log(
                     datalogger.createCV("Sensor", this.name),
-                    datalogger.createCV("Time (ms)", (input.runningTime() - this.startTime).toString()),
+                    datalogger.createCV("Time (ms)", time.toString()),
                     datalogger.createCV("Reading", reading.toString()),
-                    datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
+                    datalogger.createCV("Event", "N/A")
                 )
-                config.measurements -= 1
             }
-
+            this.config.measurements -= 1
             return true
         }
 
@@ -168,14 +147,11 @@ namespace microcode {
         draw(fromX: number, fromY: number, color: number): void {
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
                 // Normalise the data points, then calculate their position for the graph:
-                const norm1 = ((this.dataBuffer[i] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
-                const norm2 = ((this.dataBuffer[i + 1] - this.minimum) / (this.maximum + Math.abs(this.minimum))) * (screen.height - fromY)
+                const norm1 = ((this.dataBuffer[i] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY)
+                const norm2 = ((this.dataBuffer[i + 1] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY)
                 const y1 = Math.round(screen.height - norm1) - fromY
                 const y2 = Math.round(screen.height - norm2) - fromY
 
-                if (this.dataBuffer[i] > this.peakDataPoint[1]) {
-                    this.peakDataPoint = [i, this.dataBuffer[i]]
-                }
 
                 for (let j = 0; j < Sensor.PLOT_SMOOTHING_CONSTANT; j++) {
                     screen.drawLine(fromX + i, y1 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, fromX + i - 1, y2 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, color);
@@ -188,33 +164,27 @@ namespace microcode {
      * Onboard Light Sensor; ranged between 0 and 255
      */
     export class LightSensor extends Sensor {
-        constructor() {
-            super(function () {return input.lightLevel()}, "Light", 0, 255, "led_light_sensor")
-        }
+        constructor() {super(function () {return input.lightLevel()}, "Light")}
+
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 255;}
     }
 
     /**
      * Onboard Thermometer; ranged between 0 and 100
      */
     export class TemperatureSensor extends Sensor {
-        constructor() {
-            super(function () {return input.temperature()}, "Temp.", 0, 100, "thermometer")
-        }
+        constructor() {super(function () {return input.temperature()}, "Temp.")}
     }
-
 
     /**
      * Onboard Accelerometer for X, Y, Z dimensions; ranged between -1023, 1023
      */
     export class AccelerometerSensor extends Sensor {
-        constructor(dim: Dimension) {
-            super(function () {return input.acceleration(dim)}, 
-                "Accel. " + ['X', 'Y', 'Z'][dim], 
-                -1023,
-                1023, 
-                "accelerometer"
-            )
-        }
+        constructor(dim: Dimension) {super(function () {return input.acceleration(dim)}, "Accel. " + ['X', 'Y', 'Z'][dim])}
+
+        public static getMinimum(): number {return -1023;}
+        public static getMaximum(): number {return 1023;}
     }
 
     /**
@@ -223,21 +193,20 @@ namespace microcode {
     export class PinSensor extends Sensor {
         constructor(pin: TouchPin) {
             super(function () {
-                    let res: number = 0
-                    input.onPinPressed(pin, function () {
-                        res = 1
-                    })
-                    return res
-                },
-                // Pins are 0, 1, 2 = 100, 101, 102
-                "Pin " + (pin % 100),
-                0,
-                1,
-                "pin_" + (pin % 100)
+                let res: number = 0
+                input.onPinPressed(pin, function () {
+                    res = 1
+                })
+                return res
+            },
+            "Pin " + (pin % 100),
+            "pin_" + (pin % 100)
             )
         }
-    }
 
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
 
     /**
      * Onboard Magnometer for X, Y, Z dimensions
@@ -245,16 +214,11 @@ namespace microcode {
      * MIN & MAX RANGE UNVERIFIED
      */
     export class MagnetSensor extends Sensor {
-        constructor(dim: Dimension) {
-            super(function() {return input.magneticForce(dim)},
-                "Magnet " + dim.toString(),
-                0,
-                1,
-                "magnet"
-            )
-        }
-    }
+        constructor(dim: Dimension) {super(function() {return input.magneticForce(dim)}, "Magnet " + dim.toString())}
 
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
 
     /**
      * Onboard Pitch or Roll sensor
@@ -269,7 +233,7 @@ namespace microcode {
                 name = "Roll"
             }
 
-            super(function () {return input.rotation(rot)}, name, 0, 100, "right_turn")    
+            super(function () {return input.rotation(rot)}, name)
         }
     }
 
@@ -280,15 +244,10 @@ namespace microcode {
      * sensorMaxReading may change in future
      */
     export class LogoPressSensor extends Sensor {
-        constructor() {
-            super(
-                function () {if(input.logoIsPressed()) {return 1} return 0}, 
-                "Logo Pressed", 
-                0,
-                1, 
-                "finger_press"
-            )
-        }
+        constructor() {super(function () {if(input.logoIsPressed()) {return 1} return 0}, "Logo Pressed")}
+
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
     }
 
     /**
@@ -296,120 +255,62 @@ namespace microcode {
      * Ranged between 0 and 360 degrees
      */
     export class CompassHeadingSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return input.compassHeading()}, 
-                "Compass", 
-                0, 
-                360, 
-                "compass"
-            )
-        }
-    }    
+        constructor() {super(function () {return input.compassHeading()}, "Compass")}
+
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 360;}
+    }
 
     /**
      * Sensor for the Microphone
      * Ranged between 0 and 255
      */
     export class VolumeSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return input.soundLevel()}, 
-                "Volume", 
-                0, 
-                255, 
-                "speaker"
-            )
-        }
+        constructor() {super(function () {return input.soundLevel()}, "Volume")}
+
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 255;}
     }
 
     /**
      * modules.lightLevel1.lightLevel sensor from pxt-jacdac/jacdac-light-level
      */
     export class JacdacLightSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.lightLevel1.lightLevel()}, 
-                "Jac Light", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.lightLevel1.lightLevel()}, "Jac Light")}
     }
 
     /**
      * modules.distance1.distance sensor from pxt-jacdac/jacdac-distance
      */
     export class JacdacDistanceSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.distance1.distance()}, 
-                "Jac Dist", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.distance1.distance()}, "Jac Dist")}
     }
 
     /**
      * modules.soilMoisture1.moisture sensor from pxt-jacdac/jacdac-soil-moisture
      */
     export class JacdacSoilMoistureSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.soilMoisture1.moisture()}, 
-                "Jac Moist", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.soilMoisture1.moisture()}, "Jac Moist")}
     }
 
     /**
      * modules.flex1.bending sensor from pxt-jacdac/flex
      */
     export class JacdacFlexSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.flex1.bending()}, 
-                "Jac Flex", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.flex1.bending()}, "Jac Flex")}
     }
 
     /**
      * modules.temperature1.temperature sensor from pxt-jacdac/temperature
      */
     export class JacdacTemperatureSensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.temperature1.temperature()}, 
-                "Jac Temp", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.temperature1.temperature()}, "Jac Temp")}
     }
 
     /**
      * modules.humidity1.humidity sensor from pxt-jacdac/humidity
      */
     export class JacdacHumiditySensor extends Sensor {
-        constructor() {
-            super(
-                function () {return modules.humidity1.humidity()}, 
-                "Jac Humid", 
-                0, 
-                100,
-                "microbitLogo"
-            )
-        }
+        constructor() {super(function () {return modules.humidity1.humidity()}, "Jac Humid")}
     }
 }

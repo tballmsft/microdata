@@ -24,6 +24,8 @@ namespace microcode {
                 "Event"
             ])
 
+            this.dataRows = []
+
 
             // for (let i = 0; i < 10; i++) {
             //     datalogger.log(
@@ -34,7 +36,7 @@ namespace microcode {
             //     )
             // }
 
-            this.dataRows = []
+            
             // const tokens = datalogger.getData().split("_")
             // const tokens = datalogger.getNRows(0, 10).split("_")
 

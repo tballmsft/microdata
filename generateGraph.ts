@@ -2,10 +2,16 @@ namespace microcode {
     /** No information beyond this Y coordinate */
     const MAX_Y_SCOLL = -75
 
+
+    /**
+     * Takes the datalogger logs and generates a labelled graph.
+     * Each sensor is a unique coloured line, sensor information is detailed below.
+     */
     export class GraphGenerator extends Scene {
         private dataRows: string[][];
         private numberOfCols: number;
         private numberOfSensors: number;
+
         private lowestSensorMinimum: number;
         private highestSensorMaximum: number;
 
@@ -35,9 +41,10 @@ namespace microcode {
             this.yScrollOffset = 0
 
             this.dataRows = []
-            const tokens = datalogger.getData().split("_")
             this.numberOfCols = 4
-            
+
+            // Build the dataRows:
+            const tokens = datalogger.getData().split("_")
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
@@ -179,7 +186,6 @@ namespace microcode {
 
             // Draw data lines:
             const fromY = this.windowBotBuffer - (2 * this.yScrollOffset)
-            const fromX = this.windowLeftBuffer
 
             let priorXOffset = 0
             let xOffset = 0
@@ -201,9 +207,9 @@ namespace microcode {
                 }
 
                 screen.drawLine(
-                    fromX + priorXOffset,
+                    this.windowLeftBuffer + priorXOffset,
                     y1,
-                    fromX + xOffset,
+                    this.windowLeftBuffer + xOffset,
                     y2,
                     color
                 );
@@ -211,8 +217,7 @@ namespace microcode {
                 color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
 
-            const yStart = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
-            let y = yStart
+            let y = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
             
             // Write Sensor information, displayed below the plot:
             for (let i = 0; i < this.numberOfSensors; i++) {
@@ -235,11 +240,34 @@ namespace microcode {
                     color
                 )
 
-                color = (color + 3) % 15
+                color = 8 + ((i % this.numberOfSensors) % 15)
             }
 
             // Markers & axes:
             this.draw_axes()
+        }
+
+        /**
+         * Draw x & y axis Double-thickness each, in yellow
+         * Draw abscissa and ordinate
+         */
+        draw_axes() {
+            for (let i = 0; i < 2; i++) {
+                screen.drawLine(
+                    this.windowLeftBuffer,
+                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
+                    this.windowWidth - this.windowRightBuffer, 
+                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
+                    5
+                );
+                screen.drawLine(
+                    this.windowLeftBuffer + i, 
+                    this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
+                    this.windowLeftBuffer + i, 
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
+                    5
+                );
+            }
 
             // Y axis:
             screen.print(
@@ -259,39 +287,17 @@ namespace microcode {
             // X axis:
             screen.print(
                 "0",
-                fromX - 2,
+                this.windowLeftBuffer - 2,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
 
             screen.print(
                 ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
-                fromX + xOffset - 3,
+                Screen.WIDTH - this.windowRightBuffer - 3,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
-        }
-
-        /**
-         * 2 Axis of Double-thickness each, in yellow
-         */
-        draw_axes() {
-            for (let i = 0; i < 2; i++) {
-                screen.drawLine(
-                    this.windowLeftBuffer,
-                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidth - this.windowRightBuffer, 
-                    this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
-                    5
-                );
-                screen.drawLine(
-                    this.windowLeftBuffer + i, 
-                    this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowLeftBuffer + i, 
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    5
-                );
-            }
         }
     }
 }

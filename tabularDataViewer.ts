@@ -6,8 +6,10 @@ namespace microcode {
      */
     const TABULAR_MAX_ROWS = 8
 
-    export const enum DATA_VIEW_DISPLAY_MODE {
+    const enum DATA_VIEW_DISPLAY_MODE {
+        /** Show all data from all sensors */
         TABULAR_DATA_VIEW,
+        /** Show the data from one selected sensors */
         FILTERED_DATA_VIEW,
     }
 
@@ -181,6 +183,11 @@ namespace microcode {
             )
         }
 
+
+        /**
+         * Used to retrieve the next chunk of data
+         * Invoked when this.tabularYScrollOffset reaches its screen boundaries
+         */
         private getNextDataChunk() {
             const tokens = datalogger.getNRows(this.tabularRowIndex - 1, this.tabularRowIndex + TABULAR_MAX_ROWS).split("_");
             // const tokens = datalogger.getData().split("_");

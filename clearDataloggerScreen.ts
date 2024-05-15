@@ -97,7 +97,7 @@ namespace microcode {
             )
 
             if (this.currentlyDeleting) {
-                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 10)
+                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 9)
             }
 
             for (let i = 0; i < this.btns.length; i++) {
