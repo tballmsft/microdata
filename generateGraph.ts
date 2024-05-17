@@ -2,6 +2,12 @@ namespace microcode {
     /** Number of columns used for the datalogger */
     const NUMBER_OF_COLS = 4;
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
+    const Y_AXIS_SCROLL_RATE: number = 20
+
+    enum UI_STATE {
+        GRAPH,
+        SENSOR_SELECTION
+    }
 
     /**
      * Takes the datalogger logs and generates a labelled graph.
@@ -19,10 +25,18 @@ namespace microcode {
         private yScrollOffset: number
         private xScrollOffset: number
         private xCoordinateScalar: number;
+        private uiState: UI_STATE;
 
+        /** Chunk of 10 data points from the datalogger */
         private dataRows: string[][];
+        /** Use the sensor names to write information about them below the plot */
         private sensorNames: string[];
+        /** Sensors can be turned on & off: only showSensors[n] == true are shown */
+        private drawSensorStates: boolean[];
+        /** Use the sensor minimum and maximum data to wwrite information about them below the plot */
         private sensorMinsAndMaxs: number[][];
+        /** After scrolling past the plot the user can select a sensor to disable/enable     */
+        private currentlySelectedSensorIndex: number;
         private rowQty: number;
         
         private numberOfSensors: number;
@@ -35,6 +49,7 @@ namespace microcode {
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
+            this.uiState = UI_STATE.GRAPH
 
             this.windowLeftBuffer = 38
             this.windowRightBuffer = 10
@@ -47,6 +62,7 @@ namespace microcode {
             this.getNextDataChunk()
             this.rowQty = datalogger.getNumberOfRows()
             this.sensorNames = []
+            this.drawSensorStates = []
             this.sensorMinsAndMaxs = []
 
             // Get the minimum and maximum sensor readings and the number of sensors:
@@ -54,6 +70,7 @@ namespace microcode {
             const sensor: Sensor = SENSOR_LOOKUP_TABLE[firstSensorName]
 
             this.sensorNames.push(firstSensorName)
+            this.drawSensorStates.push(true)
             this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
             this.numberOfSensors = 1
             
@@ -69,6 +86,7 @@ namespace microcode {
                     const sensor: Sensor = SENSOR_LOOKUP_TABLE[sensorName]
 
                     this.sensorNames.push(sensorName)
+                    this.drawSensorStates.push(true)
                     this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
                     this.numberOfSensors += 1
                     
@@ -98,7 +116,14 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
+                    this.yScrollOffset = Math.min(this.yScrollOffset + Y_AXIS_SCROLL_RATE, 0)
+                    if (this.yScrollOffset <= -60) {
+                        this.uiState = UI_STATE.SENSOR_SELECTION
+                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / Y_AXIS_SCROLL_RATE
+                    }
+                    else {
+                        this.uiState = UI_STATE.GRAPH
+                    }
                     this.update() // For fast response to the above change
                 }
             )
@@ -107,7 +132,14 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, -(this.windowHeight + 40))
+                    this.yScrollOffset = Math.max(this.yScrollOffset - Y_AXIS_SCROLL_RATE, -(this.windowHeight + 40))
+                    if (this.yScrollOffset <= -60) {
+                        this.uiState = UI_STATE.SENSOR_SELECTION
+                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / Y_AXIS_SCROLL_RATE
+                    }
+                    else {
+                        this.uiState = UI_STATE.GRAPH
+                    }
                     this.update() // For fast response to the above change
                 }
             )
@@ -139,28 +171,16 @@ namespace microcode {
                 }
             )
 
-            // // Zoom in:
-            // control.onEvent(
-            //     ControllerButtonEvent.Pressed,
-            //     controller.A.id,
-            //     () => {
-            //         if (this.selectedXCoordinate == null || this.selectedYCoordinate == null) {
-            //             this.selectedXCoordinate = Math.round(this.sensors[this.selectedSensorIndex].getDataBufferLength() / 2)
-            //             this.selectedYCoordinate = this.sensors[this.selectedSensorIndex].getNthReading(this.selectedXCoordinate)
-            //         }
-
-            //         this.xScrollOffset = Math.round(Screen.HALF_WIDTH - this.selectedXCoordinate)
-
-            //         this.windowHeight = this.windowHeight + (Screen.HEIGHT * 0.5)
-            //         this.windowWidth = this.windowWidth + (Screen.WIDTH * 0.5)
-
-            //         this.windowLeftBuffer = this.windowLeftBuffer - (18 * 0.5)
-            //         this.windowTopBuffer = this.windowTopBuffer - (5 * 0.5)
-            //         this.windowBotBuffer = this.windowBotBuffer - (20 * 0.5)
-
-            //         this.currentZoomDepth += 1
-            //     }
-            // )
+            // Zoom in:
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                () => {
+                    if (this.uiState == UI_STATE.SENSOR_SELECTION) {
+                        this.drawSensorStates[this.currentlySelectedSensorIndex] = !this.drawSensorStates[this.currentlySelectedSensorIndex]
+                    }
+                }
+            )
 
             // // Zoom out, if at default zoom (none), then go back to home
             // control.onEvent(
@@ -234,30 +254,32 @@ namespace microcode {
             let priorXOffset = 0
             let xOffset = 0
             for (let row = 0; row < this.dataRows.length - this.numberOfSensors; row++) {
-                const sensorName = this.dataRows[row][0];
-                const sensor: Sensor = SENSOR_LOOKUP_TABLE[sensorName];
-                const minimum = sensor.getMinimum()
-                const maximum = sensor.getMaximum()
+                if (this.drawSensorStates[row % this.numberOfSensors]) {
+                    const sensorName = this.dataRows[row][0];
+                    const sensor: Sensor = SENSOR_LOOKUP_TABLE[sensorName];
+                    const minimum = sensor.getMinimum();
+                    const maximum = sensor.getMaximum();
 
-                const norm1 = ((+this.dataRows[row][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
-                const norm2 = ((+this.dataRows[row + this.numberOfSensors][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
-            
-                const y1 = Math.round(screen.height - norm1) - fromY  
-                const y2 = Math.round(screen.height - norm2) - fromY
+                    const norm1 = ((+this.dataRows[row][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+                    const norm2 = ((+this.dataRows[row + this.numberOfSensors][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY)
+                
+                    const y1 = Math.round(screen.height - norm1) - fromY;
+                    const y2 = Math.round(screen.height - norm2) - fromY;
 
-                if ((row % this.numberOfSensors) == 0) {
-                    priorXOffset = xOffset
-                    xOffset += this.xCoordinateScalar
+                    if ((row % this.numberOfSensors) == 0) {
+                        priorXOffset = xOffset;
+                        xOffset += this.xCoordinateScalar;
+                    }
+
+                    let color = SENSOR_COLORS[(row % this.numberOfSensors) % SENSOR_COLORS.length];
+                    screen.drawLine(
+                        this.windowLeftBuffer + priorXOffset,
+                        y1,
+                        this.windowLeftBuffer + xOffset,
+                        y2,
+                        color
+                    );
                 }
-
-                let color = SENSOR_COLORS[(row % this.numberOfSensors) % SENSOR_COLORS.length]
-                screen.drawLine(
-                    this.windowLeftBuffer + priorXOffset,
-                    y1,
-                    this.windowLeftBuffer + xOffset,
-                    y2,
-                    color
-                );
             }
 
             // Sensor information:
@@ -273,66 +295,61 @@ namespace microcode {
                     15
                 )
 
+                // Sensor is disabled:
+                let blockColor: number = SENSOR_COLORS[(i % this.numberOfSensors) % SENSOR_COLORS.length]
+                let textColor: number = 15; // black
+                if (!this.drawSensorStates[i]) {
+                    blockColor = 15; // black
+                    textColor = 1;   // white
+                }
+
                 // Coloured block:
                 screen.fillRect(
                     7,
                     y,
                     145,
                     45,
-                    SENSOR_COLORS[(i % this.numberOfSensors) % SENSOR_COLORS.length]
+                    blockColor
                 )
+
+                // Blue outline for selected sensor:
+                if (i == this.currentlySelectedSensorIndex) {
+                    // Blue edges:
+                    for (let thickness = 0; thickness < 3; thickness++) {
+                        screen.drawRect(
+                            7 - thickness,
+                            y - thickness,
+                            145 + thickness,
+                            45 + thickness,
+                            6
+                        )
+                    }
+                }
 
                 // Information:
                 screen.print(
                     this.sensorNames[i],
                     12,
                     y + 2,
-                    15
+                    textColor
                 )
 
                 screen.print(
                     "Minimum: " + this.sensorMinsAndMaxs[i][0],
                     12,
                     y + 16,
-                    15
+                    textColor
                 )
 
                 screen.print(
                     "Maximum: " + this.sensorMinsAndMaxs[i][1],
                     12,
                     y + 32,
-                    15
+                    textColor
                 )
 
                 y += 55
             }
-            // let y = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
-            // color = 8
-            
-            // // Write Sensor information, displayed below the plot:
-            // for (let i = 0; i < this.numberOfSensors; i++) {
-            //     // Colour used to represent this sensor, same colour as plotted & ticker:
-            //     y += (i * 12)
-
-            //     screen.fillRect(
-            //         0,
-            //         y,
-            //         7,
-            //         7,
-            //         color
-            //     )
-
-            //     // Name, reading / maximum
-            //     screen.print(
-            //         this.dataRows[i + 1][0],
-            //         12,
-            //         y,
-            //         color
-            //     )
-
-            //     color = 8 + ((i + 1 % this.numberOfSensors) % 15)
-            // }
-
             // Markers & axes:
             this.draw_axes()
         }
@@ -360,21 +377,23 @@ namespace microcode {
             }
 
             // Y axis:
-            // Bot:
-            screen.print(
-                this.lowestSensorMinimum.toString(),
-                (6 * font.charWidth) - (this.lowestSensorMinimum.toString().length * font.charWidth),
-                this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
-                15
-            )
+            if (this.yScrollOffset > -60) {
+                // Bot:
+                screen.print(
+                    this.lowestSensorMinimum.toString(),
+                    (6 * font.charWidth) - (this.lowestSensorMinimum.toString().length * font.charWidth),
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
+                    15
+                )
 
-            // Top:
-            screen.print(
-                this.highestSensorMaximum.toString(),
-                (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
-                Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.5 * this.yScrollOffset),
-                15
-            )
+                // Top:
+                screen.print(
+                    this.highestSensorMaximum.toString(),
+                    (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
+                    Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset),
+                    15
+                )
+            }
 
             // X axis:
             // Start
