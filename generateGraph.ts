@@ -1,20 +1,12 @@
 namespace microcode {
-    /** No information beyond this Y coordinate */
-    const MAX_Y_SCOLL = -75
-
+    /** Number of columns used for the datalogger */
+    const NUMBER_OF_COLS = 4;
 
     /**
      * Takes the datalogger logs and generates a labelled graph.
      * Each sensor is a unique coloured line, sensor information is detailed below.
      */
     export class GraphGenerator extends Scene {
-        private dataRows: string[][];
-        private numberOfCols: number;
-        private numberOfSensors: number;
-
-        private lowestSensorMinimum: number;
-        private highestSensorMaximum: number;
-
         private windowWidth: number
         private windowHeight: number
 
@@ -24,7 +16,15 @@ namespace microcode {
         private windowBotBuffer: number
 
         private yScrollOffset: number
+        private xScrollOffset: number
         private xCoordinateScalar: number;
+
+        private dataRows: string[][];
+        private rowQty: number;
+        
+        private numberOfSensors: number;
+        private lowestSensorMinimum: number;
+        private highestSensorMaximum: number;
 
         constructor(app: App) {
             super(app, "graphGeneration")
@@ -39,22 +39,19 @@ namespace microcode {
             this.windowBotBuffer = 20
 
             this.yScrollOffset = 0
+            this.xScrollOffset = 0
 
-            this.dataRows = []
-            this.numberOfCols = 4
+            this.getNextDataChunk()
+            this.rowQty = datalogger.getNumberOfRows()
 
-            // Build the dataRows:
-            const tokens = datalogger.getData().split("_")
-            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
-                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
-            }
-
-            // Count until sensor name is repeated:
-            const firstSensor = this.dataRows[1][0] // Skip first row (headers)
+            // Get the minimum and maximum sensor readings and the number of sensors:
+            const firstSensor = this.dataRows[0][0]
             this.numberOfSensors = 1
+            
             this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[firstSensor].getMinimum()
             this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[firstSensor].getMaximum()
 
+            // Count until sensor name is repeated:
             // Go from second sensor onward (3rd row):
             for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
                 // First element in row is the sensor:
@@ -77,7 +74,10 @@ namespace microcode {
 
             this.xCoordinateScalar = 1
             if (this.dataRows.length < Screen.WIDTH) {
-                this.xCoordinateScalar = Math.round((Screen.WIDTH - this.windowLeftBuffer + this.windowRightBuffer) / (this.dataRows.length / this.numberOfSensors))
+                this.xCoordinateScalar = Math.round(
+                    (Screen.WIDTH - this.windowLeftBuffer + this.windowRightBuffer) /
+                    (this.dataRows.length / this.numberOfSensors)
+                ) - 1
             }
 
             control.onEvent(
@@ -93,7 +93,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
+                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, -(this.windowHeight + 40))
                     this.update() // For fast response to the above change
                 }
             )
@@ -102,8 +102,9 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    this.yScrollOffset = Math.min(this.yScrollOffset + 20, 0)
-                    this.update() // For fast response to the above change
+                    this.xScrollOffset = Math.max(0, this.xScrollOffset - 1)
+                    this.getNextDataChunk()
+                    this.update() // For fast response to the above changes
                 }
             )
 
@@ -111,8 +112,16 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.yScrollOffset - 20, MAX_Y_SCOLL)
-                    this.update() // For fast response to the above change
+                    // If it is a multiple of 10 then that last row will have no data, so stop 1 row before:
+                    if ((this.rowQty % 10) == 0) {
+                        this.xScrollOffset = Math.min(this.xScrollOffset + 1, (this.rowQty / 10) - 1)
+                    }
+                    // Otherwise there will be > 0 && < 10 elements on the last row:
+                    else {
+                        this.xScrollOffset = Math.min(this.xScrollOffset + 1, Math.floor(this.rowQty / 10))
+                    }
+                    this.getNextDataChunk()
+                    this.update() // For fast response to the above changes
                 }
             )
 
@@ -166,12 +175,35 @@ namespace microcode {
         }
 
         /**
+         * Used to retrieve the next chunk of data
+         * Can be used to intialise this.dataRows
+         * Invoked when this.xScrollOffset changes (Left or Right is pressed)
+         * Mutates: this.dataRows
+         */
+        private getNextDataChunk() {
+            this.dataRows = []
+            const tokens = datalogger.getRows(this.xScrollOffset * 10, (this.xScrollOffset * 10) + 10).split("_");
+
+            // First row returned is the header: Skip it:
+            if (this.xScrollOffset == 0) {
+                for (let i = NUMBER_OF_COLS; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
+                    this.dataRows[(i / NUMBER_OF_COLS) - 1] = tokens.slice(i, i + NUMBER_OF_COLS);
+                }
+            }
+
+            else {
+                for (let i = 0; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
+                    this.dataRows[i / NUMBER_OF_COLS] = tokens.slice(i, i + NUMBER_OF_COLS);
+                }
+            }
+        }
+        
+        /**
          * Request each sensor updates its buffers,
          * Then draw to screen
          */
         update() {
             screen.fill(this.color);
-            // screen.fill(0);
             
             // Make graph region black:
             screen.fillRect(
@@ -189,7 +221,7 @@ namespace microcode {
 
             let priorXOffset = 0
             let xOffset = 0
-            for (let row = 1; row < this.dataRows.length - this.numberOfSensors - 1; row++) {
+            for (let row = 0; row < this.dataRows.length - this.numberOfSensors; row++) {
                 const sensorName = this.dataRows[row][0];
                 const sensor = SENSOR_LOOKUP_TABLE[sensorName];
                 const minimum = sensor.getMinimum()
@@ -217,32 +249,32 @@ namespace microcode {
                 color = 8 + (((row - 1) % this.numberOfSensors) % 15)
             }
 
-            let y = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
-            color = 8
+            // let y = this.windowHeight - this.windowBotBuffer + this.yScrollOffset  + this.yScrollOffset + 15
+            // color = 8
             
-            // Write Sensor information, displayed below the plot:
-            for (let i = 0; i < this.numberOfSensors; i++) {
-                // Colour used to represent this sensor, same colour as plotted & ticker:
-                y += (i * 12)
+            // // Write Sensor information, displayed below the plot:
+            // for (let i = 0; i < this.numberOfSensors; i++) {
+            //     // Colour used to represent this sensor, same colour as plotted & ticker:
+            //     y += (i * 12)
 
-                screen.fillRect(
-                    0,
-                    y,
-                    7,
-                    7,
-                    color
-                )
+            //     screen.fillRect(
+            //         0,
+            //         y,
+            //         7,
+            //         7,
+            //         color
+            //     )
 
-                // Name, reading / maximum
-                screen.print(
-                    this.dataRows[i + 1][0],
-                    12,
-                    y,
-                    color
-                )
+            //     // Name, reading / maximum
+            //     screen.print(
+            //         this.dataRows[i + 1][0],
+            //         12,
+            //         y,
+            //         color
+            //     )
 
-                color = 8 + ((i + 1 % this.numberOfSensors) % 15)
-            }
+            //     color = 8 + ((i + 1 % this.numberOfSensors) % 15)
+            // }
 
             // Markers & axes:
             this.draw_axes()
@@ -271,6 +303,7 @@ namespace microcode {
             }
 
             // Y axis:
+            // Bot:
             screen.print(
                 this.lowestSensorMinimum.toString(),
                 (6 * font.charWidth) - (this.lowestSensorMinimum.toString().length * font.charWidth),
@@ -278,6 +311,7 @@ namespace microcode {
                 15
             )
 
+            // Top:
             screen.print(
                 this.highestSensorMaximum.toString(),
                 (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
@@ -286,15 +320,17 @@ namespace microcode {
             )
 
             // X axis:
+            // Start
             screen.print(
-                "0",
+                (this.xScrollOffset * 10).toString(),
                 this.windowLeftBuffer - 2,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
 
+            // End:
             screen.print(
-                ((this.dataRows.length - 1) / this.numberOfSensors).toString(),
+                ((this.xScrollOffset + 1) * 10).toString(),
                 Screen.WIDTH - this.windowRightBuffer - 3,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
