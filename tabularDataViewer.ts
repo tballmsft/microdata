@@ -53,12 +53,6 @@ namespace microcode {
             this.numberOfCols = 4;
             this.getNextDataChunk();
 
-            // const tokens = datalogger.getNRows(this.tabularRowIndex - 1, TABULAR_MAX_ROWS).split("_")
-            // // Skip the first column of each row (Time (Seconds)):
-            // for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
-            //     this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
-            // }
-
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             // Count until sensor name is repeated:
@@ -189,13 +183,10 @@ namespace microcode {
          * Invoked when this.tabularYScrollOffset reaches its screen boundaries
          */
         private getNextDataChunk() {
-            const tokens = datalogger.getNRows(this.tabularRowIndex - 1, this.tabularRowIndex + TABULAR_MAX_ROWS).split("_");
-            // const tokens = datalogger.getData().split("_");
-            
+            const tokens = datalogger.getRows(this.tabularRowIndex - 1, this.tabularRowIndex + TABULAR_MAX_ROWS).split("_");
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
-            // basic.showNumber(this.dataRows.length)
         }
 
         /**
