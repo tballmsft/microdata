@@ -19,10 +19,8 @@ namespace microcode {
             super.startup()
 
             // Includes the header:
-            const numberOfColumns = 4
             this.dataloggerEmpty = true
-
-            if (datalogger.getNRows(0, 2).split("_").length / numberOfColumns >= 1) {
+            if (datalogger.getNumberOfRows() > 1) {
                 this.dataloggerEmpty = false
             }
             

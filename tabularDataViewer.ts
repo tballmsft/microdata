@@ -51,7 +51,7 @@ namespace microcode {
             this.headerStringLengths = []
             
             this.numberOfCols = 4;
-            this.getNextDataChunk();
+            this.getNextDataChunk(this.tabularRowIndex);
 
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
@@ -112,7 +112,7 @@ namespace microcode {
 
                         else {
                             this.tabularYScrollOffset = Math.max(this.tabularYScrollOffset - 1, 0)
-                            this.getNextDataChunk();
+                            this.getNextDataChunk(this.tabularYScrollOffset);
                         }
                     }
 
@@ -140,7 +140,7 @@ namespace microcode {
                         }
                         else if (this.tabularRowIndex + this.tabularYScrollOffset < this.dataRows.length - 1) {
                             this.tabularYScrollOffset += 1
-                            this.getNextDataChunk();
+                            this.getNextDataChunk(this.tabularRowIndex);
                         }
                     }
 
@@ -177,13 +177,12 @@ namespace microcode {
             )
         }
 
-
         /**
          * Used to retrieve the next chunk of data
          * Invoked when this.tabularYScrollOffset reaches its screen boundaries
          */
-        private getNextDataChunk() {
-            const tokens = datalogger.getRows(this.tabularRowIndex - 1, this.tabularRowIndex + TABULAR_MAX_ROWS).split("_");
+        private getNextDataChunk(from: number) {
+            const tokens = datalogger.getRows(from - 1, from + TABULAR_MAX_ROWS).split("_");
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
