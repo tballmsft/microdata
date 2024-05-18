@@ -12,6 +12,7 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            // datalogger.deleteLog(datalogger.DeleteType.Full)
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
             
             // Small write is currently needed to read all the existing data if the uBit has just been powered.
@@ -26,24 +27,24 @@ namespace microcode {
 
             this.dataRows = []
 
+            for (let i = 1; i <= 11; i++) {
+                datalogger.log(
+                    datalogger.createCV("Sensor", "Accel. X"),
+                    datalogger.createCV("Time (ms)", "1000"),
+                    datalogger.createCV("Reading", +i),
+                    datalogger.createCV("Event", "N/A")
+                )
+            }
 
-            // for (let i = 0; i < 10; i++) {
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "test"),
-            //         datalogger.createCV("Time (ms)", "1000"),
-            //         datalogger.createCV("Reading", +i),
-            //         datalogger.createCV("Event", "N/A")
-            //     )
-            // }
-
+            // basic.showNumber(datalogger.getNumberOfRows())
             
             // const tokens = datalogger.getData().split("_")
-            // const tokens = datalogger.getNRows(0, 10).split("_")
+            // const tokens = datalogger.getRows(1, 20).split("_")
 
-            // basic.showString(tokens.length)
+            // basic.showNumber(tokens.length)
             // const numberOfCols = 4
             
-            // Skip the first column of each row (Time (Seconds)):
+            // // Skip the first column of each row (Time (Seconds)):
             // for (let i = 0; i < tokens.length - numberOfCols; i += numberOfCols) {
             //     this.dataRows[i / numberOfCols] = tokens.slice(i, i + numberOfCols);
             // }
@@ -150,7 +151,6 @@ namespace microcode {
                     microcode.font
                 )
             }
-
 
             // for (let i = 0; i < this.dataRows.length; i++) {
             //     Screen.fillRect(

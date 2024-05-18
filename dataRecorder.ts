@@ -25,7 +25,7 @@ namespace microcode {
             this.sensorWaitTimes = []
             this.sensorIndexOffset = 0
             this.currentSensorIndex = 0
-            this.sensorBoxColor = 16
+            this.sensorBoxColor = 15
 
             /**
              * There are more efficient methods of intialising this.
@@ -73,6 +73,13 @@ namespace microcode {
                     this.app.popScene()
                     this.app.pushScene(new Home(this.app))
                 }
+            )
+
+            // Clear whatever A was previously bound to
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                () => {}
             )
 
             // Scroll Up

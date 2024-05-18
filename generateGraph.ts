@@ -2,28 +2,37 @@ namespace microcode {
     /** Number of columns used for the datalogger */
     const NUMBER_OF_COLS = 4;
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
-    const Y_AXIS_SCROLL_RATE: number = 20
 
+    /**
+     * Is the graph being shown, or the sensors?
+     */
     enum UI_STATE {
+        /** Graph is being shown */
         GRAPH,
+        /** The sensors are being shown */
         SENSOR_SELECTION
     }
+
+    /** y-axis scroll change when the graph is shown */
+    const GRAPH_Y_AXIS_SCROLL_RATE: number = 20
+    /** y-axis scroll change when the sensors are being shown */
+    const SENSOR_Y_AXIS_SCROLL_RATE: number = 60
 
     /**
      * Takes the datalogger logs and generates a labelled graph.
      * Each sensor is a unique coloured line, sensor information is detailed below.
      */
     export class GraphGenerator extends Scene {
-        private windowWidth: number
-        private windowHeight: number
+        private windowWidth: number;
+        private windowHeight: number;
 
-        private windowLeftBuffer: number
-        private windowRightBuffer: number
-        private windowTopBuffer: number
-        private windowBotBuffer: number
+        private windowLeftBuffer: number;
+        private windowRightBuffer: number;
+        private windowTopBuffer: number;
+        private windowBotBuffer: number;
 
-        private yScrollOffset: number
-        private xScrollOffset: number
+        private yScrollOffset: number;
+        private xScrollOffset: number;
         private xCoordinateScalar: number;
         private uiState: UI_STATE;
 
@@ -116,10 +125,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    this.yScrollOffset = Math.min(this.yScrollOffset + Y_AXIS_SCROLL_RATE, 0)
+                    this.yScrollOffset = Math.min(this.yScrollOffset + GRAPH_Y_AXIS_SCROLL_RATE, 0)
                     if (this.yScrollOffset <= -60) {
                         this.uiState = UI_STATE.SENSOR_SELECTION
-                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / Y_AXIS_SCROLL_RATE
+                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / GRAPH_Y_AXIS_SCROLL_RATE
                     }
                     else {
                         this.uiState = UI_STATE.GRAPH
@@ -132,10 +141,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    this.yScrollOffset = Math.max(this.yScrollOffset - Y_AXIS_SCROLL_RATE, -(this.windowHeight + 40))
+                    this.yScrollOffset = Math.max(this.yScrollOffset - GRAPH_Y_AXIS_SCROLL_RATE, -(this.windowHeight + 40))
                     if (this.yScrollOffset <= -60) {
                         this.uiState = UI_STATE.SENSOR_SELECTION
-                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / Y_AXIS_SCROLL_RATE
+                        this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / GRAPH_Y_AXIS_SCROLL_RATE
                     }
                     else {
                         this.uiState = UI_STATE.GRAPH
@@ -166,8 +175,8 @@ namespace microcode {
                     else {
                         this.xScrollOffset = Math.min(this.xScrollOffset + 1, Math.floor(this.rowQty / 10))
                     }
-                    this.getNextDataChunk()
-                    this.update() // For fast response to the above changes
+                    this.getNextDataChunk();
+                    this.update(); // For fast response to the above changes
                 }
             )
 
@@ -313,7 +322,7 @@ namespace microcode {
                 )
 
                 // Blue outline for selected sensor:
-                if (i == this.currentlySelectedSensorIndex) {
+                if (this.uiState == UI_STATE.SENSOR_SELECTION && i == this.currentlySelectedSensorIndex) {
                     // Blue edges:
                     for (let thickness = 0; thickness < 3; thickness++) {
                         screen.drawRect(
