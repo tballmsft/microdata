@@ -528,7 +528,7 @@ namespace microcode {
 
             // Start
             screen.print(
-                this.xScrollOffset.toString(),
+                this.sensors[0].numberOfReadings.toString(),
                 this.windowLeftBuffer - 2,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
@@ -536,7 +536,7 @@ namespace microcode {
 
             // End:
             screen.print(
-                this.sensors[0].getBufferLength().toString(),
+                (this.sensors[0].numberOfReadings + this.sensors[0].getBufferLength()).toString(),
                 Screen.WIDTH - this.windowRightBuffer - 3,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
