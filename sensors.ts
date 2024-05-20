@@ -5,25 +5,27 @@ namespace microcode {
     }
 
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
-    export const EVENT_POLLING_PERIOD_MS = 100
+    export const SENSOR_EVENT_POLLING_PERIOD_MS: number = 100
+    /** The maximum number of elements permissable in any sensor's buffer */
+    export const SENSOR_BUFFER_LIMIT: number = 80;
+
     /** Value returned by default if the abstract getMinimum() is not overriddent */
     const DEFAULT_SENSOR_MINIMUM = 0
     /** Value returned by default if the abstract getMaximum() is not overriddent */
     const DEFAULT_SENSOR_MAXIMUM = 100
 
-
     /**
      * Only used within this sensor file.
      * Forcing prescence of below functions.
      */
-    interface Sensorable {
+    interface ISensorable {
         getReading(): number;
         getMinimum(): number;
         getMaximum(): number;
 
         getNthReading(n: number): number;
-        getDataBufferLength(): number;
-        getNormalisedReading(): number;
+        getBufferLength(): number;
+        /** Successful? */
         log(): boolean;
     }
 
@@ -35,8 +37,7 @@ namespace microcode {
     /**
      * Abstraction for all available sensors,
      */
-    export abstract class Sensor implements Sensorable {
-        public static readonly BUFFER_LIMIT: number = 100;
+    export abstract class Sensor implements ISensorable {
         public static readonly PLOT_SMOOTHING_CONSTANT: number = 4
 
         public readonly name: string
@@ -77,13 +78,11 @@ namespace microcode {
         getReading(): number {return this.sensorFn()}
         getMinimum(): number {return DEFAULT_SENSOR_MINIMUM;}
         getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
-        
         getNthReading(n: number): number {return this.dataBuffer[n]}
-        getDataBufferLength(): number {return this.dataBuffer.length}
-        getNormalisedReading(): number{return this.sensorFn() / this.getMaximum()}
+        getBufferLength(): number {return this.dataBuffer.length}
 
         readIntoBufferOnce(): void {
-            if (this.dataBuffer.length >= Sensor.BUFFER_LIMIT) {
+            if (this.dataBuffer.length >= SENSOR_BUFFER_LIMIT) {
                 this.dataBuffer.shift();
             }
             this.dataBuffer.push(this.getReading());
@@ -125,7 +124,7 @@ namespace microcode {
                 if (sensorEventFunctionLookup[config.inequality](reading, config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.name),
-                        datalogger.createCV("Time (ms)", EVENT_POLLING_PERIOD_MS),
+                        datalogger.createCV("Time (ms)", SENSOR_EVENT_POLLING_PERIOD_MS),
                         datalogger.createCV("Reading", reading.toString()),
                         datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
                     )
@@ -164,9 +163,14 @@ namespace microcode {
                 const y1 = Math.round(screen.height - norm1) - fromY;
                 const y2 = Math.round(screen.height - norm2) - fromY;
 
-
-                for (let j = 0; j < Sensor.PLOT_SMOOTHING_CONSTANT; j++) {
-                    screen.drawLine(fromX + i, y1 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, fromX + i - 1, y2 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, color);
+                for (let j = 0; j < 1; j++) {
+                    screen.drawLine(
+                        fromX + i, 
+                        y1 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, 
+                        fromX + i - 1, 
+                        y2 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, 
+                        color
+                    );
                 }
             }
         }
