@@ -14,6 +14,9 @@ namespace microcode {
     /** Value returned by default if the abstract getMaximum() is not overriddent */
     const DEFAULT_SENSOR_MAXIMUM = 100
 
+    /** How many times should a line be duplicated when drawn? */
+    const PLOT_SMOOTHING_CONSTANT: number = 3
+
     /**
      * Only used within this sensor file.
      * Forcing prescence of below functions.
@@ -34,27 +37,24 @@ namespace microcode {
      * SENSOR_LOOKUP_TABLE is at the bottom of this file
      */
 
+
     /**
      * Abstraction for all available sensors,
      */
     export abstract class Sensor implements ISensorable {
-        public static readonly PLOT_SMOOTHING_CONSTANT: number = 4
-
         public readonly name: string
         public sensorFn: () => number
 
         /** Set upon the first reading */
         public startTime: number
 
+        /** Used by the live data viewer to write the small abscissa
+         * Always increases: even when data buffer is shifted to avoid reaching the BUFFER_LIMIT
+         */
+        public numberOfReadings: number
+
         public config: RecordingConfig | EventConfig
         public loggingMode: SensorLoggingMode
-
-        /**
-         * Normally the time between sensor readings is greater than the period
-         * This is because of operations that happen inbetween readings
-         * Calculate the average difference and subtract that from the periods
-         */
-        public lastReadingDelay: number
 
         // Reading Statistics:
         public lastLoggedEventDescription: string
@@ -65,7 +65,7 @@ namespace microcode {
             this.name = name
             this.sensorFn = sensorFn
             this.startTime = 0
-            this.lastReadingDelay = 0
+            this.numberOfReadings = 0
 
             this.config = config
             this.loggingMode = null
@@ -82,6 +82,7 @@ namespace microcode {
         getBufferLength(): number {return this.dataBuffer.length}
 
         readIntoBufferOnce(): void {
+            this.numberOfReadings += 1
             if (this.dataBuffer.length >= SENSOR_BUFFER_LIMIT) {
                 this.dataBuffer.shift();
             }
@@ -102,6 +103,7 @@ namespace microcode {
  
         /**
          * Invokes logData() if this is a RecordingSensor, logEvent() if logging events
+         * Currently writes the "Time (Ms)" column using the cumulative period - rather than the real-time
          * @returns Has measurements left
          */
         log(): boolean {
@@ -115,7 +117,6 @@ namespace microcode {
 
             const reading = this.getReading()
             // const time = input.runningTime() - this.startTime
-            
 
             if (this.loggingMode == SensorLoggingMode.EVENTS) {
                 const config = this.config as EventConfig
@@ -163,12 +164,12 @@ namespace microcode {
                 const y1 = Math.round(screen.height - norm1) - fromY;
                 const y2 = Math.round(screen.height - norm2) - fromY;
 
-                for (let j = 0; j < 1; j++) {
+                for (let j = 0; j < PLOT_SMOOTHING_CONSTANT; j++) {
                     screen.drawLine(
                         fromX + i, 
-                        y1 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, 
+                        y1 - (PLOT_SMOOTHING_CONSTANT / 2) + j, 
                         fromX + i - 1, 
-                        y2 - (Sensor.PLOT_SMOOTHING_CONSTANT / 2) + j, 
+                        y2 - (PLOT_SMOOTHING_CONSTANT / 2) + j, 
                         color
                     );
                 }
