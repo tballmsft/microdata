@@ -1,28 +1,34 @@
 namespace microcode {
+    /** Number of sensor information boxes that can fit onto the screen at once*/
     const MAX_SENSORS_ON_SCREEN: number = 5
+    /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_BOX_COLORS: number[] = [2,3,4,6,7,9]
 
+    /**
+     * Responsible for invoking the logging commands for each sensor,
+     * Presents information about each sensor's state via colourful collapsing boxes
+     * 
+     * Sensors are now logged via a scheduler
+     */
     export class DataRecorder extends Scene {
         private sensors: Sensor[]
+        /** Ordered sensor periods */
         private sensorWaitTimes: number[]
 
         // UI:
+        /** Sensor to be shown */
         private currentSensorIndex: number
+        /** Last sensor on the screen */
         private sensorIndexOffset: number
+        /** For the currentSensorIndex */
         private sensorBoxColor: number
 
         constructor(app: App, sensors: Sensor[]) {
             super(app, "dataRecorder")
 
-            datalogger.setColumns([
-                "Sensor",
-                "Time (ms)",
-                "Reading",
-                "Event"
-            ])
-
             this.sensors = sensors
             this.sensorWaitTimes = []
+
             this.sensorIndexOffset = 0
             this.currentSensorIndex = 0
             this.sensorBoxColor = 15
@@ -36,8 +42,8 @@ namespace microcode {
 
             // Order the sensors by period ascending - events have period of sensors.ts/EVENT_POLLING_PERIOD_MS
             this.sensors.sort((a, b) => {
-                let aPeriod = EVENT_POLLING_PERIOD_MS
-                let bPeriod = EVENT_POLLING_PERIOD_MS
+                let aPeriod = SENSOR_EVENT_POLLING_PERIOD_MS
+                let bPeriod = SENSOR_EVENT_POLLING_PERIOD_MS
 
                 if (a.loggingMode == SensorLoggingMode.RECORDING) {
                     const config: RecordingConfig = a.config as RecordingConfig;
@@ -57,7 +63,7 @@ namespace microcode {
                 }
 
                 else {
-                    return EVENT_POLLING_PERIOD_MS
+                    return SENSOR_EVENT_POLLING_PERIOD_MS
                 }
             })
 
@@ -120,12 +126,6 @@ namespace microcode {
          * Schedules the sensors and orders them to .log()
          */
         log() {
-            // Number of times you call log given timeUntilNext
-            // Upon modulus zero,
-            // Pause for remainder of time in addition to timeUntilNext
-            // log
-            // Pause for offset to return to timeUntilNext
-
             control.inBackground(() => {
                 let loggingStates = this.sensors.map((_) => true)
                 let remainingSensorCount = this.sensors.length
@@ -267,7 +267,6 @@ namespace microcode {
                 0xc
             )
 
-
             // Check if all sensors have finished their work:
             let recordingsComplete = true
             for (let i = 0; i < this.sensors.length; i++) {
@@ -294,6 +293,7 @@ namespace microcode {
                     // Get the colour for this box
                     this.sensorBoxColor = SENSOR_BOX_COLORS[i % SENSOR_BOX_COLORS.length]
 
+                    // Draw box as collapsed:
                     if (i != this.currentSensorIndex) {
                         screen.fillRect(
                             5,
@@ -319,6 +319,7 @@ namespace microcode {
                         )
                     }
 
+                    // Box is selected: Draw all information:
                     else {
                         screen.fillRect(
                             5,
@@ -336,6 +337,10 @@ namespace microcode {
                             this.sensorBoxColor
                         )
 
+                        //-------------------------------
+                        // Information inside sensor box:
+                        //-------------------------------
+
                         const sensor = this.sensors[i]
                         screen.print(
                             sensor.name,
@@ -344,6 +349,8 @@ namespace microcode {
                             15
                         )
 
+                        // Sensors have different information to display depending on their mode
+                        // Build up the information in an array:
                         let sensorInfo: string[]
                         if (sensor.loggingMode == SensorLoggingMode.RECORDING) {
                             const config = sensor.config as RecordingConfig
@@ -362,6 +369,11 @@ namespace microcode {
                                 sensor.lastLoggedEventDescription
                             ]
                         }
+
+                        
+                        //------------------------------
+                        // Write the sensor information:
+                        //------------------------------
 
                         sensorInfo.forEach((info) => {
                             y += 12

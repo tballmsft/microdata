@@ -46,10 +46,6 @@ namespace microcode {
             this.navigator.addButtons(this.btns)
         }
 
-        //---------
-        // Control:
-        //---------
-        
         draw() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
@@ -97,7 +93,7 @@ namespace microcode {
             )
 
             if (this.currentlyDeleting) {
-                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 9)
+                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 9, 15)
             }
 
             for (let i = 0; i < this.btns.length; i++) {

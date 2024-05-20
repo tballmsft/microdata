@@ -40,7 +40,7 @@ namespace microcode {
 
         constructor(app: App) {
             super(app, "editor")
-            this.color = 6
+            this.backgroundColor = 6
         }
 
         public changed() {
@@ -451,7 +451,7 @@ namespace microcode {
 
         draw() {
             if (this.dirty) {
-                Screen.image.fill(this.color)
+                Screen.image.fill(this.backgroundColor)
                 if (!this.backgroundCaptured) {
                     this.drawBackground()
                     this.drawEditor()

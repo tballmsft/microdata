@@ -1,11 +1,12 @@
 namespace microcode {
     /** Number of columns used for the datalogger */
     const NUMBER_OF_COLS = 4;
+    /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
 
     /**
-     * Is the graph being shown, or the sensors?
-     */
+     * Is the graph or the sensors being shown?
+    */
     enum UI_STATE {
         /** Graph is being shown */
         GRAPH,
@@ -19,6 +20,10 @@ namespace microcode {
     /**
      * Takes the datalogger logs and generates a labelled graph.
      * Each sensor is a unique coloured line, sensor information is detailed below.
+     * 
+     * GRAPH GENERATION IS NOT PERFECT:
+     *      IF LOGGED DATA HAS VARIABLE MEASUREMENTS THERE IS A CHANCE THE GRAPH COULD BE WRONG
+     *      THERE NEED TO BE MORE CHECKS ON EACH ROW OF DATA TO SOLVE THIS.
      */
     export class GraphGenerator extends Scene {
         private windowWidth: number;
@@ -46,7 +51,6 @@ namespace microcode {
         private sensorMinsAndMaxs: number[][];
         /** After scrolling past the plot the user can select a sensor to disable/enable */
         private currentlySelectedSensorIndex: number;
-        private rowQty: number;
         
         /** Required to be able to find the index of the next reading quickly from processedReadings */
         private numberOfSensors: number;
@@ -57,7 +61,7 @@ namespace microcode {
 
         constructor(app: App) {
             super(app, "graphGeneration")
-            this.color = 3
+            this.backgroundColor = 3
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
@@ -72,8 +76,6 @@ namespace microcode {
             this.xScrollOffset = 0
 
             this.getNextDataChunk()
-            this.processReadings()
-            this.rowQty = datalogger.getNumberOfRows()
             this.sensorNames = []
             this.drawSensorStates = []
             this.sensorMinsAndMaxs = []
@@ -116,6 +118,9 @@ namespace microcode {
                     break
                 }
             }
+
+            // Requires sensor names:
+            this.processReadings()
 
             this.xCoordinateScalar = 1
             if (this.dataRows.length < Screen.WIDTH) {
@@ -174,17 +179,23 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    // If it is a multiple of 10 then that last row will have no data, so stop 1 row before:
-                    if ((this.rowQty % 10) == 0) {
-                        this.xScrollOffset = Math.min(this.xScrollOffset + 1, (this.rowQty / 10) - 1)
+                    basic.showNumber(6)
+                    const dataRows = this.dataRows
+                    this.xScrollOffset += 1
+                    this.getNextDataChunk()
+                    basic.showNumber(7)
+
+                    // basic.showNumber(x)
+                    if (this.dataRows.length > 1) {
+                        this.xScrollOffset += 1
+                        this.processReadings();
+                        this.update(); // For fast response to the above changes
                     }
-                    // Otherwise there will be > 0 && < 10 elements on the last row:
+
                     else {
-                        this.xScrollOffset = Math.min(this.xScrollOffset + 1, Math.floor(this.rowQty / 10))
+                        this.xScrollOffset -= 1
+                        this.dataRows = dataRows
                     }
-                    this.getNextDataChunk();
-                    this.processReadings();
-                    this.update(); // For fast response to the above changes
                 }
             )
 
@@ -204,7 +215,7 @@ namespace microcode {
          * Used to retrieve the next chunk of data
          * Can be used to intialise this.dataRows
          * Invoked when this.xScrollOffset changes (Left or Right is pressed)
-         * Mutates: this.dataRows
+         *@returns dataRows where each row contains 4 columns [Sensor Name, Time(ms), Reading, Events]
          */
         private getNextDataChunk() {
             this.dataRows = []
@@ -231,9 +242,14 @@ namespace microcode {
          * Mutates: this.processedReadings
          */
         private processReadings() {
-            this.processedReadings = []
-            for (let sensor = 0; sensor < this.numberOfSensors; sensor++) {
-                this.processedReadings.push([])
+            // Makes it easier to write to:
+            interface ISensorReadings {
+                [index: string]: number[];
+            }
+            let readings = {} as ISensorReadings;
+
+            for (let sensor = 0; sensor < this.sensorNames.length; sensor++) {
+                readings[this.sensorNames[sensor]] = []
             }
 
             const fromY = this.windowBotBuffer - (2 * this.yScrollOffset)
@@ -244,22 +260,32 @@ namespace microcode {
                     const minimum: number = sensor.getMinimum();
                     const maximum: number = sensor.getMaximum();
 
-                    const norm1 = ((+this.dataRows[row][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
-                    const norm2 = ((+this.dataRows[row + this.numberOfSensors][2] - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
+                    // Find the next reading (each sensor can have a different number of measurements)
+                    // So they may not neccessarily be spaced by this.numberOfSensors
+                    const reading1 = this.dataRows[row][2];
+                    let reading2 = this.dataRows[row + this.numberOfSensors][2]
+                    for (let offset = 1; offset < this.numberOfSensors; offset++) {
+                        if (this.dataRows[row + offset][0] == sensorName) {
+                            reading2 = this.dataRows[row + offset][2]
+                        } 
+                    }
+
+                    const norm1 = ((+reading1 - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
+                    const norm2 = ((+reading2 - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
                     
-                    this.processedReadings[row % this.numberOfSensors].push(Math.round(screen.height - norm1) - fromY);
-                    this.processedReadings[row % this.numberOfSensors].push(Math.round(screen.height - norm2) - fromY);
+                    readings[sensorName].push(Math.round(screen.height - norm1) - fromY)
+                    readings[sensorName].push(Math.round(screen.height - norm2) - fromY)
                 }
+            }
+
+            this.processedReadings = []
+            for (let sensor = 0; sensor < this.sensorNames.length; sensor++) {
+                this.processedReadings[sensor] = readings[this.sensorNames[sensor]];
             }
         }
         
         update() {
-            // Screen could update before this is intialised: moving to an overriden .startup() function does not resolve
-            if (this.processedReadings.length == 0) {
-                this.processReadings()
-            }
-
-            screen.fill(this.color);
+            screen.fill(this.backgroundColor);
             
             // Make graph region black:
             screen.fillRect(
@@ -270,6 +296,10 @@ namespace microcode {
                 0
             );
 
+            
+            //------------------
+            // Draw sensor data:
+            //------------------
 
             // Draw the data from each sensor, as a separate coloured line: sensors may have variable quantities of data:
             for (let sensor = 0; sensor < this.numberOfSensors; sensor++) {
@@ -280,32 +310,16 @@ namespace microcode {
                         this.processedReadings[sensor][row],
                         this.windowLeftBuffer + xOffset + this.xCoordinateScalar,
                         this.processedReadings[sensor][row + this.numberOfSensors],
-                        SENSOR_COLORS[(row % this.numberOfSensors) % SENSOR_COLORS.length]
+                        SENSOR_COLORS[sensor % SENSOR_COLORS.length]
                     );
                 }
             }
 
+            
+            //---------------
+            // Sensor blocks:
+            //---------------
 
-            // // Draw data lines:
-            // let xOffset = 0;
-            // for (let row = 0; row < this.processedReadings.length - this.numberOfSensors; row+=2) {
-            //     if (this.drawSensorStates[row % this.numberOfSensors]) { 
-            //         screen.drawLine(
-            //             this.windowLeftBuffer + xOffset,
-            //             this.processedReadings[row],
-            //             this.windowLeftBuffer + xOffset + this.xCoordinateScalar,
-            //             this.processedReadings[row + this.numberOfSensors],
-            //             SENSOR_COLORS[(row % this.numberOfSensors) % SENSOR_COLORS.length]
-            //         );
-
-            //         // Draw all nth line segments for the nth sensor readings
-            //         if ((row % this.numberOfSensors) == 0) {
-            //             xOffset += this.xCoordinateScalar;
-            //         }
-            //     }
-            // }
-
-            // Sensor information:
             let y = this.windowHeight - 2 + (2 * this.yScrollOffset)
             for (let i = 0; i < this.numberOfSensors; i++) {
                 // Black edges:
@@ -348,7 +362,10 @@ namespace microcode {
                     }
                 }
 
-                // Information:
+                //--------------------
+                // Sensor information:
+                //--------------------
+
                 screen.print(
                     this.sensorNames[i],
                     12,

@@ -14,10 +14,10 @@ namespace microcode {
             return this.xfrm_
         }
         //% blockCombine block="color" callInDebugger
-        public get color() {
+        public get backgroundColor() {
             return this.color_
         }
-        public set color(v) {
+        public set backgroundColor(v) {
             this.color_ = v
         }
 

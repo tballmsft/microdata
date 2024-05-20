@@ -13,7 +13,7 @@ namespace microcode {
 
         constructor(app: App, navigator?: INavigator) {
             super(app, "scene")
-            this.color = 11
+            this.backgroundColor = 11
             this.navigator = navigator
         }
 
@@ -147,7 +147,7 @@ namespace microcode {
 
         constructor(app: App, goBack1PageFn: () => void) {
             super(app)
-            this.color = 11
+            this.backgroundColor = 11
 
             this.goBack1PageFn = goBack1PageFn
         }
