@@ -1,26 +1,4 @@
 namespace microcode {
-    export const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
-        "Accel. X": new AccelerometerSensor(Dimension.X),
-        "Accel. Y": new AccelerometerSensor(Dimension.Y),
-        "Accel. Z": new AccelerometerSensor(Dimension.Z),
-        "Pitch": new RotationSensor(Rotation.Pitch),
-        "Roll": new RotationSensor(Rotation.Roll),
-        "Pin 0": new PinSensor(TouchPin.P0),
-        "Pin 1": new PinSensor(TouchPin.P1),
-        "Pin 2": new PinSensor(TouchPin.P2),
-        "Light": new LightSensor(),
-        "Temp.": new TemperatureSensor(),
-        "Magnet X": new MagnetSensor(Dimension.X),
-        "Logo Pressed": new LogoPressSensor(),
-        "Volume": new VolumeSensor(),
-        "Compass": new CompassHeadingSensor(),
-        "Jac Light": new JacdacLightSensor(),
-        "Jac Moist": new JacdacSoilMoistureSensor(),
-        "Jac Dist": new JacdacDistanceSensor(),
-        "Jac Flex": new JacdacFlexSensor(),
-        "Jac Temp": new JacdacTemperatureSensor()
-    }
-
 
     /**
      * Responsible for allowing the user to select sensors to record or view live readings from.
@@ -42,378 +20,48 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            //---------
-            // Control:
-            //---------
+            // icons & ariaIDs are the same length:
+            const icons: string[] = [
+                "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
+                "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
+                "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
+            ]
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "accelerometer",
-                ariaId: "accelerometer X",
-                x: -60,
-                y: -40,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Accel. X")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Accel. X")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
+            const ariaIDs: string[] = [
+                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "Pin 0", "Pin 1", "Pin 2", "led_light_sensor",
+                "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
+                "Jacdac Moisture", "Jacdac Distance"
+            ]
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "accelerometer",
-                ariaId: "accelerometer Y",
-                x: -30,
-                y: -40,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Accel. Y")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Accel. Y")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
+            let x = -60;
+            let y = -40;
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "accelerometer",
-                ariaId: "accelerometer Z",
-                x: 0,
-                y: -40,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Accel. Z")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Accel. Z")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
+            for (let i = 0; i < icons.length; i++) {
+                this.btns.push(new Button({
+                    parent: null,
+                    style: ButtonStyles.Transparent,
+                    icon: icons[i],
+                    ariaId: ariaIDs[i],
+                    x: x,
+                    y: y,
+                    onClick: (button: Button) => {
+                        const index = this.selectedSensorNames.indexOf(button.ariaId)
+                        if (index != -1) {
+                            this.selectedSensorNames.splice(index, 1)
+                        }
+                        else {
+                            this.selectedSensorNames.push(button.ariaId)
+                        }
+                    },          
+                    dynamicBoundaryColorsOn: true,
+                }))
 
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "right_turn",
-                ariaId: "Pitch",
-                x: 30,
-                y: -40,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Pitch")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Pitch")
-                    }
-                }, 
-                dynamicBoundaryColorsOn: true,          
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "right_spin",
-                ariaId: "Roll",
-                x: 60,
-                y: -40,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Roll")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Roll")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
-
-            // -----------
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "pin_0",
-                ariaId: "Pin 0",
-                x: -60,
-                y: -11,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Pin 0")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Pin 0")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "pin_1",
-                ariaId: "Pin 1",
-                x: -30,
-                y: -11,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Pin 1")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Pin 1")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
-
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "pin_2",
-                ariaId: "Pin 2",
-                x: 0,
-                y: -11,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Pin 2")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Pin 2")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
-
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "led_light_sensor",
-                ariaId: "led_light_sensor",
-                x: 30,
-                y: -11,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Light")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Light")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,  
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "thermometer",
-                ariaId: "thermometer",
-                x: 60,
-                y: -11,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Temp.")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Temp.")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,
-            }))
-
-            // -----------
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "magnet",
-                ariaId: "S10",
-                x: -60,
-                y: 18,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Magnet X")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Magnet X")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true,
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "finger_press",
-                ariaId: "Logo Press",
-                x: -30,
-                y: 18,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Logo Pressed")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Logo Pressed")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "speaker",
-                ariaId: "Volume",
-                x: 0,
-                y: 18,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Volume")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Volume")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "compass",
-                ariaId: "Compass",
-                x: 30,
-                y: 18,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Compass")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Compass")
-                    }
-                },          
-                dynamicBoundaryColorsOn: true, 
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac Flex",
-                x: 60,
-                y: 18,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jac Flex")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Jac Flex")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,     
-            }))
-
-            //-----------
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac Temperature",
-                x: -60,
-                y: 44,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jac Temp")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Jac Temp")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,     
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac Light",
-                x: -30,
-                y: 44,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jac Light")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Jac Light")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac Moisture",
-                x: 0,
-                y: 44,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jac Moist")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Jac Moist")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,
-            }))
-
-            this.btns.push(new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "microbitLogoWhiteBackground",
-                ariaId: "Jacdac Distance",
-                x: 30,
-                y: 44,
-                onClick: () => {
-                    const index = this.selectedSensorNames.indexOf("Jac Dist")
-                    if (index != -1) {
-                        this.selectedSensorNames.splice(index, 1)
-                    }
-                    else {
-                        this.selectedSensorNames.push("Jac Dist")
-                    }
-                },
-                dynamicBoundaryColorsOn: true,
-            }))
+                x += 30
+                if (x > 60) {
+                    x = -60
+                    y += 28
+                }
+            }
 
             this.btns.push(new Button({
                 parent: null,
@@ -421,7 +69,7 @@ namespace microcode {
                 icon: "green_tick",
                 ariaId: "Done",
                 x: 60,
-                y: 44,
+                y: 47,
                 onClick: () => {
                     if (this.selectedSensorNames.length === 0) {
                         return

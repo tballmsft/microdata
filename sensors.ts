@@ -6,20 +6,31 @@ namespace microcode {
 
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const EVENT_POLLING_PERIOD_MS = 100
+    /** Value returned by default if the abstract getMinimum() is not overriddent */
     const DEFAULT_SENSOR_MINIMUM = 0
+    /** Value returned by default if the abstract getMaximum() is not overriddent */
     const DEFAULT_SENSOR_MAXIMUM = 100
 
+
+    /**
+     * Only used within this sensor file.
+     * Forcing prescence of below functions.
+     */
     interface Sensorable {
         getReading(): number;
         getMinimum(): number;
         getMaximum(): number;
 
-        getBufferSize(): number;
         getNthReading(n: number): number;
         getDataBufferLength(): number;
         getNormalisedReading(): number;
         log(): boolean;
     }
+
+
+    /**
+     * SENSOR_LOOKUP_TABLE is at the bottom of this file
+     */
 
     /**
      * Abstraction for all available sensors,
@@ -66,8 +77,6 @@ namespace microcode {
         getReading(): number {return this.sensorFn()}
         getMinimum(): number {return DEFAULT_SENSOR_MINIMUM;}
         getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
-
-        getBufferSize(): number {return this.dataBuffer.length}
         
         getNthReading(n: number): number {return this.dataBuffer[n]}
         getDataBufferLength(): number {return this.dataBuffer.length}
@@ -91,7 +100,7 @@ namespace microcode {
             this.loggingMode = SensorLoggingMode.EVENTS
             this.totalMeasurements = config.measurements
         }
-
+ 
         /**
          * Invokes logData() if this is a RecordingSensor, logEvent() if logging events
          * @returns Has measurements left
@@ -150,10 +159,10 @@ namespace microcode {
         draw(fromX: number, fromY: number, color: number): void {
             for (let i = 0; i < this.dataBuffer.length - 1; i++) {
                 // Normalise the data points, then calculate their position for the graph:
-                const norm1 = ((this.dataBuffer[i] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY)
-                const norm2 = ((this.dataBuffer[i + 1] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY)
-                const y1 = Math.round(screen.height - norm1) - fromY
-                const y2 = Math.round(screen.height - norm2) - fromY
+                const norm1 = ((this.dataBuffer[i] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY);
+                const norm2 = ((this.dataBuffer[i + 1] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY);
+                const y1 = Math.round(screen.height - norm1) - fromY;
+                const y2 = Math.round(screen.height - norm2) - fromY;
 
 
                 for (let j = 0; j < Sensor.PLOT_SMOOTHING_CONSTANT; j++) {
@@ -314,5 +323,30 @@ namespace microcode {
      */
     export class JacdacHumiditySensor extends Sensor {
         constructor() {super(function () {return modules.humidity1.humidity()}, "Jac Humid")}
+    }
+
+    /**
+     * Translates the ariaID for a sensor into a real sensor object
+     */
+    export const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
+        "accelerometer X": new AccelerometerSensor(Dimension.X),
+        "accelerometer Y": new AccelerometerSensor(Dimension.Y),
+        "accelerometer Z": new AccelerometerSensor(Dimension.Z),
+        "Pitch": new RotationSensor(Rotation.Pitch),
+        "Roll": new RotationSensor(Rotation.Roll),
+        "Pin 0": new PinSensor(TouchPin.P0),
+        "Pin 1": new PinSensor(TouchPin.P1),
+        "Pin 2": new PinSensor(TouchPin.P2),
+        "led_light_sensor": new LightSensor(),
+        "thermometer": new TemperatureSensor(),
+        "S10": new MagnetSensor(Dimension.X),
+        "Logo Press": new LogoPressSensor(),
+        "Volume": new VolumeSensor(),
+        "Compass": new CompassHeadingSensor(),
+        "Jacdac Light": new JacdacLightSensor(),
+        "Jacdac Moisture": new JacdacSoilMoistureSensor(),
+        "Jacdac Distance": new JacdacDistanceSensor(),
+        "Jacdac Flex": new JacdacFlexSensor(),
+        "Jacdac Temperature": new JacdacTemperatureSensor()
     }
 }
