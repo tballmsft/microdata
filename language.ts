@@ -3,7 +3,7 @@ namespace microcode {
         provides?: number[]
         requires?: number[]
         only?: (string | number)[]
-        allow?: (string | number)[]
+        allow?: (string | number)[] 
         disallow?: (string | number)[]
     }
 

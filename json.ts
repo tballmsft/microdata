@@ -1,7 +1,7 @@
 namespace microcode {
     function ruleDefnFromJson(obj: any): RuleDefn {
         const extractField = (t: string) => (s: string) => {
-            let hasField = s.indexOf("(")
+            let hasField = s.indexOf("(") 
             if (hasField >= 0) {
                 const elem = s.substr(0, hasField)
                 if (Object.keys(tilesDB[t]).indexOf(elem) >= 0) {

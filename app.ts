@@ -8,7 +8,7 @@ namespace microcode {
     }
 
     export class App {
-        sceneManager: SceneManager
+        sceneManager: SceneManager 
 
         constructor() {
             // One interval delay to ensure all static constructors have executed.

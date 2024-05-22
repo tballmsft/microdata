@@ -28,7 +28,7 @@ namespace microcode {
                     e.kind === FORWARD_BUTTON_ERROR_KIND
                 )
                     return
-                else throw e
+                else throw e 
             }
         }
 

@@ -5,7 +5,7 @@ namespace microcode {
         invisible: boolean
 
         public get xfrm() {
-            return this.xfrm_
+            return this.xfrm_ 
         }
         public get width() {
             return this.image.width

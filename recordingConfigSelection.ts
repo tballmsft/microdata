@@ -316,7 +316,7 @@ namespace microcode {
                         const numberOfMeasurementRows = this.guiRecordingConfigRows.length
                         this.currentConfigRow = (((this.currentConfigRow - 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
-                }
+                } 
             )
 
             control.onEvent(

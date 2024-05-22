@@ -4,7 +4,7 @@ namespace microcode {
     const RENDER_PRIORITY = 30
     const SCREEN_PRIORITY = 100
 
-    export abstract class Scene implements IComponent {
+    export abstract class Scene implements IComponent { 
         private xfrm_: Affine
         private color_: number
         private backgroundCaptured_ = false

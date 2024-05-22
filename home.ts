@@ -3,7 +3,7 @@ namespace microcode {
         private recordDataBtn: Button
         private liveDataBtn: Button
         private viewBtn: Button
-        private dataRows: string[][];
+        private dataRows: string[][]; 
 
         constructor(app: App) {
             super(app)

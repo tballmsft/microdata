@@ -13,7 +13,7 @@ namespace microcode {
         if (!skipBack) editor.back()
     }
 
-    //% shim=TD_NOOP
+    //% shim=TD_NOOP 
     function editorSkipForward(editor: Editor, skipBack: boolean) {
         if (!skipBack) editor.forward()
     }

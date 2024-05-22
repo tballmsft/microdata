@@ -2,7 +2,7 @@ namespace jacs {
     export let debugOut = false
 
     export const SRV_JACSCRIPT_CONDITION = 0x1196796d
-    export const CMD_CONDITION_FIRE = 0x80
+    export const CMD_CONDITION_FIRE = 0x80 
 
     export const CMD_GET_REG = 0x1000
     export const CMD_SET_REG = 0x2000

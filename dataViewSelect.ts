@@ -11,7 +11,7 @@ namespace microcode {
         private graphViewBtn: Button
         private dataloggerEmpty: boolean
 
-        constructor(app: App) {
+        constructor(app: App) { 
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
         }
 

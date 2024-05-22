@@ -8,7 +8,7 @@ namespace pointerevents {
 
     export interface WheelEventMessage {
         type: "wheel"
-        dx: number
+        dx: number 
         dy: number
         dz: number
     }

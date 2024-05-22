@@ -3,7 +3,7 @@ namespace microcode {
         constructor(
             public readonly label: string,
             public readonly ariaId: string,
-            public readonly icon: string,
+            public readonly icon: string, 
             public readonly b64: string
         ) {}
 

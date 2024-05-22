@@ -6,7 +6,7 @@ namespace microcode {
         public set x(v) {
             this.x_ = v
         }
-        public get y() {
+        public get y() { 
             return this.y_
         }
         public set y(v) {

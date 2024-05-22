@@ -16,7 +16,7 @@ namespace microcode {
      */
     export type SensorEventFunction = (reading: number, comparator: number) => boolean
 
-    /**
+    /** 
      * Get aa function that performs that inequality check & logs it with an event description if the event has triggered.
      */
     export const sensorEventFunctionLookup: {[inequality: string]: SensorEventFunction} = {

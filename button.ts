@@ -219,7 +219,7 @@ namespace microcode {
                 value: this.ariaId,
                 force,
             }
-            accessibility.setLiveContent(msg)
+            accessibility.setLiveContent(msg) 
         }
 
         constructor(opts: {

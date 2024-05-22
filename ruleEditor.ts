@@ -1,7 +1,7 @@
 namespace microcode {
     type ButtonRuleRep = { [name: string]: Button[] }
 
-    function repNames() {
+    function repNames() { 
         return ["sensors", "filters", "actuators", "modifiers"]
     }
 

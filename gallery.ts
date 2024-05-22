@@ -8,7 +8,7 @@ namespace microcode {
             super.shutdown()
         }
 
-        /* override */ startup() {
+        /* override */ startup() { 
             super.startup()
 
             let x = -72,

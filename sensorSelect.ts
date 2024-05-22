@@ -6,7 +6,7 @@ namespace microcode {
      *      These sensors are passed to either the measurement screen or the live data view
      */
     export class SensorSelect extends CursorSceneWithPriorPage {
-        private btns: Button[]
+        private btns: Button[] 
         private selectedSensorNames: string[]
         private nextSceneEnum: CursorSceneEnum
         

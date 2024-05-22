@@ -60,7 +60,7 @@ namespace microcode {
 
             // Outline:
             screen.fillRect(
-                Screen.HALF_WIDTH - 70,
+                Screen.HALF_WIDTH - 70, 
                 Screen.HALF_HEIGHT - 40,
                 140,
                 90,

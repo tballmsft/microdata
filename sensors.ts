@@ -339,7 +339,7 @@ namespace microcode {
         "accelerometer Z": new AccelerometerSensor(Dimension.Z),
         "Pitch": new RotationSensor(Rotation.Pitch),
         "Roll": new RotationSensor(Rotation.Roll),
-        "Pin 0": new PinSensor(TouchPin.P0),
+        "Pin 0": new PinSensor(TouchPin.P0), 
         "Pin 1": new PinSensor(TouchPin.P1),
         "Pin 2": new PinSensor(TouchPin.P2),
         "led_light_sensor": new LightSensor(),

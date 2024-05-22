@@ -504,7 +504,7 @@ namespace microcode {
             //----------
             // Ordinate:
             //----------
-            if (this.yScrollOffset > -60) {
+            if (this.yScrollOffset > -60) { 
                 // Bot:
                 screen.print(
                     this.lowestSensorMinimum.toString(),

@@ -1,11 +1,11 @@
-namespace microcode {
+ namespace microcode {
     export class Screen {
         private static image_: SImage
 
         public static WIDTH = screen.width
         public static HEIGHT = screen.height
         public static HALF_WIDTH = screen.width >> 1
-        public static HALF_HEIGHT = screen.height >> 1
+        public static HALF_HEIGHT = screen.height >> 1 
         public static LEFT_EDGE = -Screen.HALF_WIDTH
         public static RIGHT_EDGE = Screen.HALF_WIDTH
         public static TOP_EDGE = -Screen.HALF_HEIGHT

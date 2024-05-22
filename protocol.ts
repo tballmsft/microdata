@@ -9,7 +9,7 @@ const enum RobotLineState {
     Both = Left | Right,
     //% block="lost left"
     LostLeft = None | 0x04,
-    //% block="lost right"
+    //% block="lost right" 
     LostRight = None | 0x0a,
 }
 

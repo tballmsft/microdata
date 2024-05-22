@@ -29,7 +29,7 @@ namespace microcode {
             this.sensors = sensors
             this.sensorWaitTimes = []
 
-            this.sensorIndexOffset = 0
+            this.sensorIndexOffset = 0 
             this.currentSensorIndex = 0
             this.sensorBoxColor = 15
 

@@ -4,7 +4,7 @@ namespace microcode {
         public static profiling = false
         public static menuProfiling = false // heap-dump on MENU press
     }
-
+ 
     export function profile() {
 
     }

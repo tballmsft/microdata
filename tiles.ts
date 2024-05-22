@@ -8,7 +8,7 @@ namespace microcode {
     export const TID_SENSOR_RELEASE = "S2B"
     export const TID_SENSOR_ACCELEROMETER = "S3"
     export const TID_SENSOR_TIMER = "S4"
-    export const TID_SENSOR_LIGHT = "S5"
+    export const TID_SENSOR_LIGHT = "S5" 
     export const TID_SENSOR_TEMP = "S6"
     export const TID_SENSOR_RADIO_RECEIVE = "S7"
     export const TID_SENSOR_MICROPHONE = "S8"
