@@ -47,11 +47,14 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            // basic.showNumber(datalogger.getNumberOfRows())
+
             this.dataRows = []
             this.headerStringLengths = []
             
             this.numberOfCols = 4;
-            this.getNextDataChunk(this.tabularRowIndex);
+            this.getNextDataChunk(0);
+            // basic.showNumber(datalogger.getNumberOfRows())
 
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
@@ -133,26 +136,17 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
-                        if (this.tabularRowIndex < limit) {
-                            this.tabularRowIndex = Math.min(this.tabularRowIndex + 1, this.dataRows.length - 1)
-                            
+                        const limit = Math.min(this.dataRows.length, TABULAR_MAX_ROWS)
+                        if (this.tabularRowIndex + 1 < limit) {
+                            this.tabularRowIndex += 1
                         }
-                        else if (this.tabularRowIndex + this.tabularYScrollOffset < this.dataRows.length - 1) {
+
+
+                        // limit != this.dataRows.length - 1 && 
+                        else if (this.tabularYScrollOffset < datalogger.getNumberOfRows(TABULAR_MAX_ROWS)) {
+                            basic.showNumber(this.tabularYScrollOffset + 1)
                             this.tabularYScrollOffset += 1
-                            this.getNextDataChunk(this.tabularRowIndex);
-                        }
-                    }
-
-                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
-                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
-
-                        if (this.filteredRowIndex < limit) {
-                            this.filteredRowIndex = Math.min(this.filteredRowIndex + 1, this.dataRows.length - 1)
-                        }
-    
-                        else if (this.filteredRowIndex + this.filteredYScrollOffset < this.dataRows.length - 1) {
-                            this.filteredYScrollOffset += 1
+                            this.getNextDataChunk(this.tabularYScrollOffset);
                         }
                     }
                 }
@@ -182,9 +176,10 @@ namespace microcode {
          * Invoked when this.tabularYScrollOffset reaches its screen boundaries
          */
         private getNextDataChunk(from: number) {
-            const tokens = datalogger.getRows(from - 1, from + TABULAR_MAX_ROWS).split("_");
-            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
-                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
+            const rows = datalogger.getRows(from, TABULAR_MAX_ROWS).split("\n");
+            this.dataRows = []
+            for (let i = 0; i < rows.length; i++) {
+                this.dataRows.push(rows[i].split(","));
             }
         }
 
@@ -303,17 +298,17 @@ namespace microcode {
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
-                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length, TABULAR_MAX_ROWS)
+                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS)
                     this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
 
                     // Values:
-                    for (let row = 0; row < Math.min(this.dataRows.length - this.tabularYScrollOffset, TABULAR_MAX_ROWS); row++) {
+                    for (let row = 0; row < Math.min(this.dataRows.length, TABULAR_MAX_ROWS); row++) {
                         let cumulativeColOffset = 0;
 
                         // Skip the first column: Time (Seconds)
                         for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            let value = this.dataRows[row + this.tabularYScrollOffset][colID]
+                            let value = this.dataRows[row][colID]
 
                             if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break

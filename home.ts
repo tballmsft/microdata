@@ -12,7 +12,7 @@ namespace microcode {
             super.startup()
 
 
-
+            datalogger.deleteLog(datalogger.DeleteType.Full)
             /**
              * MicroData uses its own data format of:
              * [
@@ -33,6 +33,21 @@ namespace microcode {
                 "Reading",
                 "Event"
             ])
+
+            for (let i = 1; i <= 11; i++) {
+                datalogger.log(
+                    datalogger.createCV("Sensor", "Accel. X"),
+                    datalogger.createCV("Time (ms)", +(i * 1000)),
+                    datalogger.createCV("Reading", +i),
+                    datalogger.createCV("Event", "N/a")
+                )
+            }
+
+            basic.showNumber(datalogger.getNumberOfRows())
+            basic.showString("b1")
+            basic.showNumber(datalogger.getNumberOfRows(datalogger.getNumberOfRows()))
+            basic.showString("b2")
+            basic.showNumber(datalogger.getNumberOfRows(100))
 
             this.liveDataBtn = new Button({
                 parent: null,

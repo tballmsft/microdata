@@ -331,27 +331,52 @@ namespace microcode {
     }
 
     /**
-     * Translates the ariaID for a sensor into a real sensor object
+     * Translates the Name for a sensor into a real sensor object
      */
     export const SENSOR_LOOKUP_TABLE: {[ariaID: string]: Sensor} = {
-        "accelerometer X": new AccelerometerSensor(Dimension.X),
-        "accelerometer Y": new AccelerometerSensor(Dimension.Y),
-        "accelerometer Z": new AccelerometerSensor(Dimension.Z),
-        "Pitch": new RotationSensor(Rotation.Pitch),
-        "Roll": new RotationSensor(Rotation.Roll),
-        "Pin 0": new PinSensor(TouchPin.P0),
-        "Pin 1": new PinSensor(TouchPin.P1),
-        "Pin 2": new PinSensor(TouchPin.P2),
-        "led_light_sensor": new LightSensor(),
-        "thermometer": new TemperatureSensor(),
-        "S10": new MagnetSensor(Dimension.X),
-        "Logo Press": new LogoPressSensor(),
-        "Volume": new VolumeSensor(),
-        "Compass": new CompassHeadingSensor(),
-        "Jacdac Light": new JacdacLightSensor(),
-        "Jacdac Moisture": new JacdacSoilMoistureSensor(),
-        "Jacdac Distance": new JacdacDistanceSensor(),
-        "Jacdac Flex": new JacdacFlexSensor(),
-        "Jacdac Temperature": new JacdacTemperatureSensor()
+        "Accel. X"      : new AccelerometerSensor(Dimension.X),
+        "Accel. Y"      : new AccelerometerSensor(Dimension.Y),
+        "Accel. Z"      : new AccelerometerSensor(Dimension.Z),
+        "Pitch"         : new RotationSensor(Rotation.Pitch),
+        "Roll"          : new RotationSensor(Rotation.Roll),
+        "Pin 0"         : new PinSensor(TouchPin.P0),
+        "Pin 1"         : new PinSensor(TouchPin.P1),
+        "Pin 2"         : new PinSensor(TouchPin.P2),
+        "Light"         : new LightSensor(),
+        "Temp."         : new TemperatureSensor(),
+        "Magnet"        : new MagnetSensor(Dimension.X),
+        "Logo Pressed"  : new LogoPressSensor(),
+        "Volume"        : new VolumeSensor(),
+        "Compass"       : new CompassHeadingSensor(),
+        "Jac Flex"      : new JacdacLightSensor(),
+        "Jac Temp"      : new JacdacSoilMoistureSensor(),
+        "Jac Light"     : new JacdacDistanceSensor(),
+        "Jac Moist"     : new JacdacFlexSensor(),
+        "Jac Dist"      : new JacdacTemperatureSensor()
+    }
+
+    /**
+     * Translates the ariaID into the Name used by that sensor
+     */
+    export const ARIAID_TO_SENSOR_NAME_LOOKUP_TABLE: {[ariaID: string]: string} = {
+        "accelerometer X"    : "Accel. X",
+        "accelerometer Y"    : "Accel. Y",
+        "accelerometer Z"    : "Accel. Z",
+        "Pitch"              : "Pitch",
+        "Roll"               : "Roll",
+        "Pin 0"              : "Pin 0",
+        "Pin 1"              : "Pin 1",
+        "Pin 2"              : "Pin 2",
+        "led_light_sensor"   : "Light",
+        "thermometer"        : "Temp.",
+        "S10"                : "Magnet",
+        "Logo Press"         : "Logo Pressed",
+        "Volume"             : "Volume",
+        "Compass"            : "Compass",
+        "Jacdac Light"       : "Jac Flex",
+        "Jacdac Moisture"    : "Jac Temp",
+        "Jacdac Distance"    : "Jac Light",
+        "Jacdac Flex"        : "Jac Moist",
+        "Jacdac Temperature" : "Jac Dist"
     }
 }

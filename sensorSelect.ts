@@ -20,7 +20,6 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // icons & ariaIDs are the same length:
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
                 "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
@@ -33,9 +32,8 @@ namespace microcode {
                 "Jacdac Moisture", "Jacdac Distance"
             ]
 
-            let x = -60;
-            let y = -40;
-
+            let x: number = -60;
+            let y: number = -40;
             for (let i = 0; i < icons.length; i++) {
                 this.btns.push(new Button({
                     parent: null,
@@ -74,7 +72,7 @@ namespace microcode {
                     if (this.selectedSensorNames.length === 0) {
                         return
                     }
-                    const sensors = this.selectedSensorNames.map((name) => SENSOR_LOOKUP_TABLE[name])
+                    const sensors = this.selectedSensorNames.map((name) => SENSOR_LOOKUP_TABLE[ARIAID_TO_SENSOR_NAME_LOOKUP_TABLE[name]])
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
                         this.app.pushScene(new LiveDataViewer(this.app, sensors))

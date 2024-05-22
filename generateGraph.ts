@@ -179,22 +179,12 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    basic.showNumber(6)
-                    const dataRows = this.dataRows
-                    this.xScrollOffset += 1
-                    this.getNextDataChunk()
-                    basic.showNumber(7)
-
-                    // basic.showNumber(x)
-                    if (this.dataRows.length > 1) {
-                        this.xScrollOffset += 1
+                    if (datalogger.getNumberOfRows(((this.xScrollOffset + 1) * 10) + 1) > 0) {
+                        basic.showNumber(datalogger.getNumberOfRows(((this.xScrollOffset + 1) * 10) + 1))
+                        this.xScrollOffset += 1;
+                        this.getNextDataChunk();
                         this.processReadings();
                         this.update(); // For fast response to the above changes
-                    }
-
-                    else {
-                        this.xScrollOffset -= 1
-                        this.dataRows = dataRows
                     }
                 }
             )
@@ -209,6 +199,15 @@ namespace microcode {
                     }
                 }
             )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => {
+                    this.app.popScene()
+                    this.app.pushScene(new DataViewSelect(this.app))
+                }
+            )
         }
 
         /**
@@ -219,19 +218,11 @@ namespace microcode {
          */
         private getNextDataChunk() {
             this.dataRows = []
-            const tokens = datalogger.getRows(this.xScrollOffset * 10, (this.xScrollOffset * 10) + 10).split("_");
 
-            // First row returned is the header: Skip it:
-            if (this.xScrollOffset == 0) {
-                for (let i = NUMBER_OF_COLS; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
-                    this.dataRows[(i / NUMBER_OF_COLS) - 1] = tokens.slice(i, i + NUMBER_OF_COLS);
-                }
-            }
-
-            else {
-                for (let i = 0; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
-                    this.dataRows[i / NUMBER_OF_COLS] = tokens.slice(i, i + NUMBER_OF_COLS);
-                }
+            // Skip header, if this.xScrollOffset == 0: add one to avoid overlapping the first value in this next chunk with the last of the prior chunk
+            const rows = datalogger.getRows((this.xScrollOffset * 10) + 1, 10).split("\n");
+            for (let i = 0; i < rows.length; i++) {
+                this.dataRows.push(rows[i].split(","));
             }
         }
 
@@ -295,7 +286,6 @@ namespace microcode {
                 this.windowHeight - this.windowBotBuffer - 4,
                 0
             );
-
             
             //------------------
             // Draw sensor data:
