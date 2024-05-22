@@ -180,7 +180,6 @@ namespace microcode {
                 controller.right.id,
                 () => {
                     if (datalogger.getNumberOfRows(((this.xScrollOffset + 1) * 10) + 1) > 0) {
-                        basic.showNumber(datalogger.getNumberOfRows(((this.xScrollOffset + 1) * 10) + 1))
                         this.xScrollOffset += 1;
                         this.getNextDataChunk();
                         this.processReadings();
