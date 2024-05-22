@@ -535,9 +535,10 @@ namespace microcode {
             )
 
             // End:
+            const end: string = (this.sensors[0].numberOfReadings + this.sensors[0].getBufferLength()).toString() 
             screen.print(
-                (this.sensors[0].numberOfReadings + this.sensors[0].getBufferLength()).toString(),
-                Screen.WIDTH - this.windowRightBuffer - 3,
+                end,
+                Screen.WIDTH - this.windowRightBuffer - (end.length * font.charWidth) - 1,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
