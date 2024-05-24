@@ -47,14 +47,11 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
-            // basic.showNumber(datalogger.getNumberOfRows())
-
             this.dataRows = []
             this.headerStringLengths = []
             
             this.numberOfCols = 4;
             this.getNextDataChunk(0);
-            // basic.showNumber(datalogger.getNumberOfRows())
 
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
