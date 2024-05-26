@@ -303,7 +303,6 @@ namespace microcode {
                     );
                 }
             }
-
             
             //---------------
             // Sensor blocks:

@@ -138,10 +138,7 @@ namespace microcode {
                             this.tabularRowIndex += 1
                         }
 
-
-                        // limit != this.dataRows.length - 1 && 
                         else if (this.tabularYScrollOffset < datalogger.getNumberOfRows(TABULAR_MAX_ROWS)) {
-                            basic.showNumber(this.tabularYScrollOffset + 1)
                             this.tabularYScrollOffset += 1
                             this.getNextDataChunk(this.tabularYScrollOffset);
                         }

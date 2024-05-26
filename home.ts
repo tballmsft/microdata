@@ -39,7 +39,7 @@ namespace microcode {
             //         datalogger.createCV("Sensor", "Accel. X"),
             //         datalogger.createCV("Time (ms)", +(i * 1000)),
             //         datalogger.createCV("Reading", +i),
-            //         datalogger.createCV("Event", "N/a")
+            //         datalogger.createCV("Event", "N/A")
             //     )
             // }
 

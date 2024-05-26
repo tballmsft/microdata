@@ -1,9 +1,4 @@
 namespace microcode {
-    export enum SensorLoggingMode {
-        RECORDING,
-        EVENTS
-    }
-
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const SENSOR_EVENT_POLLING_PERIOD_MS: number = 100
     /** The maximum number of elements permissable in any sensor's buffer */
@@ -28,8 +23,10 @@ namespace microcode {
 
         getNthReading(n: number): number;
         getBufferLength(): number;
-        /** Successful? */
-        log(): boolean;
+
+        log(): void;
+        hasMeasurements(): boolean;
+        getPeriod(): number;
     }
 
 
@@ -46,33 +43,31 @@ namespace microcode {
         public sensorFn: () => number
 
         /** Set upon the first reading */
-        public startTime: number
+        public totalMeasurements: number
 
         /** Used by the live data viewer to write the small abscissa
          * Always increases: even when data buffer is shifted to avoid reaching the BUFFER_LIMIT
          */
         public numberOfReadings: number
 
-        public config: RecordingConfig | EventConfig
-        public loggingMode: SensorLoggingMode
+        public config: RecordingConfig
+        public isInEventMode: boolean
 
         // Reading Statistics:
         public lastLoggedEventDescription: string
         private dataBuffer: number[]
-        private totalMeasurements: number;
 
         constructor(sensorFn: () => number, name: string, config?: RecordingConfig) {
             this.name = name
             this.sensorFn = sensorFn
-            this.startTime = 0
+            this.totalMeasurements = 0
             this.numberOfReadings = 0
 
             this.config = config
-            this.loggingMode = null
+            this.isInEventMode = false
 
             this.lastLoggedEventDescription = ""
             this.dataBuffer = []
-            this.totalMeasurements = 0
         }
 
         getReading(): number {return this.sensorFn()}
@@ -89,62 +84,50 @@ namespace microcode {
             this.dataBuffer.push(this.getReading());
         }
 
-        setRecordingConfig(config: RecordingConfig) {
+        setConfig(config: RecordingConfig, isInEventMode: boolean) {
             this.config = config
-            this.loggingMode = SensorLoggingMode.RECORDING
-            this.totalMeasurements = config.measurements
+            this.totalMeasurements = this.config.measurements
+            this.isInEventMode = isInEventMode
         }
 
-        setEventConfig(config: EventConfig) {
-            this.config = config
-            this.loggingMode = SensorLoggingMode.EVENTS
-            this.totalMeasurements = config.measurements
+        hasMeasurements(): boolean {
+            return this.config.measurements > 0;
         }
- 
+
+        getPeriod(): number {
+            return this.config.period;
+        }
+
         /**
-         * Invokes logData() if this is a RecordingSensor, logEvent() if logging events
-         * Currently writes the "Time (Ms)" column using the cumulative period - rather than the real-time
-         * @returns Has measurements left
+         * Records a sensor's reading to the datalogger, or polls for an event
+         * Invoked by dataRecorder.log()
+         * Writes the "Time (Ms)" column using the cumulative period
          */
-        log(): boolean {
-            // if (this.startTime == 0) {
-            //     this.startTime = input.runningTime()
-            // }
-
-            if (this.config.measurements <= 0) {
-                return false
-            }
-
+        log() {
             const reading = this.getReading()
-            // const time = input.runningTime() - this.startTime
-
-            if (this.loggingMode == SensorLoggingMode.EVENTS) {
-                const config = this.config as EventConfig
-                const reading = this.getReading()
-
-                if (sensorEventFunctionLookup[config.inequality](reading, config.comparator)) {
+            const time = (this.totalMeasurements - this.config.measurements) * this.config.period
+            
+            if (this.isInEventMode) {
+                if (sensorEventFunctionLookup[this.config.inequality](reading, this.config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.name),
-                        datalogger.createCV("Time (ms)", SENSOR_EVENT_POLLING_PERIOD_MS),
+                        datalogger.createCV("Time (ms)", time),
                         datalogger.createCV("Reading", reading.toString()),
-                        datalogger.createCV("Event", reading + " " + config.inequality + " " + config.comparator)
+                        datalogger.createCV("Event", reading + " " + this.config.inequality + " " + this.config.comparator)
                     )
+                    this.config.measurements -= 1
                 }
             }
 
             else {
-                const config = this.config as RecordingConfig
-                const time = (this.totalMeasurements - config.measurements) * config.period
-
                 datalogger.log(
                     datalogger.createCV("Sensor", this.name),
                     datalogger.createCV("Time (ms)", time.toString()),
                     datalogger.createCV("Reading", reading.toString()),
                     datalogger.createCV("Event", "N/A")
                 )
+                this.config.measurements -= 1
             }
-            this.config.measurements -= 1
-            return true
         }
 
         /**
