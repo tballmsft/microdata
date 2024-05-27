@@ -34,9 +34,16 @@ namespace microcode {
                 "Event"
             ])
 
-            // for (let i = 1; i <= 11; i++) {
+            // for (let i = 1; i <= 4; i++) {
             //     datalogger.log(
             //         datalogger.createCV("Sensor", "Accel. X"),
+            //         datalogger.createCV("Time (ms)", +(i * 1000)),
+            //         datalogger.createCV("Reading", +i),
+            //         datalogger.createCV("Event", "N/A")
+            //     )
+
+            //     datalogger.log(
+            //         datalogger.createCV("Sensor", "Accel. Y"),
             //         datalogger.createCV("Time (ms)", +(i * 1000)),
             //         datalogger.createCV("Reading", +i),
             //         datalogger.createCV("Event", "N/A")

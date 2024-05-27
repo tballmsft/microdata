@@ -15,8 +15,6 @@ namespace microcode {
         private schedule: {sensor: Sensor, waitTime: number}[];
         private numberOfSensors: number;
 
-        // private actions: string[]
-
         // UI:
         private sensors: Sensor[]
         /** Sensor to be shown */
@@ -31,7 +29,6 @@ namespace microcode {
 
             this.schedule = []
             this.numberOfSensors = sensors.length
-            // this.actions = []
 
             this.sensors = sensors
             this.sensorIndexOffset = 0
@@ -104,10 +101,13 @@ namespace microcode {
  
         /**
          * Schedules the sensors and orders them to .log()
+         * Runs within a separate fiber.
+         * Mutates this.schedule
         */
         log() {
             control.inBackground(() => {
-                let currentTime = 0;
+                let currentTime = 0;                
+                this.sensors.forEach((sensor) => sensor.log())
 
                 while (this.schedule.length > 0) {
                     const nextLogTime = this.schedule[0].waitTime;
@@ -154,10 +154,6 @@ namespace microcode {
 
             // Check if all sensors have finished their work:
             let recordingsComplete = !(this.schedule.length > 0)
-
-            // for (let i = 0; i < this.actions.length; i++) {
-            //     screen.printCenter(this.actions[i], i * 10)
-            // }
 
             if (recordingsComplete) {
                 screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);

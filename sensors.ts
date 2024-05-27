@@ -1,8 +1,6 @@
 namespace microcode {
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const SENSOR_EVENT_POLLING_PERIOD_MS: number = 100
-    /** The maximum number of elements permissable in any sensor's buffer */
-    export const SENSOR_BUFFER_LIMIT: number = 80;
 
     /** Value returned by default if the abstract getMinimum() is not overriddent */
     const DEFAULT_SENSOR_MINIMUM = 0
@@ -10,7 +8,7 @@ namespace microcode {
     const DEFAULT_SENSOR_MAXIMUM = 100
 
     /** How many times should a line be duplicated when drawn? */
-    const PLOT_SMOOTHING_CONSTANT: number = 3
+    const PLOT_SMOOTHING_CONSTANT: number = 4
 
     /**
      * Only used within this sensor file.
@@ -22,6 +20,7 @@ namespace microcode {
         getMaximum(): number;
 
         getNthReading(n: number): number;
+        setBufferSize(newBufferSize: number): void;
         getBufferLength(): number;
 
         log(): void;
@@ -45,6 +44,8 @@ namespace microcode {
         /** Set upon the first reading */
         public totalMeasurements: number
 
+        public maxBufferSize: number
+
         /** Used by the live data viewer to write the small abscissa
          * Always increases: even when data buffer is shifted to avoid reaching the BUFFER_LIMIT
          */
@@ -60,6 +61,8 @@ namespace microcode {
         constructor(sensorFn: () => number, name: string, config?: RecordingConfig) {
             this.name = name
             this.sensorFn = sensorFn
+
+            this.maxBufferSize = 80
             this.totalMeasurements = 0
             this.numberOfReadings = 0
 
@@ -74,11 +77,20 @@ namespace microcode {
         getMinimum(): number {return DEFAULT_SENSOR_MINIMUM;}
         getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
         getNthReading(n: number): number {return this.dataBuffer[n]}
+
+        setBufferSize(newBufferSize: number): void {
+            // Remove additional values if neccessary:
+            if (this.dataBuffer.length > newBufferSize) {
+                const difference = this.maxBufferSize - newBufferSize
+                this.dataBuffer.splice(this.dataBuffer.length - difference, difference)
+            }
+            this.maxBufferSize = newBufferSize
+        }
         getBufferLength(): number {return this.dataBuffer.length}
 
         readIntoBufferOnce(): void {
             this.numberOfReadings += 1
-            if (this.dataBuffer.length >= SENSOR_BUFFER_LIMIT) {
+            if (this.dataBuffer.length >= this.maxBufferSize) {
                 this.dataBuffer.shift();
             }
             this.dataBuffer.push(this.getReading());
@@ -134,25 +146,25 @@ namespace microcode {
          * Default draw mode: may be overriden to accommodate multiple draw modes
          * Each value in the data buffer is normalised and scaled to screen size per frame.
          *      This is inefficient since only one value is added per frame
-         * 
          * @param fromX starting x coordinate
          * @param fromY starting y coordinate
          * @param color
          */
         draw(fromX: number, fromY: number, color: number): void {
-            for (let i = 0; i < this.dataBuffer.length - 1; i++) {
-                // Normalise the data points, then calculate their position for the graph:
-                const norm1 = ((this.dataBuffer[i] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY);
-                const norm2 = ((this.dataBuffer[i + 1] - this.getMinimum()) / (this.getMaximum() + Math.abs(this.getMinimum()))) * (screen.height - fromY);
-                const y1 = Math.round(screen.height - norm1) - fromY;
-                const y2 = Math.round(screen.height - norm2) - fromY;
+            const range: number = Math.abs(this.getMinimum()) + this.getMaximum();
 
-                for (let j = 0; j < PLOT_SMOOTHING_CONSTANT; j++) {
+            for (let i = 0; i < this.dataBuffer.length - 1; i++) {
+                const norm1 = ((this.dataBuffer[i] - this.getMinimum()) / range) * (BUFFERED_SCREEN_HEIGHT - fromY);
+                const norm2 = ((this.dataBuffer[i + 1] - this.getMinimum()) / range) * (BUFFERED_SCREEN_HEIGHT - fromY);
+                const y1 = Math.round(Screen.HEIGHT - norm1) - fromY;
+                const y2 = Math.round(Screen.HEIGHT - norm2) - fromY;
+
+                for (let j = -(PLOT_SMOOTHING_CONSTANT / 2); j < PLOT_SMOOTHING_CONSTANT / 2; j++) {
                     screen.drawLine(
-                        fromX + i, 
-                        y1 - (PLOT_SMOOTHING_CONSTANT / 2) + j, 
-                        fromX + i - 1, 
-                        y2 - (PLOT_SMOOTHING_CONSTANT / 2) + j, 
+                        fromX + i,
+                        y1 + j,
+                        fromX + i + 1,
+                        y2 + j,
                         color
                     );
                 }
