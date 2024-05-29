@@ -10,9 +10,7 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-
-            // datalogger.deleteLog(datalogger.DeleteType.Full)
-
+            
             /**
              * MicroData uses its own data format of:
              * [
@@ -33,22 +31,6 @@ namespace microcode {
                 "Reading",
                 "Event"
             ])
-
-            // for (let i = 1; i <= 4; i++) {
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "Accel. X"),
-            //         datalogger.createCV("Time (ms)", +(i * 1000)),
-            //         datalogger.createCV("Reading", +i),
-            //         datalogger.createCV("Event", "N/A")
-            //     )
-
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "Accel. Y"),
-            //         datalogger.createCV("Time (ms)", +(i * 1000)),
-            //         datalogger.createCV("Reading", +i),
-            //         datalogger.createCV("Event", "N/A")
-            //     )
-            // }
 
             this.liveDataBtn = new Button({
                 parent: null,
@@ -133,6 +115,7 @@ namespace microcode {
                     ,
                 y - wordLogo.height + this.yOffset + margin
             )
+
             if (!this.yOffset) {
                 const tagline = resolveTooltip("tagline")
                 Screen.print(

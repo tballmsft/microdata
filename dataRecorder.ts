@@ -8,7 +8,7 @@ namespace microcode {
      * Responsible for invoking the logging commands for each sensor,
      * Presents information about each sensor's state via colourful collapsing boxes
      * 
-     * Sensors are now logged via a scheduler
+     * Sensors are logged via a scheduler
      */
     export class DataRecorder extends Scene {
         /** Ordered sensor periods */
@@ -191,7 +191,7 @@ namespace microcode {
                         )
 
                         screen.print(
-                            this.sensors[i].name,
+                            this.sensors[i].getName(),
                             12,
                             y + 2,
                             15
@@ -222,36 +222,16 @@ namespace microcode {
 
                         const sensor = this.sensors[i]
                         screen.print(
-                            sensor.name,
+                            sensor.getName(),
                             12,
                             y + 2,
                             15
                         )
 
-                        // Sensors have different information to display depending on their mode
-                        // Build up the information in an array:
-                        let sensorInfo: string[]
-                        if (sensor.isInEventMode) {
-                            sensorInfo = [
-                                sensor.config.measurements.toString() + " events left",
-                                "Logging " + sensor.config.inequality + " " + sensor.config.comparator + " events",
-                                sensor.lastLoggedEventDescription
-                            ]
-                        }
-
-                        else {
-                            sensorInfo = [
-                                sensor.getPeriod() / 1000 + " second period", 
-                                sensor.config.measurements.toString() + " measurements left",
-                                ((sensor.config.measurements * sensor.getPeriod()) / 1000).toString() + " seconds left"
-                            ]
-                        }
-
-                        
                         //------------------------------
                         // Write the sensor information:
                         //------------------------------
-
+                        const sensorInfo: string[] = (sensor.isInEventMode) ? sensor.getEventInformation() : sensor.getRecordingInformation();
                         sensorInfo.forEach((info) => {
                             y += 12
                             screen.print(

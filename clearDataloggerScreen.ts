@@ -25,7 +25,7 @@ namespace microcode {
                 y: 20,
                 onClick: () => {
                     this.currentlyDeleting = true
-                    datalogger.deleteLog()
+                    datalogger.deleteLog(datalogger.DeleteType.Fast)
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },    
@@ -86,7 +86,7 @@ namespace microcode {
             // Underline the title:
             screen.fillRect(
                 headerX - (tutorialTextLength / 2) + 2,
-                Screen.HALF_HEIGHT - 40 + 25,
+                Screen.HALF_HEIGHT - 40 + 24,
                 tutorialTextLength - (1 * font.charWidth),
                 2,
                 15 // Black
