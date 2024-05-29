@@ -4,7 +4,7 @@ namespace microcode {
         TUTORIAL,
         /** User is selecting a sensor to modify */
         SELECTING_SENSOR,
-        /** User has selected a sensor and is has now selected to write recordingConfig settings to it (period, delay, measurements, inequality, etc) */
+        /** User has selected a sensor and is has now selected to write recordingConfig settings to it (period, measurements, inequality, etc) */
         SELECTING_WRITE_MODE,
         /** User has confirmed the recordingConfig settings */
         CONFIRM_CONFIGURATION,
@@ -12,15 +12,6 @@ namespace microcode {
         WRITING,
         /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         DEFAULT
-    }
-
-    /**
-     * The user may be writing to the UI elements for the 
-     * recording config or the events
-     */
-    const enum WRITE_MODE {
-        RECORDING_SETTINGS,
-        EVENT_SETTINGS,
     }
 
     /**
@@ -37,18 +28,19 @@ namespace microcode {
         largeDelta: number
     }
 
+    /**
+     * The user may be writing to the UI elements for the 
+     * recording config or the events
+     */
+    const enum WRITE_MODE {
+        RECORDING_SETTINGS,
+        EVENT_SETTINGS,
+    }
 
     /**
      * The (ms, second, minute, hour, day) ui elements kept in RecordingSettingsGUIColumn.value are converted into ms using this:
      */
     const TIME_CONVERSION_TABLE: number[] = [1, 1000, 60000, 3600000, 86400000]
-    const MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN: number = 3
-    
-    type TutorialTip = {
-        text: string,
-        keywords?: string[],
-        keywordColors?: number[],
-    }
 
     /**
      * Responsible for allowing the user to select the specific recording configurations for each passed sensor.
@@ -56,7 +48,7 @@ namespace microcode {
      * 
      * After submission the DataRecorder is loaded & these sensor configs excercised.
      */
-    export class RecordingConfigSelection extends Scene {
+    export class RecordingConfigSelection extends Scene implements IHasTutorial {
         private guiState: GUI_STATE
         private writingMode: WRITE_MODE
 
@@ -76,7 +68,6 @@ namespace microcode {
          * 0  : Minutes
          * 0  : Hours
          * 0  : Days
-         * 0  : Delay
          * When the user selects a sensor & interacts with the GUI these values are changed.
          * They are later compiled into a single MS period in .createSensorConfigs()
          */
@@ -105,15 +96,19 @@ namespace microcode {
         /** Reflects whether or not sensor n will be used to sense events: modidifies the behaviour of  */
         private willSenseEvents: boolean[]
 
-        private tutorialTextTips: TutorialTip[]
-        private tutorialTextIndexOffset: number
-
         /** Whether or not the user has manipulated the UI for a sensor. 
          *  Selecting a sensor, but leaving its config as default counts as 'changing' it; since the user may purposefully set it as such.
         */
         private configHasChanged: boolean[]
 
-        constructor(app: App, sensors: Sensor[]){
+        /**
+         * 
+         * @param app 
+         * @param sensors 
+         */
+        private tutorialWindow: TutorialWindow
+
+        constructor(app: App, sensors: Sensor[]) {
             super(app, "measurementConfigSelect")
             this.guiState = GUI_STATE.TUTORIAL
             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
@@ -125,7 +120,6 @@ namespace microcode {
                 {name: "Minutes", smallDelta: 1, largeDelta: 5},
                 {name: "Hours",   smallDelta: 1, largeDelta: 5},
                 {name: "Days",    smallDelta: 1, largeDelta: 5},
-                {name: "Delay",   smallDelta: 1, largeDelta: 5},
             ]
             this.guiRecordingConfigValues = []
 
@@ -145,8 +139,7 @@ namespace microcode {
                     1,  // Seconds
                     0,  // Minutes
                     0,  // Hours
-                    0,  // Days
-                    0   // Delay
+                    0
                 ])
                 const midpoint = Math.abs(this.sensors[i].getMaximum()) - Math.abs(this.sensors[i].getMinimum())
                 this.guiEventConfigValues.push([0, midpoint, 10]) // [x: (0 -> sensorEventSymbols.length), y: (sensor.min -> sensor.max), measurements: (0 -> _)]
@@ -163,7 +156,7 @@ namespace microcode {
             this.currentEventCol = 0
 
             // Optional keyword colouring:
-            this.tutorialTextTips = [
+            this.tutorialWindow = new TutorialWindow({tips: [
                 {text: "This screen is where\nyou configure your\nsensors."},
                 {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
                 {text: "Use UP and DOWN to\nscroll through\nmenus. Try it now!"},
@@ -172,22 +165,31 @@ namespace microcode {
                 {text: "Configured sensors\nare green.", keywords: [" green"], keywordColors: [7]}, // Green
                 {text: "Unconfigured sensors\nare red.", keywords: [" red"], keywordColors: [2]}, // Red
                 {text: "Press A to configure\nsome sensors!", keywords: [" A "], keywordColors: [6]}, // Blue
-            ]
-            this.tutorialTextIndexOffset = 0
+                ],
+                backFn: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                },
+                owner: this
+            })
+        }
 
-            //--------------
-            // User Control:
-            //--------------
 
+        //--------------------
+        // INTERFACE FUNCTION:
+        //--------------------
+
+        public finishTutorial(): void {
+            this.guiState = GUI_STATE.SELECTING_SENSOR
+            this.setupControls()
+        }
+
+        private setupControls() {
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
                 () => {
                     switch (this.guiState) {
-                        case GUI_STATE.TUTORIAL:
-                            this.guiState = GUI_STATE.SELECTING_SENSOR
-                            break;
-
                         case GUI_STATE.SELECTING_SENSOR:
                             this.guiState = GUI_STATE.SELECTING_WRITE_MODE
                             this.configHasChanged[this.currentSensorRow] = true
@@ -293,10 +295,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    if (this.guiState === GUI_STATE.TUTORIAL) {
-                        this.tutorialTextIndexOffset = Math.max(this.tutorialTextIndexOffset - 1, 0)
-                    }
-                    else if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
+                    if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         // Non-negative modulo:
                         this.currentSensorRow = (((this.currentSensorRow - 1) % this.sensors.length) + this.sensors.length) % this.sensors.length
                     }
@@ -344,11 +343,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    if (this.guiState === GUI_STATE.TUTORIAL) {
-                        this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialTextTips.length - MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
-                    }
-
-                    else if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
+                    if (this.guiState === GUI_STATE.SELECTING_SENSOR) {
                         this.currentSensorRow = (this.currentSensorRow + 1) % this.sensors.length
                     }
 
@@ -464,7 +459,7 @@ namespace microcode {
 
                 else {
                     let period: number = 0
-                    for (let col = 1; col < this.guiRecordingConfigText.length - 1; col++) {
+                    for (let col = 1; col < this.guiRecordingConfigText.length; col++) {
                         period += this.guiRecordingConfigValues[sensorRow][col] * TIME_CONVERSION_TABLE[col - 1]
                     }
 
@@ -487,7 +482,7 @@ namespace microcode {
             this.drawSensorSelection()
 
             if (this.guiState == GUI_STATE.TUTORIAL) {
-                this.drawTutorialWindow()
+                this.tutorialWindow.draw()
             }
 
             else if (this.guiState == GUI_STATE.CONFIRM_CONFIGURATION) {
@@ -561,7 +556,7 @@ namespace microcode {
                 headerX - 9,
                 14,
                 Screen.WIDTH - headerX + 8,
-                Screen.HEIGHT,
+                Screen.HEIGHT - rowSize,
                 0
             )
 
@@ -569,7 +564,7 @@ namespace microcode {
                 headerX - 7,
                 15,
                 Screen.WIDTH - headerX + 10,
-                Screen.HEIGHT - 2,
+                Screen.HEIGHT - rowSize - 2,
                 6
             )
 
@@ -698,112 +693,6 @@ namespace microcode {
             )
         }
 
-        private drawTutorialWindow() {
-            const headerX = Screen.HALF_WIDTH
-            const headerY = Screen.HALF_HEIGHT - 60 + 8
-
-            // Sub-window:
-            // Outline:
-            screen.fillRect(
-                Screen.HALF_WIDTH - 70,
-                Screen.HALF_HEIGHT - 60,
-                140,
-                120,
-                15 // Black
-            )
-
-            screen.fillRect(
-                Screen.HALF_WIDTH - 70 + 3,
-                Screen.HALF_HEIGHT - 60 + 3,
-                140 - 6,
-                120 - 6,
-                3 // Pink
-            )
-
-            const tutorialTextLength = ("Tutorial".length * font.charWidth)
-            screen.print(
-                "Tutorial",
-                headerX - (tutorialTextLength / 2),
-                headerY,
-                15 // Black
-            )
-                
-            // Underline the title:
-            screen.fillRect(
-                headerX - (tutorialTextLength / 2) - 4,
-                Screen.HALF_HEIGHT - 60 + 17,
-                tutorialTextLength + 4,
-                1,
-                15 // Black
-            )
-
-            // Print the tutorial tips as bulletpoints:
-            // Some tutorials have coloured keywords, the tip is printed in all black first, then the keyword is printed ontop:
-
-            let tutorialTextYOffset = 25
-            const tipsOnScreen = Math.min(this.tutorialTextTips.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN)
-
-            this.tutorialTextTips.slice(this.tutorialTextIndexOffset, tipsOnScreen).forEach((tip) => {
-                screen.print(
-                    tip.text,
-                    headerX - 55,
-                    tutorialTextYOffset,
-                    15 // Black
-                )
-
-                // Keyword highlighting:
-                if (tip.keywords != null) {
-                    for (let id = 0; id < tip.keywords.length; id++) {
-                        let keyword = tip.keywords[id]
-
-                        const keywordIndex = tip.text.indexOf(keyword)
-                        const stringBeforeKeyword = tip.text.split(keyword, keywordIndex)[0]
-                        const newlinesBeforeKeyword = stringBeforeKeyword.split("\n", keywordIndex)
-
-                        // Find the position of the last newline before the keyword:
-                        let newlineBeforeKeywordIndex = 0
-                        for (let i = keywordIndex; i > 0; i--) {
-                            if (stringBeforeKeyword.charAt(i) == "\n") {
-                                newlineBeforeKeywordIndex = i
-                                break
-                            }
-                        }
-
-                        // Qty of characters between the last newline before the keyword is the xOffset:
-                        let xOffset = (keywordIndex - newlineBeforeKeywordIndex) * font.charWidth
-
-                        // Account for newline char:
-                        if (newlineBeforeKeywordIndex != 0) {
-                            xOffset -= 1 * font.charWidth
-                        }
-                        
-                        // Number of newlines before the keyword are pushed infront:
-                        for (let _ = 0; _ < newlinesBeforeKeyword.length - 1; _++) {
-                            keyword = "\n" + keyword
-                        }
-
-                        // Print them directly ontop of the word in black, but with the specified colouring:
-                        screen.print(
-                            keyword, 
-                            headerX - 55 + xOffset,
-                            tutorialTextYOffset,
-                            tip.keywordColors[id],
-                        )
-                    }
-                }
-
-                // Bullet point:
-                screen.fillCircle(
-                    headerX - 61,
-                    tutorialTextYOffset + 4,
-                    2,
-                    15 // Black
-                )
-                
-                tutorialTextYOffset += (tip.text.split("\n").length * font.charHeight * 1.33) + 3 // .match() and matchAll() are not present; .split() is memory inefficient
-            })
-        }
-
         private drawEventSelectionWindow() {
             const xOffset = 8
 
@@ -843,7 +732,7 @@ namespace microcode {
             switch (this.currentEventCol) {
                 case 0:
                     screen.drawRect(
-                        xOffset + 8 + (sensor.name.length * font.charWidth) + 9 - borderOffset,
+                        xOffset + 8 + (sensor.getName().length * font.charWidth) + 9 - borderOffset,
                         Screen.HALF_HEIGHT - 7 - borderOffset,
                         (inequalitySymbol.length * font.charWidth) + 5 + borderOffset,
                         12 + borderOffset,
@@ -853,7 +742,7 @@ namespace microcode {
 
                 case 1:
                     screen.drawRect(
-                        xOffset + 8 + (sensor.name.length * font.charWidth) + 16 + (inequalitySymbol.length * font.charWidth),
+                        xOffset + 8 + (sensor.getName().length * font.charWidth) + 16 + (inequalitySymbol.length * font.charWidth),
                         Screen.HALF_HEIGHT - 7 - borderOffset,
                         (inequalityOperand.length * font.charWidth) + 5 + borderOffset,
                         12 + borderOffset,
@@ -863,7 +752,7 @@ namespace microcode {
 
                 case 2:
                     screen.drawRect(
-                        xOffset + 8 + (sensor.name.length * font.charWidth) + 16 + (inequalitySymbol.length * font.charWidth) + (inequalityOperand.length * font.charWidth) + 23,
+                        xOffset + 8 + (sensor.getName().length * font.charWidth) + 16 + (inequalitySymbol.length * font.charWidth) + (inequalityOperand.length * font.charWidth) + 23,
                         Screen.HALF_HEIGHT - 7 - borderOffset,
                         (eventMeasurements.length * font.charWidth) + 5 + borderOffset,
                         12 + borderOffset,
@@ -877,7 +766,7 @@ namespace microcode {
 
             // Write Event expression:
             screen.print(
-                "(" + sensor.name + " " + inequalitySymbol + " " + inequalityOperand + ") * " + eventMeasurements,
+                "(" + sensor.getName() + " " + inequalitySymbol + " " + inequalityOperand + ") * " + eventMeasurements,
                 xOffset * 2,
                 Screen.HALF_HEIGHT - 5,
                 15 // black
@@ -903,7 +792,7 @@ namespace microcode {
                 screen.fillRect(
                     0,
                     22 + (row * rowSize) - 3,
-                    (this.sensors[row].name.length) * font.charWidth + 4,
+                    (this.sensors[row].getName().length) * font.charWidth + 4,
                     font.charHeight + 9,
                     16
                 )
@@ -911,13 +800,13 @@ namespace microcode {
                 screen.fillRect(
                     1,
                     22 + (row * rowSize) - 3,
-                    (this.sensors[row].name.length) * font.charWidth + 5,
+                    (this.sensors[row].getName().length) * font.charWidth + 5,
                     font.charHeight + 6,
                     boxColor
                 )
 
                 screen.print(
-                    this.sensors[row].name,
+                    this.sensors[row].getName(),
                     headerX - 2,
                     24 + (row * rowSize) - 1,
                     15 // black
