@@ -234,9 +234,8 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.currentCol + 1 < NUMBER_OF_COLS - 1) {
+                    if (this.currentCol + 1 < NUMBER_OF_COLS - 1)
                         this.currentCol += 1
-                    }
                 }
             )
         }
@@ -283,7 +282,7 @@ namespace microcode {
                         }
                     }
                 }
-                start += TABULAR_MAX_ROWS
+                start += Math.min(TABULAR_MAX_ROWS, datalogger.getNumberOfRows(start))
             }
         }
 
@@ -306,7 +305,6 @@ namespace microcode {
                 }
             }
             this.needToScroll = this.numberOfFilteredRows > TABULAR_MAX_ROWS
-            // basic.showNumber(this.numberOfFilteredRows)
         }
 
 
@@ -384,7 +382,11 @@ namespace microcode {
                 // Skip the first column: Time (Seconds)
                 for (let col = 0; col < NUMBER_OF_COLS - this.currentCol; col++) {
                     const colID = col + this.currentCol
-                    let value = this.dataRows[row][colID]
+                    let value: string = this.dataRows[row][colID]
+
+                    // If the column of readings and not the header:
+                    if (col == 2 && this.currentRowOffset != 0)
+                        value = value.slice(0, 5)
 
                     if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                         break;
@@ -397,7 +399,7 @@ namespace microcode {
                     }
 
                     Screen.print(
-                        value,
+                        value.slice(0, 5),
                         Screen.LEFT_EDGE + cumulativeColOffset + (this.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                         Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                         0xb,
