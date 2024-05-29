@@ -182,7 +182,7 @@ namespace microcode {
          * Invoked when this.tabularYScrollOffset reaches its screen boundaries
          */
         private getNextDataChunk(from: number) {
-            const tokens = datalogger.getRows(from - 1, from + TABULAR_MAX_ROWS).split("_");
+            const tokens = ["FOO"]; // TODO datalogger.getRows(from - 1, from + TABULAR_MAX_ROWS).split("_");
             for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
                 this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }

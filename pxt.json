@@ -26,7 +26,6 @@
         "component.ts",
         "assets.ts",
         "scene.ts",
-
         "app.ts",
         "sprite.ts",
         "cursor.ts",

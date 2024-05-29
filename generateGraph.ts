@@ -219,7 +219,7 @@ namespace microcode {
          */
         private getNextDataChunk() {
             this.dataRows = []
-            const tokens = datalogger.getRows(this.xScrollOffset * 10, (this.xScrollOffset * 10) + 10).split("_");
+            const tokens = ["BAR"] // TODO datalogger.getRows(this.xScrollOffset * 10, (this.xScrollOffset * 10) + 10).split("_");
 
             // First row returned is the header: Skip it:
             if (this.xScrollOffset == 0) {

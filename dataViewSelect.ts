@@ -20,9 +20,10 @@ namespace microcode {
 
             // Includes the header:
             this.dataloggerEmpty = true
-            if (datalogger.getNumberOfRows() > 1) {
-                this.dataloggerEmpty = false
-            }
+            // TODO
+            // if (datalogger.getNumberOfRows() > 1) {
+            //    this.dataloggerEmpty = false
+            //}
             
             //---------
             // Control:
