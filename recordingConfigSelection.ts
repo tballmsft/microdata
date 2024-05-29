@@ -1,15 +1,16 @@
 namespace microcode {
-    /**
-     * SELECTING_SENSOR: User is selecting a sensor to modify
-     * WRITING: User is modifying a setting
-     * DEFAULT: User is not changing any settings & PROMPT_SHARED_CONFIG has occured.
-     */
     const enum GUI_STATE {
+        /** The tutorial text is being displayed to the user */
         TUTORIAL,
+        /** User is selecting a sensor to modify */
         SELECTING_SENSOR,
+        /** User has selected a sensor and is has now selected to write recordingConfig settings to it (period, delay, measurements, inequality, etc) */
         SELECTING_WRITE_MODE,
+        /** User has confirmed the recordingConfig settings */
         CONFIRM_CONFIGURATION,
+        /** User is modifying a setting */
         WRITING,
+        /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         DEFAULT
     }
 
@@ -44,7 +45,7 @@ namespace microcode {
     const MAX_NUMBER_OF_TUTORIAL_PARAGRAPHS_ON_SCREEN: number = 3
     const MAX_NUMBER_OF_SENSORS_ON_SCREEN: number = 6
 
-
+    
     type TutorialTip = {
         text: string,
         keywords?: string[],
@@ -291,7 +292,7 @@ namespace microcode {
                                     break;
 
                                 case 1:
-                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].maximum
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
 
                                 case 2:
@@ -315,7 +316,7 @@ namespace microcode {
                         const numberOfMeasurementRows = this.guiRecordingConfigRows.length
                         this.currentConfigRow = (((this.currentConfigRow - 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
-                }
+                } 
             )
 
             control.onEvent(
@@ -344,7 +345,7 @@ namespace microcode {
                                     break;
                                 case 1:
                                     // May be negative:
-                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].minimum
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
                                 case 2:
                                     // Non-negative modulo is required for the 3rd column - since you cannot have negative event counts:
@@ -645,7 +646,7 @@ namespace microcode {
                 Screen.HALF_WIDTH - 30,
                 Screen.HALF_HEIGHT + 15,
                 1,
-                bitmap.font8
+                simage.font8
             )
 
             screen.print(
@@ -669,7 +670,7 @@ namespace microcode {
                 Screen.HALF_WIDTH + 30,
                 Screen.HALF_HEIGHT + 15,
                 1,
-                bitmap.font8
+                simage.font8
             )
 
             screen.print(

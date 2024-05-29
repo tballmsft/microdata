@@ -5,7 +5,7 @@ namespace accessibility {
     }
 
     export interface TextAccessibilityMessage extends AccessibilityMessage {
-        type: "text"
+        type: "text" 
         value: string
     }
 

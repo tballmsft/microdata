@@ -2,7 +2,7 @@ namespace microcode {
     export interface AnalyticsEvent {
         type: "event"
         msg: string
-        data?: { [name: string]: string | number }
+        data?: { [name: string]: string | number } 
     }
 
     /**

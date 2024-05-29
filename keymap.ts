@@ -1,7 +1,7 @@
 namespace keymap {
     export const PLAYER_OFFSET = 7
     export const Up2 = new controller.Button(
-        ControllerButton.Up + PLAYER_OFFSET,
+        ControllerButton.Up + PLAYER_OFFSET, 
         undefined
     )
     export const Down2 = new controller.Button(

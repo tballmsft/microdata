@@ -7,7 +7,7 @@ namespace microcode {
     export type PickerButtonDef = {
         icon: string
         ariaId?: string
-    }
+    } 
 
     export interface IPicker {
         size: number

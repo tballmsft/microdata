@@ -2,41 +2,74 @@ namespace microcode {
     /**
      * Display limits
      * Data in excess will require scrolling to view
+     * Includes header row
      */
-    const TABULAR_MAX_ROWS = 9
-    const TABULAR_MAX_COLS = 3
-    const METADATA_MAX_ROWS = 6
+    const TABULAR_MAX_ROWS = 8
 
-    export const enum DATA_VIEW_DISPLAY_MODE {
-        METADATA_VIEW,
+    const enum DATA_VIEW_DISPLAY_MODE {
+        /** Show all data from all sensors */
         TABULAR_DATA_VIEW,
+        /** Show the data from one selected sensors */
         FILTERED_DATA_VIEW,
     }
 
     /**
-     * Used to view the recorded data & its meta data
+     * Used to view the information stored in the data logger
+     * 
      */
     export class TabularDataViewer extends Scene {
+        private dataRows: string[][];
+        private numberOfCols: number;
+        private numberOfSensors: number;
+        private headerStringLengths: number[];
+
         private guiState: DATA_VIEW_DISPLAY_MODE
         private xScrollOffset: number
-        private yScrollOffset: number
 
-        private numberOfMetadataRows: number
-        private currentRowIndex: number
+        private tabularYScrollOffset: number
+        private filteredYScrollOffset: number
 
-        constructor(app: App, guiState: DATA_VIEW_DISPLAY_MODE) {
+        private tabularRowIndex: number
+        private filteredRowIndex: number
+
+        constructor(app: App) {
             super(app, "recordedDataViewer")
-            this.guiState = guiState
+            this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
 
             this.xScrollOffset = 0
-            this.yScrollOffset = 0
-            this.currentRowIndex = 1
+            this.tabularYScrollOffset = 0
+            this.filteredYScrollOffset = 0
 
-            this.numberOfMetadataRows = FauxDataLogger.getNumberOfMetadataRows()
+            this.tabularRowIndex = 1
+            this.filteredRowIndex = 1
         }
-
+        
         /* override */ startup() {
             super.startup()
+
+            this.dataRows = []
+            this.headerStringLengths = []
+            
+            this.numberOfCols = 4;
+            this.getNextDataChunk(this.tabularRowIndex);
+
+            this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
+
+            // Count until sensor name is repeated:
+            const firstSensor = this.dataRows[1][0] // Skip first row (headers)
+            this.numberOfSensors = 1
+
+            // Go from second sensor onward (3rd row):
+            for (let rowID = 2; rowID < this.dataRows.length; rowID++) {
+                // First element in row is the sensor:
+                if (this.dataRows[rowID][0] != firstSensor) {
+                    this.numberOfSensors += 1
+                }
+
+                else {
+                    break
+                }
+            }
 
             //----------
             // Controls:
@@ -47,6 +80,8 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     if(this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        this.filteredRowIndex = 1
+                        this.filteredYScrollOffset = 0
                         this.guiState = DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW
                     }
                     else {
@@ -71,12 +106,23 @@ namespace microcode {
                 controller.up.id,
                 () => {
                     if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        if (this.currentRowIndex > 1) {
-                            this.currentRowIndex = Math.max(this.currentRowIndex - 1, 1)
+                        if (this.tabularRowIndex > 1) {
+                            this.tabularRowIndex = Math.max(this.tabularRowIndex - 1, 1)
                         }
 
                         else {
-                            this.yScrollOffset = Math.max(this.yScrollOffset - 1, 0)
+                            this.tabularYScrollOffset = Math.max(this.tabularYScrollOffset - 1, 0)
+                            this.getNextDataChunk(this.tabularYScrollOffset);
+                        }
+                    }
+
+                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        if (this.filteredRowIndex > 1) {
+                            this.filteredRowIndex = Math.max(this.filteredRowIndex - 1, 1)
+                        }
+
+                        else {
+                            this.filteredYScrollOffset = Math.max(this.filteredYScrollOffset - 1, 0)
                         }
                     }
                 }
@@ -86,20 +132,27 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    if (this.guiState === DATA_VIEW_DISPLAY_MODE.METADATA_VIEW) {
-                        if (this.yScrollOffset + 1 < this.numberOfMetadataRows - METADATA_MAX_ROWS) {
-                            this.yScrollOffset += 1
+                    if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
+                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
+                        if (this.tabularRowIndex < limit) {
+                            this.tabularRowIndex = Math.min(this.tabularRowIndex + 1, this.dataRows.length - 1)
+                            
+                        }
+                        else if (this.tabularRowIndex + this.tabularYScrollOffset < this.dataRows.length - 1) {
+                            this.tabularYScrollOffset += 1
+                            this.getNextDataChunk(this.tabularRowIndex);
                         }
                     }
 
-                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                        const limit = Math.min(FauxDataLogger.numberOfRows - 1, TABULAR_MAX_ROWS - 1)
-                        if (this.currentRowIndex < limit) {
-                            this.currentRowIndex = Math.min(this.currentRowIndex + 1, FauxDataLogger.numberOfRows - 1)
-                        }
+                    else if (this.guiState === DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                        const limit = Math.min(this.dataRows.length - 1, TABULAR_MAX_ROWS - 1)
 
-                        else if (this.currentRowIndex + this.yScrollOffset < FauxDataLogger.numberOfRows - 1) {
-                            this.yScrollOffset = Math.min(this.yScrollOffset + 1, FauxDataLogger.numberOfRows - 1)
+                        if (this.filteredRowIndex < limit) {
+                            this.filteredRowIndex = Math.min(this.filteredRowIndex + 1, this.dataRows.length - 1)
+                        }
+    
+                        else if (this.filteredRowIndex + this.filteredYScrollOffset < this.dataRows.length - 1) {
+                            this.filteredYScrollOffset += 1
                         }
                     }
                 }
@@ -117,50 +170,41 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.xScrollOffset + TABULAR_MAX_COLS < FauxDataLogger.headers.length) {
+                    if (this.xScrollOffset + 1 < this.numberOfCols - 1) {
                         this.xScrollOffset += 1
                     }
                 }
             )
         }
 
-        drawGrid(colBufferSize: number, rowBufferSize: number) {
-            for (let colOffset = 0; colOffset <= Screen.WIDTH; colOffset+=colBufferSize) {
-                Screen.drawLine(
-                    Screen.LEFT_EDGE + colOffset,
-                    Screen.TOP_EDGE,
-                    Screen.LEFT_EDGE + colOffset,
-                    Screen.HEIGHT,
-                    0x0
-                )
-            }
-
-            for (let rowOffset = 0; rowOffset <= Screen.HEIGHT; rowOffset+=rowBufferSize) {
-                Screen.drawLine(
-                    Screen.LEFT_EDGE,
-                    Screen.TOP_EDGE + rowOffset,
-                    Screen.WIDTH,
-                    Screen.TOP_EDGE + rowOffset,
-                    0x0
-                )
+        /**
+         * Used to retrieve the next chunk of data
+         * Invoked when this.tabularYScrollOffset reaches its screen boundaries
+         */
+        private getNextDataChunk(from: number) {
+            const tokens = datalogger.getRows(from - 1, from + TABULAR_MAX_ROWS).split("_");
+            for (let i = 0; i < tokens.length - this.numberOfCols; i += this.numberOfCols) {
+                this.dataRows[i / this.numberOfCols] = tokens.slice(i, i + this.numberOfCols);
             }
         }
-
 
         /**
          * Each header and its corresopnding rows of data have variable lengths,
          *      The small screen sizes exaggerates these differences, hence variable column sizing.
-         * Uses FauxDataLogger.headerStringLengths to get these lengths
-         * @param colBufferSizes FauxDataLogger.headerStringLengths spliced by this.xScrollOffset
+         * @param colBufferSizes this.headerStringLengths spliced by this.xScrollOffset
          * @param rowBufferSize remains constant
          */
         drawGridOfVariableColSize(colBufferSizes: number[], rowBufferSize: number) {
             let cumulativeColOffset = 0
-            
-            // colBufferSizes.forEach(function(headerLen) {
+
+            // Skip the first column: Time (Seconds):
             for (let col = 0; col < colBufferSizes.length; col++) {
+                if (cumulativeColOffset + colBufferSizes[col] > Screen.WIDTH) {
+                    break
+                }
+
                 // The last column should use all remaining space, if it is lesser than that remaining space:
-                if (col == colBufferSizes.length - 1 && colBufferSizes[col] < cumulativeColOffset) {
+                if (col == colBufferSizes.length - 1 || cumulativeColOffset + colBufferSizes[col] + colBufferSizes[col + 1] > Screen.WIDTH) {
                     cumulativeColOffset += Screen.WIDTH - cumulativeColOffset
                 }
                 else {
@@ -187,17 +231,20 @@ namespace microcode {
                     0x0
                 )
             }
-            
-            if (this.guiState == DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW) {
-                // Draw selected box:
-                Screen.drawRect(
-                    Screen.LEFT_EDGE,
-                    Screen.TOP_EDGE + (this.currentRowIndex * rowBufferSize),
-                    colBufferSizes[0],
-                    rowBufferSize,
-                    6
-                )
+
+            let row = this.tabularRowIndex
+            if (this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                row = this.filteredRowIndex
             }
+            
+            // Draw selected box:
+            Screen.drawRect(
+                Screen.LEFT_EDGE,
+                Screen.TOP_EDGE + (row * rowBufferSize),
+                colBufferSizes[0],
+                rowBufferSize,
+                6
+            )
         }
 
         draw() {
@@ -210,100 +257,85 @@ namespace microcode {
             )
 
             switch (this.guiState) {
-                case DATA_VIEW_DISPLAY_MODE.METADATA_VIEW:
-                    const metadataColSize = Screen.WIDTH / 2
-                    const metadataRowSize = Screen.HEIGHT / METADATA_MAX_ROWS
+                case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW: 
+                    const filteredRowBufferSize = Screen.HEIGHT / Math.min((this.dataRows.length / this.numberOfSensors) - 1, TABULAR_MAX_ROWS)
+                    this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
 
-                    this.drawGrid(metadataColSize, metadataRowSize)
-                    const metadata = FauxDataLogger.getMetadata()
+                    const filteredSensor: string = this.dataRows[this.tabularRowIndex + this.tabularYScrollOffset][0]
+                    let filteredData: string[][] = [this.dataRows[0]]
 
-                    for (let row = 0; row < METADATA_MAX_ROWS; row++) {
-                        Screen.print(
-                            metadata[row + this.yScrollOffset].col1,
-                            Screen.LEFT_EDGE + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col1.length) / 2),
-                            Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
-                            0xb,
-                            bitmap.font8
-                        )
-                        
-                        Screen.print(
-                            metadata[row + this.yScrollOffset].col2,
-                            Screen.LEFT_EDGE + metadataColSize + (metadataColSize / 2) - ((font.charWidth * metadata[row + this.yScrollOffset].col2.length) / 2),
-                            Screen.TOP_EDGE + (row * metadataRowSize) + (metadataRowSize / 2) - 4,
-                            0xb,
-                            bitmap.font8
-                        )
-                    }
-                    break;
-                
-                
-                case DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW:
-                    const filteredRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows / FauxDataLogger.sensors.length, TABULAR_MAX_ROWS)
-                    this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), filteredRowBufferSize)
-
-                    const filteredSensor: string = FauxDataLogger.entries[this.currentRowIndex + this.yScrollOffset].data[0];
-                    let filteredData: string[][] = []
-
-                    FauxDataLogger.entries.forEach((entry) => {
-                        if (entry.data[0] == filteredSensor) {
-                            filteredData.push(entry.data)
+                    this.dataRows.forEach((row) => {
+                        if (row[0] == filteredSensor) {
+                            filteredData.push(row)
                         }
-                    });
-                    
-                    for (let row = 0; row < Math.min(filteredData.length, TABULAR_MAX_ROWS); row++) {
-                        let cumulativeColOffset = 0
-                        const data = filteredData[row + 1]
+                    })
 
-                        for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
+                    // Values:
+                    for (let row = 0; row < Math.min(filteredData.length - this.filteredYScrollOffset, TABULAR_MAX_ROWS); row++) {
+                        let cumulativeColOffset = 0;
+
+                        // Skip the first column: Time (Seconds)
+                        for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            const colOffset = (font.charWidth * filteredData[colID].length) + 2
-        
-                            if (cumulativeColOffset + colOffset > Screen.WIDTH) {
+                            let value = filteredData[row + this.filteredYScrollOffset][colID]
+
+                            if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
                             }
-        
+
+                            // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
+                            // This will align the text to the center of this column space
+                            if (colID == this.numberOfCols - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
+                                cumulativeColOffset += ((Screen.WIDTH - cumulativeColOffset) / 2) - (this.headerStringLengths[colID] / 2)
+                            }
+
                             Screen.print(
-                                data[colID],
-                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
+                                value,
+                                Screen.LEFT_EDGE + cumulativeColOffset + (this.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                                 Screen.TOP_EDGE + (row * filteredRowBufferSize) + (filteredRowBufferSize / 2) - 4,
                                 0xb,
-                                bitmap.font8
+                                simage.font8
                             )
-        
-                            cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
+
+                            cumulativeColOffset += this.headerStringLengths[colID]
                         }
                     }
-
                     break;
 
                 case DATA_VIEW_DISPLAY_MODE.TABULAR_DATA_VIEW:
-                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS)
-                    this.drawGridOfVariableColSize(FauxDataLogger.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
-                    
-                    for (let row = 0; row < Math.min(FauxDataLogger.numberOfRows, TABULAR_MAX_ROWS); row++) {
-                        const data = FauxDataLogger.entries[row + this.yScrollOffset].data;
-        
-                        let cumulativeColOffset = 0
-                        for (let col = 0; col < Math.min(FauxDataLogger.headers.length, TABULAR_MAX_COLS); col++) {
+                    const tabularRowBufferSize = Screen.HEIGHT / Math.min(this.dataRows.length, TABULAR_MAX_ROWS)
+                    this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.xScrollOffset), tabularRowBufferSize)
+
+                    // Values:
+                    for (let row = 0; row < Math.min(this.dataRows.length - this.tabularYScrollOffset, TABULAR_MAX_ROWS); row++) {
+                        let cumulativeColOffset = 0;
+
+                        // Skip the first column: Time (Seconds)
+                        for (let col = 0; col < this.numberOfCols - this.xScrollOffset; col++) {
                             const colID = col + this.xScrollOffset
-                            const colOffset = (font.charWidth * data[colID].length) + 2
-        
-                            if (cumulativeColOffset + colOffset > Screen.WIDTH) {
+                            let value = this.dataRows[row + this.tabularYScrollOffset][colID]
+
+                            if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
                                 break
                             }
-        
+
+                            // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
+                            // This will align the text to the center of this column space
+                            if (colID == this.numberOfCols - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
+                                cumulativeColOffset += ((Screen.WIDTH - cumulativeColOffset) / 2) - (this.headerStringLengths[colID] / 2)
+                            }
+
                             Screen.print(
-                                data[colID],
-                                Screen.LEFT_EDGE + cumulativeColOffset + (FauxDataLogger.headerStringLengths[colID] / 2) - ((font.charWidth * data[colID].length) / 2),
+                                value,
+                                Screen.LEFT_EDGE + cumulativeColOffset + (this.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                                 Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                                 0xb,
-                                bitmap.font8
+                                simage.font8
                             )
         
-                            cumulativeColOffset += FauxDataLogger.headerStringLengths[colID]
+                            cumulativeColOffset += this.headerStringLengths[colID]
                         }
                     }
-
                     break;
             
                 default:

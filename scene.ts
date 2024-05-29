@@ -4,7 +4,7 @@ namespace microcode {
     const RENDER_PRIORITY = 30
     const SCREEN_PRIORITY = 100
 
-    export abstract class Scene implements IComponent {
+    export abstract class Scene implements IComponent { 
         private xfrm_: Affine
         private color_: number
         private backgroundCaptured_ = false
@@ -14,10 +14,10 @@ namespace microcode {
             return this.xfrm_
         }
         //% blockCombine block="color" callInDebugger
-        public get color() {
+        public get backgroundColor() {
             return this.color_
         }
-        public set color(v) {
+        public set backgroundColor(v) {
             this.color_ = v
         }
 
@@ -94,7 +94,7 @@ namespace microcode {
                 if (Options.fps)
                     Screen.image.print(context.EventContext.lastStats, 1, 1, 15)
                 if (screen !== Screen.image)
-                    screen.drawBitmap(Screen.image, 0, 0)
+                    screen.drawImage(Screen.image, 0, 0)
             })
             context.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {
                 control.enablePerfCounter()

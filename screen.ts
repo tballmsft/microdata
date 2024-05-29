@@ -1,11 +1,11 @@
-namespace microcode {
+ namespace microcode {
     export class Screen {
-        private static image_: Bitmap
+        private static image_: SImage
 
         public static WIDTH = screen.width
         public static HEIGHT = screen.height
         public static HALF_WIDTH = screen.width >> 1
-        public static HALF_HEIGHT = screen.height >> 1
+        public static HALF_HEIGHT = screen.height >> 1 
         public static LEFT_EDGE = -Screen.HALF_WIDTH
         public static RIGHT_EDGE = Screen.HALF_WIDTH
         public static TOP_EDGE = -Screen.HALF_HEIGHT
@@ -43,7 +43,7 @@ namespace microcode {
         public static pos(v: Vec2) {
             return new Vec2(Screen.x(v.x), Screen.y(v.y))
         }
-        public static get image(): Bitmap {
+        public static get image(): SImage {
             if (!Screen.image_) {
                 Screen.image_ = screen
                 Screen.updateBounds()
@@ -56,22 +56,22 @@ namespace microcode {
         }
 
         public static setImageSize(width: number, height: number) {
-            Screen.image_ = bitmap.create(width, height)
+            Screen.image_ = simage.create(width, height)
             Screen.updateBounds()
         }
 
-        public static drawTransparentBitmap(from: Bitmap, x: number, y: number) {
-            Screen.image.drawTransparentBitmap(from, Screen.x(x), Screen.y(y))
+        public static drawTransparentImage(from: SImage, x: number, y: number) {
+            Screen.image.drawTransparentImage(from, Screen.x(x), Screen.y(y))
         }
 
-        public static drawTransparentBitmapXfrm(
+        public static drawTransparentImageXfrm(
             xfrm: Affine,
-            from: Bitmap,
+            from: SImage,
             x: number,
             y: number
         ) {
             const w = xfrm.worldPos
-            Screen.image.drawTransparentBitmap(
+            Screen.image.drawTransparentImage(
                 from,
                 Screen.x(x + w.x),
                 Screen.y(y + w.y)
@@ -341,7 +341,7 @@ namespace microcode {
             x: number,
             y: number,
             color?: number,
-            font?: bitmap.Font,
+            font?: simage.Font,
             offsets?: texteffects.TextEffectState[]
         ) {
             Screen.image.print(

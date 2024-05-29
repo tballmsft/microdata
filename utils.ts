@@ -7,7 +7,7 @@ namespace microcode {
         }
     }
 
-    // use this to manage a buffer that may grow
+    // use this to manage a buffer that may grow 
     export class BufferWriter {
         private buf: Buffer
         private ptr: number = 0

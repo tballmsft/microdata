@@ -120,10 +120,10 @@ namespace microcode {
             return xfrm
         }
 
-        public buildSprite(bmp: Bitmap) {
+        public buildSprite(img: SImage) {
             this.icon = new Sprite({
                 parent: this,
-                bmp,
+                img,
             })
             this.icon.xfrm.parent = this.xfrm
         }
@@ -195,7 +195,7 @@ namespace microcode {
     }
 
     export class Button extends ButtonBase {
-        private iconId: string | Bitmap
+        private iconId: string | SImage
         private _ariaId: string
         public onClick?: (button: Button) => void
         public selected: boolean
@@ -219,13 +219,13 @@ namespace microcode {
                 value: this.ariaId,
                 force,
             }
-            accessibility.setLiveContent(msg)
+            accessibility.setLiveContent(msg) 
         }
 
         constructor(opts: {
             parent?: IPlaceable
             style?: ButtonStyle
-            icon: string | Bitmap
+            icon: string | SImage
             ariaId?: string
             x: number
             y: number
@@ -274,9 +274,9 @@ namespace microcode {
                 ? icons.get(this.iconId)
                 : this.iconId
         }
-        public setIcon(iconId: string, bmp?: Bitmap) {
+        public setIcon(iconId: string, img?: SImage) {
             this.iconId = iconId
-            if (bmp) this.icon.setImage(bmp)
+            if (img) this.icon.setImage(img)
             else this.buildSprite(this.image_())
         }
 

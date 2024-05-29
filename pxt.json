@@ -1,13 +1,20 @@
 {
-    "name": "microdata",
-    "version": "1.0.00",
+    "name": "MicroData",
+    "version": "0.12.00",
     "description": "Data science with micro:bit v2",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield#smartshield",
-        "datalogger": "*"
+        "datalogger": "*",
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
+        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
+        "jacdac-light-level": "github:microsoft/pxt-jacdac/tree/master/light-level#v1.9.28",
+        "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
+        "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
+        "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
+        "jacdac-humidity": "github:microsoft/pxt-jacdac/tree/master/humidity#v1.9.28",
+        "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
     },
     "files": [
         "keymap.ts",
@@ -17,9 +24,9 @@
         "accessibility.ts",
         "button.ts",
         "component.ts",
-        "assets.ts",        
+        "assets.ts",
         "scene.ts",
-        "tiles.ts",
+
         "app.ts",
         "sprite.ts",
         "cursor.ts",
@@ -42,10 +49,10 @@
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
         "sensors.ts",
-        "fauxDataLogger.ts",
         "dataRecorder.ts",
-        "generateGraph.ts",
-        "sensorEvent.ts"
+        "sensorEvent.ts",
+        "clearDataloggerScreen.ts",
+        "generateGraph.ts"
     ],
     "testFiles": [],
     "supportedTargets": [

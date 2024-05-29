@@ -4,11 +4,11 @@ namespace microcode {
      * At the moment this class only supports translation, but if needed it could easily include:
      * - Rotation
      * - Scaling
-     * - Skew (less common)
+     * - Skew (less common) 
      * Affine transformations can be chained thru the `parent` property, in which case `worldPos` will report the composed value.
      */
     export class Affine {
-        private localPos_: Vec2
+        private localPos_: Vec2 
         private parent_: Affine
 
         //% blockCombine block="worldPos" callInDebugger
