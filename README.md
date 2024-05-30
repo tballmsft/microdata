@@ -1,6 +1,6 @@
 # MicroData
 
-The objective of this ongoing project is to create an extension that utilises the Arcade shield and Microbit V2 to create an easy to use data science library. MicroData utilises the variety of sensors & buttons onboard the Microbit to:
+This is an application for the Microbit V2 and an Arcade shield that leverages onboard sensors for scientific experiments inside the classroom - without the need for an external computer. MicroData utilises the variety of sensors & buttons onboard the Microbit to allow you to:
 * Record data and events into flash storage
 * View real-time graphs of sensor readings.
 * Create graphs from recorded data.
@@ -8,10 +8,11 @@ The objective of this ongoing project is to create an extension that utilises th
 * Supports Jacdac sensors for Light, Soil moisture, Distance, Flex, Temperature and Humidity.
 
 With the objective of allowing people to:
-* Teach and better understand Data Science
-* Experiment with Physical Computing
-* Perform science experiments
-* Explore the diverse features of the BBC Microbit V2
+* Teach and better understand Data Science.
+* Experiment with Physical Computing.
+* Perform Science experiments.
+* Explore the diverse features of the BBC Microbit V2.
+
 
 
 # Branches
