@@ -107,7 +107,7 @@ namespace microcode {
         log() {
             control.inBackground(() => {
                 let currentTime = 0;                
-                this.sensors.forEach((sensor) => sensor.log())
+                this.sensors.forEach((sensor) => sensor.log(0))
 
                 while (this.schedule.length > 0) {
                     const nextLogTime = this.schedule[0].waitTime;
@@ -124,7 +124,7 @@ namespace microcode {
 
                         // Log sensors:
                         else if (currentTime % this.schedule[i].waitTime == 0) {
-                            this.schedule[i].sensor.log()
+                            this.schedule[i].sensor.log(currentTime)
 
                             // Update schedule with when they should next be logged:
                             if (this.schedule[i].sensor.hasMeasurements()) {

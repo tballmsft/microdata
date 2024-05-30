@@ -362,7 +362,6 @@ namespace microcode {
             )
         }
 
-
         draw() {
             Screen.fillRect(
                 Screen.LEFT_EDGE,
@@ -385,7 +384,7 @@ namespace microcode {
                     let value: string = this.dataRows[row][colID]
 
                     // If the column of readings and not the header:
-                    if (col == 2 && this.currentRowOffset != 0)
+                    if ((NUMBER_OF_COLS - this.currentCol == 2) || (NUMBER_OF_COLS - this.currentCol == 3) && value.length > 8)
                         value = value.slice(0, 5)
 
                     if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
@@ -399,7 +398,7 @@ namespace microcode {
                     }
 
                     Screen.print(
-                        value.slice(0, 5),
+                        value,
                         Screen.LEFT_EDGE + cumulativeColOffset + (this.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                         Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                         0xb,

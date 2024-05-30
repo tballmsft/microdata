@@ -328,10 +328,11 @@ namespace microcode {
             // Load the buffer with new data:
             //-------------------------------
 
-            if (this.sensors[0].getBufferLength() < this.sensors[0].getMaxBufferSize() && this.guiState != GUI_STATE.SENSOR_SELECTION) {
-                this.sensors.forEach((sensor) => {
-                    sensor.readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + 8)
-                })
+            if (this.guiState != GUI_STATE.SENSOR_SELECTION) {
+                for (let i = 0; i < this.sensors.length; i++) {
+                    if (this.drawSensorStates[i])// && this.sensors[i].getBufferLength() < this.sensors[i].getMaxBufferSize())
+                        this.sensors[i].readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + 8)
+                }
             }
 
             //----------------------------
@@ -519,21 +520,23 @@ namespace microcode {
                 // Ordinate:
                 //----------
                 if (this.yScrollOffset > -60) {
-                    // Bot:
-                    screen.print(
-                        this.globalSensorMinimum.toString(),
-                        (6 * font.charWidth) - (this.globalSensorMinimum.toString().length * font.charWidth),
-                        this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
-                        15
-                    )
+                    if (this.globalSensorMinimum != null && this.globalSensorMaximum != null) {
+                        // Bot:
+                        screen.print(
+                            this.globalSensorMinimum.toString(),
+                            (6 * font.charWidth) - (this.globalSensorMinimum.toString().length * font.charWidth),
+                            this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
+                            15
+                        )
 
-                    // Top:
-                    screen.print(
-                        this.globalSensorMaximum.toString(),
-                        (6 * font.charWidth) - (this.globalSensorMaximum.toString().length * font.charWidth),
-                        Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset),
-                        15
-                    )
+                        // Top:
+                        screen.print(
+                            this.globalSensorMaximum.toString(),
+                            (6 * font.charWidth) - (this.globalSensorMaximum.toString().length * font.charWidth),
+                            Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset),
+                            15
+                        )
+                    }
                 }
 
                 //----------

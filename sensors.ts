@@ -142,7 +142,7 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(): void;
+        log(time: number): void;
     }
 
 
@@ -314,9 +314,8 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log() {
+        log(time: number) {
             const reading = this.getReading()
-            const time = (this.totalMeasurements - this.config.measurements) * this.config.period
             
             if (this.isInEventMode) {
                 if (sensorEventFunctionLookup[this.config.inequality](reading, this.config.comparator)) {
@@ -452,6 +451,10 @@ namespace microcode {
                 input.onPinPressed(TouchPin.P0, function () {
                     PinP0Sensor.pinStatus = (PinP0Sensor.pinStatus == 0) ? 1 : 0
                 })
+
+                input.onPinReleased(TouchPin.P0, function () {
+                    
+                })
             }
         }
 
@@ -469,20 +472,6 @@ namespace microcode {
     export class PinP1Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
-
-        test() {
-            if (PinP1Sensor.pinStatus == 1) {
-                input.onPinReleased(TouchPin.P1, () => {
-                    PinP1Sensor.pinStatus = 0
-                })
-            }
-
-            else {
-                input.onPinPressed(TouchPin.P1, () => {
-                    PinP1Sensor.pinStatus = 1
-                })
-            }
-        }
 
         constructor() {
             super()
@@ -618,7 +607,9 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Jac Light"}
-        public static getReading(): number {return (modules.lightLevel1.isConnected()) ? modules.lightLevel1.lightLevel() : undefined}
+        public static getReading(): number {
+            return (modules.lightLevel1.isConnected()) ? modules.lightLevel1.lightLevel() : undefined
+        }
         public static isJacdac(): boolean {return true;}
     }
 
