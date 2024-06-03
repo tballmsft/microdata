@@ -196,10 +196,14 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    let rowQty = datalogger.getNumberOfRows();
-                    if (this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW) {
+                    let rowQty = (this.dataRows.length < TABULAR_MAX_ROWS) ? this.dataRows.length - 1 : datalogger.getNumberOfRows();
+
+                    // Boundary where there are TABULAR_MAX_ROWS - 1 number of rows:
+                    if (datalogger.getNumberOfRows() == TABULAR_MAX_ROWS)
+                        rowQty = TABULAR_MAX_ROWS - 1
+
+                    if (this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW)
                         rowQty = this.numberOfFilteredRows
-                    }
 
                     if (this.needToScroll) {
                         if (this.currentRow + 1 < TABULAR_MAX_ROWS)
@@ -210,7 +214,6 @@ namespace microcode {
 
                             if (this.guiState == DATA_VIEW_DISPLAY_MODE.UNFILTERED_DATA_VIEW)
                                 this.nextDataChunk();
-
                             else
                                 this.nextFilteredDataChunk()
                         }
@@ -251,7 +254,8 @@ namespace microcode {
             
             this.dataRows = []
             for (let i = 0; i < rows.length; i++) {
-                this.dataRows.push(rows[i].split(","));
+                if (rows[i][0] != "")
+                    this.dataRows.push(rows[i].split(","));
             }
         }
 
