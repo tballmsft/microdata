@@ -412,13 +412,12 @@ namespace microcode {
             }
         }
 
-
         /**
          * Fill this.sensorsToShowOnYAxis with indices of senosrs that are permissable to draw without overlapping.
          * Invoked after scrolling LEFT or RIGHT.
          */
         private setupSensorsToShowOnYAxis() {
-            const boundary: number = 5
+            const boundary: number = 5;
             const globalSensorMinimumDraw: number = this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4
             const globalSensorMaximumDraw: number = Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset)
             
@@ -426,33 +425,36 @@ namespace microcode {
 
             for (let i = 0; i < this.sensors.length; i++) {
                 const y = this.normalisedCoordinates[i][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
-                const noMinOverlap = Math.abs(globalSensorMinimumDraw - y) > boundary;
-                const noMaxOverlap = Math.abs(globalSensorMaximumDraw - y) > boundary;
+                const minOverlap = Math.abs(globalSensorMinimumDraw - y) < boundary;
+                const maxOverlap = Math.abs(globalSensorMaximumDraw - y) < boundary;
 
-                if (noMinOverlap && noMaxOverlap) {
-                    for (let j = 0; j < this.sensors.length; j++) {
-                        if (i != j) {
-                            let alreadySelected = true
-                            for (let k = 0; k < this.sensorsIndicesForYAxis.length; k++) {
-                                if (this.sensorsIndicesForYAxis[k] == j) {
-                                    alreadySelected = false
-                                    break
-                                }
-                            }
+                if (!this.drawSensorStates[this.sensors[i].getName()] || minOverlap || maxOverlap)
+                    continue
 
-                            const otherY = this.normalisedCoordinates[j][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
-                            const noOtherOverlap = Math.abs(otherY - y) > boundary;
-                            if (!alreadySelected && (this.sensorsIndicesForYAxis.length == 0 || noOtherOverlap)) {
-                                this.sensorsIndicesForYAxis.push(j)
-                                break
-                            }
+                if (this.sensorsIndicesForYAxis.length == 0)
+                    this.sensorsIndicesForYAxis.push(i);
+
+                let isOverlap = false;
+                for (let j = 0; j < this.sensorsIndicesForYAxis.length; j++) {
+                    if (this.sensorsIndicesForYAxis[j] != i) {
+                        const index = this.sensorsIndicesForYAxis[j];
+                        const otherY = this.normalisedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                        
+                        const otherOverlap = Math.abs(y - otherY) < boundary;
+                        const minOverlap = Math.abs(globalSensorMinimumDraw - otherY) < boundary;
+                        const maxOverlap = Math.abs(globalSensorMaximumDraw - otherY) < boundary;
+                        
+                        if (minOverlap || maxOverlap || (this.drawSensorStates[this.sensors[i].getName()] && otherOverlap)) {
+                            isOverlap = true;
+                            break;
                         }
                     }
                 }
+                if (!isOverlap)
+                    this.sensorsIndicesForYAxis.push(i);
             }
         }
 
-        
         update() {
             screen.fill(this.backgroundColor);
             
@@ -609,9 +611,10 @@ namespace microcode {
 
                     // Middle y-axis values: one per sensor: skip if too close to others:
                     for (let i = 0; i < this.sensorsIndicesForYAxis.length; i++) {
-                        if (this.drawSensorStates[this.sensors[i].getName()]) {
-                            const yWrite: string = this.rawCoordinates[this.sensors[i].getName()][1].toString().slice(0, 5);
-                            const yDraw = this.normalisedCoordinates[i][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                        const index = this.sensorsIndicesForYAxis[i]
+                        if (this.drawSensorStates[this.sensors[index].getName()]) {
+                            const yWrite: string = this.rawCoordinates[this.sensors[index].getName()][1].toString().slice(0, 5);
+                            const yDraw = this.normalisedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
                             screen.print(
                                 yWrite,
                                 (6 * font.charWidth) - (yWrite.length * font.charWidth),
