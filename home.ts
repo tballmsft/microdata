@@ -11,11 +11,6 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
             
-
-            /**
-             * Experimental code used for testing tabular data viewer and graph gen without needing to manually setup recordings:
-             */
-            // datalogger.deleteLog(datalogger.DeleteType.Full)
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
             datalogger.setColumns([
                 "Sensor",
@@ -23,23 +18,6 @@ namespace microcode {
                 "Reading",
                 "Event"
             ])
-
-            // const total = 11
-            // for (let i = 1; i <= total; i++) {
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "Accel. X"),
-            //         datalogger.createCV("Time (ms)", i * 1000),
-            //         datalogger.createCV("Reading", i * (1023 / total)),
-            //         datalogger.createCV("Event", "N/A")
-            //     )
-
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "Accel. Y"),
-            //         datalogger.createCV("Time (ms)", i * 1000),
-            //         datalogger.createCV("Reading", i * (1023 / (total + 1))),
-            //         datalogger.createCV("Event", "N/A")
-            //     )
-            // }
 
             this.liveDataBtn = new Button({
                 parent: null,
