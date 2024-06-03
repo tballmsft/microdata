@@ -183,6 +183,7 @@ namespace microcode {
          * Needed since the entire normalisedBuffer may need to be recalculated upon scrolling or zooming.
          */
         private dataBuffer: number[]
+        private totalMeasurements: number;
 
         /**
          * Holds what the Y axis position should be for the corresponding read value, relative to a granted fromY value.
@@ -338,6 +339,8 @@ namespace microcode {
                 )
                 this.config.measurements -= 1
             }
+            this.config.measurements -= 1
+            return true
         }
 
         /**
@@ -530,7 +533,6 @@ namespace microcode {
         public static getName(): string {return "Magnet X"}
         public static getReading(): number {return input.magneticForce(Dimension.X)}
     }
-
 
     /**
      * Onboard Pitch or Roll sensor

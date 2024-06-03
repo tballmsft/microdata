@@ -3,6 +3,7 @@ namespace microcode {
      * Display limits
      * Data in excess will require scrolling to view
      * Includes header row
+     * Includes header row
      */
     const TABULAR_MAX_ROWS = 8
 
@@ -120,6 +121,7 @@ namespace microcode {
             this.filteredSensorName = ""
             this.filteredReadStarts = [0]
         }
+        
         
         /* override */ startup() {
             super.startup()
@@ -307,10 +309,10 @@ namespace microcode {
             this.needToScroll = this.numberOfFilteredRows > TABULAR_MAX_ROWS
         }
 
-
         /**
          * Each header and its corresopnding rows of data have variable lengths,
          *      The small screen sizes exaggerates these differences, hence variable column sizing.
+         * @param colBufferSizes this.headerStringLengths spliced by this.xScrollOffset
          * @param colBufferSizes this.headerStringLengths spliced by this.xScrollOffset
          * @param rowBufferSize remains constant
          */
@@ -318,12 +320,19 @@ namespace microcode {
             let cumulativeColOffset = 0
 
             // Skip the first column: Time (Seconds):
+
+            // Skip the first column: Time (Seconds):
             for (let col = 0; col < colBufferSizes.length; col++) {
                 if (cumulativeColOffset + colBufferSizes[col] > Screen.WIDTH) {
                     break
                 }
 
+                if (cumulativeColOffset + colBufferSizes[col] > Screen.WIDTH) {
+                    break
+                }
+
                 // The last column should use all remaining space, if it is lesser than that remaining space:
+                if (col == colBufferSizes.length - 1 || cumulativeColOffset + colBufferSizes[col] + colBufferSizes[col + 1] > Screen.WIDTH) {
                 if (col == colBufferSizes.length - 1 || cumulativeColOffset + colBufferSizes[col] + colBufferSizes[col + 1] > Screen.WIDTH) {
                     cumulativeColOffset += Screen.WIDTH - cumulativeColOffset
                 }

@@ -81,9 +81,13 @@ namespace microcode {
         constructor(app: App, sensors: Sensor[]) {
             super(app, "liveDataViewer")
             this.backgroundColor = 3
+            this.backgroundColor = 3
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
+            
+            this.windowLeftBuffer = 38
+            this.windowRightBuffer = 10
             
             this.windowLeftBuffer = 38
             this.windowRightBuffer = 10
@@ -511,7 +515,9 @@ namespace microcode {
                 // Y-Axis:
                 screen.drawLine(
                     this.windowLeftBuffer + i, 
+                    this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
+                    this.windowLeftBuffer + i, 
                     this.windowLeftBuffer + i, 
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5

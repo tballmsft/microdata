@@ -5,7 +5,7 @@ namespace microcode {
         draw: () => void
     }
 
-    export interface IPlaceable {
+    export interface IPlaceable { 
         xfrm: Affine
     }
 

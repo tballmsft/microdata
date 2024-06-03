@@ -1,6 +1,8 @@
 namespace microcode {
     /** Number of sensor information boxes that can fit onto the screen at once*/
+    /** Number of sensor information boxes that can fit onto the screen at once*/
     const MAX_SENSORS_ON_SCREEN: number = 5
+    /** The colours that will be used for the lines & sensor information boxes */
     /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_BOX_COLORS: number[] = [2,3,4,6,7,9]
 
@@ -20,7 +22,9 @@ namespace microcode {
         /** Sensor to be shown */
         private currentSensorIndex: number
         /** Last sensor on the screen */
+        /** Last sensor on the screen */
         private sensorIndexOffset: number
+        /** For the currentSensorIndex */
         /** For the currentSensorIndex */
         private sensorBoxColor: number
 
@@ -31,7 +35,9 @@ namespace microcode {
             this.numberOfSensors = sensors.length
 
             this.sensors = sensors
-            this.sensorIndexOffset = 0
+            this.sensorWaitTimes = []
+
+            this.sensorIndexOffset = 0 
             this.currentSensorIndex = 0
             this.sensorBoxColor = 15
 
@@ -57,6 +63,13 @@ namespace microcode {
                     this.app.popScene()
                     this.app.pushScene(new Home(this.app))
                 }
+            )
+
+            // Clear whatever A was previously bound to
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                () => {}
             )
 
             // Clear whatever A was previously bound to
@@ -173,6 +186,7 @@ namespace microcode {
                     this.sensorBoxColor = SENSOR_BOX_COLORS[i % SENSOR_BOX_COLORS.length]
 
                     // Draw box as collapsed:
+                    // Draw box as collapsed:
                     if (i != this.currentSensorIndex) {
                         screen.fillRect(
                             5,
@@ -199,6 +213,7 @@ namespace microcode {
                     }
 
                     // Box is selected: Draw all information:
+                    // Box is selected: Draw all information:
                     else {
                         screen.fillRect(
                             5,
@@ -215,6 +230,10 @@ namespace microcode {
                             45,
                             this.sensorBoxColor
                         )
+
+                        //-------------------------------
+                        // Information inside sensor box:
+                        //-------------------------------
 
                         //-------------------------------
                         // Information inside sensor box:

@@ -3,6 +3,7 @@ namespace microcode {
         private recordDataBtn: Button
         private liveDataBtn: Button
         private viewBtn: Button
+        private dataRows: string[][]; 
 
         constructor(app: App) {
             super(app)
@@ -22,11 +23,14 @@ namespace microcode {
             this.liveDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
                 x: -50,
                 y: 30,
                 onClick: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                 },
@@ -35,11 +39,14 @@ namespace microcode {
             this.recordDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "edit_program",
                 ariaId: "Record",
                 x: 0,
                 y: 30,
                 onClick: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new ClearDataLoggerScreen(this.app))
                     this.app.popScene()
                     this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
@@ -48,11 +55,14 @@ namespace microcode {
             this.viewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
+                style: ButtonStyles.Transparent,
                 icon: "largeDisk",
                 ariaId: "View",
                 x: 50,
                 y: 30,
                 onClick: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new DataViewSelect(this.app))
                     this.app.popScene()
                     this.app.pushScene(new DataViewSelect(this.app))
                 },
@@ -82,6 +92,7 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
+
 
             this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()
@@ -122,6 +133,21 @@ namespace microcode {
                     microcode.font
                 )
             }
+
+            // for (let i = 0; i < this.dataRows.length; i++) {
+            //     Screen.fillRect(
+            //         Screen.LEFT_EDGE,
+            //         Screen.TOP_EDGE,
+            //         Screen.WIDTH,
+            //         Screen.HEIGHT,
+            //         0xc
+            //     )
+            //     screen.printCenter(this.dataRows[i][0], 10)
+            //     screen.printCenter(this.dataRows[i][1], 20)
+            //     screen.printCenter(this.dataRows[i][2], 30)
+            //     screen.printCenter(this.dataRows[i][3], 40)
+            //     basic.pause(1000)
+            // }
 
             this.recordDataBtn.draw()
             this.liveDataBtn.draw()

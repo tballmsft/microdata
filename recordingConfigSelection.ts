@@ -1,15 +1,20 @@
 namespace microcode {
     const enum GUI_STATE {
         /** The tutorial text is being displayed to the user */
+        /** The tutorial text is being displayed to the user */
         TUTORIAL,
+        /** User is selecting a sensor to modify */
         /** User is selecting a sensor to modify */
         SELECTING_SENSOR,
         /** User has selected a sensor and is has now selected to write recordingConfig settings to it (period, measurements, inequality, etc) */
         SELECTING_WRITE_MODE,
         /** User has confirmed the recordingConfig settings */
+        /** User has confirmed the recordingConfig settings */
         CONFIRM_CONFIGURATION,
         /** User is modifying a setting */
+        /** User is modifying a setting */
         WRITING,
+        /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         DEFAULT
     }
@@ -313,6 +318,7 @@ namespace microcode {
 
                                 case 1:
                                     this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].getMaximum()
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] + 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
 
                                 case 2:
@@ -336,7 +342,7 @@ namespace microcode {
                         const numberOfMeasurementRows = this.guiRecordingConfigText.length
                         this.currentConfigCol = (((this.currentConfigCol - 1) % numberOfMeasurementRows) + numberOfMeasurementRows) % numberOfMeasurementRows
                     }
-                }
+                } 
             )
 
             control.onEvent(
@@ -361,6 +367,7 @@ namespace microcode {
                                     break;
                                 case 1:
                                     // May be negative:
+                                    this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     this.guiEventConfigValues[this.currentSensorRow][1] = (this.guiEventConfigValues[this.currentSensorRow][1] - 1) % this.sensors[this.currentSensorRow].getMaximum()
                                     break;
                                 case 2:

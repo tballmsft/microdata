@@ -10,7 +10,7 @@ namespace microcode {
     }
 
     export interface CursorState {
-        navigator: INavigator
+        navigator: INavigator 
         pos: Vec2
         ariaId: string
         size: Bounds

@@ -566,7 +566,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 c c c c c 1 1 1 1 1 1
         1 1 1 1 c 7 7 7 7 7 c 1 1 1 1 1
-        1 1 1 c 7 7 7 7 7 7 7 c 1 1 1 1
+        1 1 1 c 7 7 7 7 7 7 7 c 1 1 1 1 
         1 1 c 7 7 7 7 7 7 7 7 7 c 1 1 1
         1 c 7 7 7 7 7 c c 7 7 7 c 1 1 1
         c 7 7 7 7 7 c c c 7 7 7 c c c 1

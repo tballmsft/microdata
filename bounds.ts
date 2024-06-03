@@ -9,7 +9,7 @@ namespace microcode {
             return this.left + this.width - 1
         }
         public set right(val: number) {
-            this.width = val - this.left + 1
+            this.width = val - this.left + 1 
         }
         //% blockCombine block="bottom" callInDebugger
         public get bottom() {
