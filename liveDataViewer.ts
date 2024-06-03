@@ -6,7 +6,7 @@ namespace microcode {
      * Used in sensors.draw()
      * Neccessary to prevent graph overflowing in the case of extreme readings
      */
-    export const BUFFERED_SCREEN_HEIGHT = Screen.HEIGHT - 13
+    export const BUFFERED_SCREEN_HEIGHT = Screen.HEIGHT - 10
 
     /**
      * Is the graph or the sensors being shown? Is the graph zoomed in on?
@@ -330,8 +330,12 @@ namespace microcode {
 
             if (this.guiState != GUI_STATE.SENSOR_SELECTION) {
                 for (let i = 0; i < this.sensors.length; i++) {
-                    if (this.drawSensorStates[i])// && this.sensors[i].getBufferLength() < this.sensors[i].getMaxBufferSize())
-                        this.sensors[i].readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + 8)
+                    if (this.drawSensorStates[i]) {
+                        const hasSpace = this.sensors[i].getBufferLength() < this.sensors[i].getMaxBufferSize()
+                        if ((this.guiState != GUI_STATE.ZOOMED_IN) || (this.guiState == GUI_STATE.ZOOMED_IN && hasSpace))
+                            this.sensors[i].readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + 8)
+                    }
+                        
                 }
             }
 
