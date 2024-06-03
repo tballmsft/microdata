@@ -11,6 +11,12 @@ namespace microcode {
             super(app, function () {app.popScene(); app.pushScene(new Home(this.app))})
             this.btns = []
             this.currentlyDeleting = false
+
+            // Data logger already empty:
+            if (datalogger.getNumberOfRows() <= 1) {
+                this.app.popScene()
+                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+            }
         }
 
         /* override */ startup() {
@@ -25,7 +31,7 @@ namespace microcode {
                 y: 20,
                 onClick: () => {
                     this.currentlyDeleting = true
-                    datalogger.deleteLog()
+                    datalogger.deleteLog(datalogger.DeleteType.Fast)
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
                 },    

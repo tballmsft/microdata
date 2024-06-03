@@ -265,7 +265,6 @@ namespace microcode {
         readIntoBufferOnce(fromY: number): void {
             const reading = this.getReading()
 
-            this.numberOfReadings += 1
             if (this.dataBuffer.length >= this.maxBufferSize || reading === undefined) {
                 this.dataBuffer.shift();
                 this.normalisedDataBuffer.shift();
@@ -274,6 +273,7 @@ namespace microcode {
             if (reading === undefined)
                 return
 
+            this.numberOfReadings += 1
             const range: number = Math.abs(this.getMinimum()) + this.getMaximum();
             this.dataBuffer.push(reading);
             this.normalisedDataBuffer.push(Math.round(Screen.HEIGHT - ((reading - this.getMinimum()) / range) * (BUFFERED_SCREEN_HEIGHT - fromY)) - fromY);
