@@ -214,7 +214,6 @@ namespace microcode {
         getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
         isJacdac(): boolean {return false;}
 
-
         getMaxBufferSize(): number {return this.maxBufferSize}
         getNthReading(n: number): number {return this.dataBuffer[n]}
         getNthNormalisedReading(n: number): number {return this.normalisedDataBuffer[n]}
@@ -266,14 +265,14 @@ namespace microcode {
         readIntoBufferOnce(fromY: number): void {
             const reading = this.getReading()
 
-            if (reading === undefined)
-                return
-
             this.numberOfReadings += 1
-            if (this.dataBuffer.length >= this.maxBufferSize) {
+            if (this.dataBuffer.length >= this.maxBufferSize || reading === undefined) {
                 this.dataBuffer.shift();
                 this.normalisedDataBuffer.shift();
             }
+
+            if (reading === undefined)
+                return
 
             const range: number = Math.abs(this.getMinimum()) + this.getMaximum();
             this.dataBuffer.push(reading);
