@@ -15,10 +15,8 @@ namespace microcode {
         }
         //% blockCombine block="color" callInDebugger
         public get backgroundColor() {
-        public get backgroundColor() {
             return this.color_
         }
-        public set backgroundColor(v) {
         public set backgroundColor(v) {
             this.color_ = v
         }

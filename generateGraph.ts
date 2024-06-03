@@ -38,8 +38,6 @@ namespace microcode {
     export class GraphGenerator extends Scene {
         private windowWidth: number;
         private windowHeight: number;
-        private windowWidth: number;
-        private windowHeight: number;
 
         private windowLeftBuffer: number;
         private windowRightBuffer: number;
@@ -81,15 +79,11 @@ namespace microcode {
         constructor(app: App) {
             super(app, "graphGeneration")
             this.backgroundColor = 3
-            this.backgroundColor = 3
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
             this.uiState = UI_STATE.GRAPH
-            this.uiState = UI_STATE.GRAPH
 
-            this.windowLeftBuffer = 38
-            this.windowRightBuffer = 10
             this.windowLeftBuffer = 38
             this.windowRightBuffer = 10
             this.windowTopBuffer = 5
@@ -223,7 +217,7 @@ namespace microcode {
 
             let dataStart = 1
             while (datalogger.getNumberOfRows(dataStart) > 0) {
-                const rows = datalogger.getRows(dataStart, Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart))).split("\n")
+                const rows = datalogger.getRows(Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
 
                 for (let i = 0; i < rows.length - 1; i++) {
                     const sensorName = rows[i].split(",", 1)[0]
@@ -301,7 +295,7 @@ namespace microcode {
 
             let foundAllReadings = false
             while (!foundAllReadings && datalogger.getNumberOfRows(dataStart) > 0) {
-                const rows = datalogger.getRows(dataStart, Math.min(targetNumberOfReadings, datalogger.getNumberOfRows(dataStart))).split("\n")
+                const rows = datalogger.getRows(Math.min(targetNumberOfReadings, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
 
                 for (let i = 0; i < rows.length; i++) {
                     const cols = rows[i].split(",") // [name, time, reading, event]
@@ -508,7 +502,6 @@ namespace microcode {
                 // Black edges:
                 screen.fillRect(
                     5,
-                    5,
                     y,
                     142,
                     47,
@@ -565,17 +558,7 @@ namespace microcode {
                     textColor
                 )
 
-                    "Minimum: " + this.sensorMinsAndMaxs[i][0],
-                    12,
-                    y + 16,
-                    textColor
-                )
-
                 screen.print(
-                    "Maximum: " + this.sensorMinsAndMaxs[i][1],
-                    12,
-                    y + 32,
-                    textColor
                     "Maximum: " + this.sensorMinsAndMaxs[i][1],
                     12,
                     y + 32,
@@ -589,25 +572,19 @@ namespace microcode {
         /**
          * Draw x & y axis Double-thickness each, in yellow
          * Draw abscissa and ordinate
-         * Draw x & y axis Double-thickness each, in yellow
-         * Draw abscissa and ordinate
          */
         draw_axes() {
             for (let i = 0; i < 2; i++) {
                 screen.drawLine(
                     this.windowLeftBuffer,
-                    this.windowLeftBuffer,
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowWidth - this.windowRightBuffer, 
                     this.windowWidth - this.windowRightBuffer, 
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
                 screen.drawLine(
                     this.windowLeftBuffer + i, 
-                    this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowLeftBuffer + i, 
                     this.windowLeftBuffer + i, 
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5
@@ -674,4 +651,3 @@ namespace microcode {
         }
     }
 }
-

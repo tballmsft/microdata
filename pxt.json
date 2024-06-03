@@ -1,14 +1,11 @@
 {
     "name": "MicroData",
     "version": "0.12.00",
-    "name": "MicroData",
-    "version": "0.12.00",
     "description": "Data science with micro:bit v2",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "datalogger": "*",
         "datalogger": "*",
         "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
         "jacdac": "github:tballmsft/pxt-jacdac",
@@ -46,18 +43,17 @@
         "utils.ts",
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
+        "sensorFactory.ts",
         "sensorSelect.ts",
+        "sensors.ts",
+        "sensorEvent.ts",
         "dataViewSelect.ts",
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
-        "sensors.ts",
         "dataRecorder.ts",
-        "sensorEvent.ts",
         "clearDataloggerScreen.ts",
-        "generateGraph.ts"
-        "sensorEvent.ts",
-        "clearDataloggerScreen.ts",
-        "generateGraph.ts"
+        "generateGraph.ts",
+        "tutorialWindow.ts"
     ],
     "testFiles": [],
     "supportedTargets": [

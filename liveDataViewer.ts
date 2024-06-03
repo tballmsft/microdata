@@ -515,9 +515,7 @@ namespace microcode {
                 // Y-Axis:
                 screen.drawLine(
                     this.windowLeftBuffer + i, 
-                    this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
-                    this.windowLeftBuffer + i, 
                     this.windowLeftBuffer + i, 
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset, 
                     5
