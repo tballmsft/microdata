@@ -107,7 +107,15 @@ namespace microcode {
         log() {
             control.inBackground(() => {
                 let currentTime = 0;                
-                this.sensors.forEach((sensor) => sensor.log(0))
+
+                // Log all sensors once:
+                for (let i = 0; i < this.schedule.length; i++) {
+                    this.schedule[i].sensor.log(0)
+
+                    // Clear from schedule (A sensor may only have 1 reading):
+                    if (!this.schedule[i].sensor.hasMeasurements())
+                        this.schedule.splice(i, 1);
+                }
 
                 while (this.schedule.length > 0) {
                     const nextLogTime = this.schedule[0].waitTime;
