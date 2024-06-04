@@ -53,6 +53,11 @@ namespace microcode {
                 () => this.backFn()
             )
 
+
+            // Unbind:
+            control.onEvent(ControllerButtonEvent.Pressed, controller.left.id, () => {})
+            control.onEvent(ControllerButtonEvent.Pressed, controller.right.id, () => {})
+
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,

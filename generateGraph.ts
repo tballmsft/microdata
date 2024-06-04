@@ -254,13 +254,11 @@ namespace microcode {
                 const sensor: Sensor = this.sensors[i]
                 if (this.drawSensorStates[sensor.getName()]) {
                     // Minimum and Maximum sensor readings for the y-axis markers
-                    if (sensor.getMinimum() < this.globalSensorMinimum || this.globalSensorMinimum == null) {
+                    if (sensor.getMinimum() < this.globalSensorMinimum || this.globalSensorMinimum == null)
                         this.globalSensorMinimum = sensor.getMinimum()
-                    }
 
-                    if (sensor.getMaximum() > this.globalSensorMaximum || this.globalSensorMaximum == null) {
+                    if (sensor.getMaximum() > this.globalSensorMaximum || this.globalSensorMaximum == null)
                         this.globalSensorMaximum = sensor.getMaximum()
-                    }
                 }
             }
         }
@@ -271,19 +269,19 @@ namespace microcode {
          * Fills this.readings, then invokes this.normaliseReadings() to setup this.normalisedReadings
          */
         private processReadings() {
-            this.rawCoordinates = {}
-            this.startReadingAt[this.xScrollOffset + 1] = 0
-            this.lowestPeriod = 0
+            this.rawCoordinates = {};
+            this.startReadingAt[this.xScrollOffset + 1] = 0;
+            this.lowestPeriod = 0;
 
             /**
              * Keep track of the last period & reading recorded
              * Since if there is only 1 element on a new chunk (after scrolling right) the last reading of that prior chunk should be used.
              * This creates the graphical effect that the new chunk is a direct continuation of the prior via a contigious line.
              */
-            let lastRawCoordinate: ISensorReadingLookup = {}
+            let lastRawCoordinate: ISensorReadingLookup = {};
             for (let i = 0; i < this.sensors.length; i++) {
-                this.rawCoordinates[this.sensors[i].getName()] = []
-                lastRawCoordinate[this.sensors[i].getName()] = [0, 0]
+                this.rawCoordinates[this.sensors[i].getName()] = [];
+                lastRawCoordinate[this.sensors[i].getName()] = [0, 0];
             }
 
             // Aim to fill the graphical window area:
@@ -308,14 +306,13 @@ namespace microcode {
                         this.lowestPeriod = currentPeriod
 
                     // Add reading & period; check if full:
-                    if ((this.rawCoordinates[cols[0]].length / 2) < targetNumberOfReadings) {
+                    if (this.rawCoordinates[cols[0]].length / 2 < targetNumberOfReadings) {
                         this.rawCoordinates[cols[0]].push(currentPeriod)  // X
                         this.rawCoordinates[cols[0]].push(currentReading) // Y
 
                         // rawCoordinates for this sensor is full: Thus start reading next chunk (where next RIGHT press starts) here:
-                        if ((this.rawCoordinates[cols[0]].length / 2) >= targetNumberOfReadings && this.startReadingAt[this.xScrollOffset + 1] == 0) {
+                        if ((this.rawCoordinates[cols[0]].length / 2) >= targetNumberOfReadings && this.startReadingAt[this.xScrollOffset + 1] == 0)
                             this.startReadingAt[this.xScrollOffset + 1] = dataStart + i
-                        }
                         
                         // Check if all are done:
                         foundAllReadings = true

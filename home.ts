@@ -83,7 +83,6 @@ namespace microcode {
                 0xc
             )
 
-
             this.yOffset = Math.min(0, this.yOffset + 2)
             const t = control.millis()
             const dy = this.yOffset == 0 ? (Math.idiv(t, 800) & 1) - 1 : 0

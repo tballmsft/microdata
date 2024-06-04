@@ -253,7 +253,6 @@ namespace microcode {
             }
             this.maxBufferSize = newBufferSize
         }
-        
 
         /**
          * Add one value to this.dataBuffer, add that value normalised into this.normalisedBuffer too.
@@ -278,7 +277,6 @@ namespace microcode {
             this.dataBuffer.push(reading);
             this.normalisedDataBuffer.push(Math.round(Screen.HEIGHT - ((reading - this.getMinimum()) / range) * (BUFFERED_SCREEN_HEIGHT - fromY)) - fromY);
         }
-
 
         /**
          * Populates this.normalisedBuffer with the Y position for each element in this.dataBuffer.
@@ -603,12 +601,10 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacLightSensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.lightLevel1.start()}
 
         public static getName(): string {return "Jac Light"}
-        public static getReading(): number {
-            return (modules.lightLevel1.isConnected()) ? modules.lightLevel1.lightLevel() : undefined
-        }
+        public static getReading(): number {return (modules.lightLevel1.isConnected()) ? modules.lightLevel1.lightLevel() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -617,7 +613,7 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacDistanceSensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.distance1.start()}
 
         public static getName(): string {return "Jac Dist"}
         public static getReading(): number {return (modules.distance1.isConnected()) ? modules.distance1.distance() : undefined}
@@ -629,7 +625,7 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacSoilMoistureSensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.soilMoisture1.start()}
 
         public static getName(): string {return "Jac Moist"}
         public static getReading(): number {return (modules.soilMoisture1.isConnected()) ? modules.soilMoisture1.moisture() : undefined}
@@ -641,7 +637,7 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacFlexSensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.flex1.start()}
 
         public static getName(): string {return "Jac Flex"}
         public static getReading(): number {return (modules.flex1.isConnected()) ? modules.flex1.bending() : undefined}
@@ -653,7 +649,7 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacTemperatureSensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.temperature1.start()}
 
         public static getName(): string {return "Jac Temp"}
         public static getReading(): number {return (modules.temperature1.isConnected()) ? modules.temperature1.temperature() : undefined}
@@ -665,7 +661,7 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacHumiditySensor extends Sensor {
-        constructor() {super()}
+        constructor() {super(); modules.humidity1.start()}
 
         public static getName(): string {return "Jac Humid"}
         public static getReading(): number {return (modules.humidity1.isConnected()) ? modules.humidity1.humidity() : undefined}
