@@ -16,11 +16,11 @@ namespace microcode {
                 case("Logo Pressed") : return new LogoPressSensor();
                 case("Volume")       : return new VolumeSensor();
                 case("Compass")      : return new CompassHeadingSensor();
-                case("Jac Flex")     : return new JacdacLightSensor();
-                case("Jac Temp")     : return new JacdacSoilMoistureSensor();
-                case("Jac Light")    : return new JacdacDistanceSensor();
-                case("Jac Moist")    : return new JacdacFlexSensor();
-                case("Jac Dist")     : return new JacdacTemperatureSensor();
+                case("Jac Light")     : return new JacdacLightSensor();
+                case("Jac Moist")     : return new JacdacSoilMoistureSensor();
+                case("Jac Dist")    : return new JacdacDistanceSensor();
+                case("Jac Flex")    : return new JacdacFlexSensor();
+                case("Jac Temp")     : return new JacdacTemperatureSensor();
 
                 default              : return new AccelerometerXSensor()
             }
