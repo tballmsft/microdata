@@ -192,7 +192,6 @@ namespace microcode {
          */
         private normalisedDataBuffer: number[]
 
-
         constructor() {
             this.maxBufferSize = 80
             this.totalMeasurements = 0
@@ -604,7 +603,7 @@ namespace microcode {
         constructor() {super(); modules.lightLevel1.start()}
 
         public static getName(): string {return "Jac Light"}
-        public static getReading(): number {return (modules.lightLevel1.isConnected()) ? modules.lightLevel1.lightLevel() : undefined}
+        public static getReading(): number {return modules.lightLevel1.isConnected() ? modules.lightLevel1.lightLevel() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -616,7 +615,7 @@ namespace microcode {
         constructor() {super(); modules.distance1.start()}
 
         public static getName(): string {return "Jac Dist"}
-        public static getReading(): number {return (modules.distance1.isConnected()) ? modules.distance1.distance() : undefined}
+        public static getReading(): number {return modules.distance1.isConnected() ? modules.distance1.distance() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -628,7 +627,7 @@ namespace microcode {
         constructor() {super(); modules.soilMoisture1.start()}
 
         public static getName(): string {return "Jac Moist"}
-        public static getReading(): number {return (modules.soilMoisture1.isConnected()) ? modules.soilMoisture1.moisture() : undefined}
+        public static getReading(): number {return modules.soilMoisture1.isConnected() ? modules.soilMoisture1.moisture() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -640,7 +639,7 @@ namespace microcode {
         constructor() {super(); modules.flex1.start()}
 
         public static getName(): string {return "Jac Flex"}
-        public static getReading(): number {return (modules.flex1.isConnected()) ? modules.flex1.bending() : undefined}
+        public static getReading(): number {return modules.flex1.isConnected() ? modules.flex1.bending() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -652,7 +651,7 @@ namespace microcode {
         constructor() {super(); modules.temperature1.start()}
 
         public static getName(): string {return "Jac Temp"}
-        public static getReading(): number {return (modules.temperature1.isConnected()) ? modules.temperature1.temperature() : undefined}
+        public static getReading(): number {return modules.temperature1.isConnected() ? modules.temperature1.temperature() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 
@@ -664,7 +663,7 @@ namespace microcode {
         constructor() {super(); modules.humidity1.start()}
 
         public static getName(): string {return "Jac Humid"}
-        public static getReading(): number {return (modules.humidity1.isConnected()) ? modules.humidity1.humidity() : undefined}
+        public static getReading(): number {return modules.humidity1.isConnected() ? modules.humidity1.humidity() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 }
