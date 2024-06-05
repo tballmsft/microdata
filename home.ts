@@ -41,7 +41,10 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                    if (datalogger.getNumberOfRows() <= 1)
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.SensorSelect))
+                    else
+                        this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
             })
 
