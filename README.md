@@ -17,7 +17,7 @@ With the objective of allowing people to:
 
 
 # Branches
-
+* The most up-to-date branch is codal_rework_fork_merge
 * Currently main is behind codal_rework.
 * codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows()
 
