@@ -1,4 +1,5 @@
 # MicroData
+![home_screen](https://github.com/KierPalin/MicroData/assets/45743174/0dd0ed8c-f8ec-4260-bdae-1ed3413f2018)
 
 This is an application for the Microbit V2 and an Arcade shield that leverages onboard sensors for scientific experiments inside the classroom - without the need for an external computer. MicroData utilises the variety of sensors & buttons onboard the Microbit to allow you to:
 * Record data and events into flash storage
