@@ -10,6 +10,16 @@ namespace microcode {
 
 
     /**
+     * Indice access alias into datalogger columns.
+     */
+    enum SENSOR_COLUMNS {
+        NAME = 0,
+        TIME = 1,
+        READING = 2,
+        EVENT = 3
+    }
+
+    /**
      * Used by this.rawCoordinates; interface for type optimisation.
      * Used since readings need to be sorted by their sensor, but the values from the datalogger may be in an unpredictable order,
      * Thus indexing by the sensorName - which is at the start of each row simplifies access.
@@ -220,7 +230,7 @@ namespace microcode {
                 const rows = datalogger.getRows(Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
 
                 for (let i = 0; i < rows.length - 1; i++) {
-                    const sensorName = rows[i].split(",", 1)[0]
+                    const sensorName = rows[i].split(",", 1)[SENSOR_COLUMNS.NAME]
                     let sensorNameAlreadyKnown = false
 
                     for (let j = 0; j < sensorNames.length; j++) {
@@ -297,21 +307,21 @@ namespace microcode {
 
                 for (let i = 0; i < rows.length; i++) {
                     const cols = rows[i].split(",") // [name, time, reading, event]
-                    lastRawCoordinate[cols[0]] = [currentReading, currentPeriod]
-                    currentPeriod = +cols[1]
-                    currentReading = +cols[2]
+                    lastRawCoordinate[cols[SENSOR_COLUMNS.NAME]] = [currentReading, currentPeriod]
+                    currentPeriod = +cols[SENSOR_COLUMNS.TIME]
+                    currentReading = +cols[SENSOR_COLUMNS.READING]
 
                     // Setup the lowestPeriod if at the start:
                     if (dataStart == this.startReadingAt[this.xScrollOffset] + 1 && i == 0)
                         this.lowestPeriod = currentPeriod
 
                     // Add reading & period; check if full:
-                    if (this.rawCoordinates[cols[0]].length / 2 < targetNumberOfReadings) {
-                        this.rawCoordinates[cols[0]].push(currentPeriod)  // X
-                        this.rawCoordinates[cols[0]].push(currentReading) // Y
+                    if (this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].length / 2 < targetNumberOfReadings) {
+                        this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].push(currentPeriod)  // X
+                        this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].push(currentReading) // Y
 
                         // rawCoordinates for this sensor is full: Thus start reading next chunk (where next RIGHT press starts) here:
-                        if ((this.rawCoordinates[cols[0]].length / 2) >= targetNumberOfReadings && this.startReadingAt[this.xScrollOffset + 1] == 0)
+                        if ((this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].length / 2) >= targetNumberOfReadings && this.startReadingAt[this.xScrollOffset + 1] == 0)
                             this.startReadingAt[this.xScrollOffset + 1] = dataStart + i
                         
                         // Check if all are done:
@@ -356,7 +366,7 @@ namespace microcode {
                 }
             }
 
-            this.resetNormalisedReadings()
+            this.resetProcessedCoordinates()
             this.normaliseReadingsOnXAxis()
             this.normaliseReadingsOnYAxis()
         }
@@ -367,7 +377,7 @@ namespace microcode {
          * This is neccessary for this.normaliseReadingsOnXAxis() && this.normaliseReadingsOnYAxis() to fill them,
          * Since they will fill via index access instead of pushing.
          */
-        private resetNormalisedReadings() {
+        private resetProcessedCoordinates() {
             this.processedCoordinates = []
             for (let i = 0; i < this.sensors.length; i++)
                 this.processedCoordinates[i] = this.rawCoordinates[this.sensors[i].getName()].map(_ => undefined)
