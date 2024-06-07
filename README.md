@@ -1,4 +1,5 @@
 # MicroData
+![home_screen](https://github.com/KierPalin/MicroData/assets/45743174/0dd0ed8c-f8ec-4260-bdae-1ed3413f2018)
 
 This is an application for the Microbit V2 and an Arcade shield that leverages onboard sensors for scientific experiments inside the classroom - without the need for an external computer. MicroData utilises the variety of sensors & buttons onboard the Microbit to allow you to:
 * Record data and events into flash storage
@@ -14,11 +15,10 @@ With the objective of allowing people to:
 * Explore the diverse features of the BBC Microbit V2.
 
 
-
 # Branches
-
-* Currently main is behind codal_rework.
-* codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows()
+* The most up-to-date branch is codal_rework_fork_merge
+* Currently main is behind codal_rework, which is behind codal_rework_fork_merge.
+* codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows() for a CODAL & pxt-microbit PR.
 
 
 ## Local setup
@@ -41,7 +41,7 @@ wsl
 ```
 3. Install the pxt-microbit dependencies.
 ```
-npm install
+npm install --ignore-scripts
 npm install -g pxt
 ```
 4. Install the local build dependencies.
