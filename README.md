@@ -42,7 +42,7 @@ wsl
 ```
 3. Install the pxt-microbit dependencies.
 ```
-npm install
+npm install --ignore-scripts
 npm install -g pxt
 ```
 4. Install the local build dependencies.
