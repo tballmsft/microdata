@@ -72,9 +72,9 @@ namespace microcode {
         private sensors: Sensor[]
         /** Each row is one sensor, the columns within the row are the raw readings from the tabular data viewer. */
         private rawCoordinates: ISensorReadingLookup
-        /** Normalise readings for the current screen size: invoked upon UP, DOWN, LEFT, RIGHT */
+        /** Normalise rawCoordinates for the current screen size: invoked upon UP, DOWN, LEFT, RIGHT */
         private processedCoordinates: number[][];
-        /** Sensors can be turned on & off: only showSensors[n] == true are shown */
+        /** Sensors can be turned on & off when this.ui_state is SENSOR_SELECTION, by boxes below the graph. Only showSensors[n] == true are shown */
         private drawSensorStates: {[sensorName: string]: boolean};
 
         /** Indices of sensors that should have their first reading shown on the y-axis */
