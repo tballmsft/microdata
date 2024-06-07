@@ -10,13 +10,21 @@ namespace microcode {
 
 
     /**
-     * Indice access alias into datalogger columns.
+     * Indice access alias into datalogger's columns.
      */
     enum SENSOR_COLUMNS {
         NAME = 0,
         TIME = 1,
         READING = 2,
         EVENT = 3
+    }
+
+    /**
+     * Indice access alias into this.sensorMinsAndMaxs columns.
+     */
+    enum MIN_MAX_COLUMNS {
+        MIN = 0,
+        MAX = 1
     }
 
     /**
@@ -561,14 +569,14 @@ namespace microcode {
                 )
 
                 screen.print(
-                    "Minimum: " + this.sensorMinsAndMaxs[i][0],
+                    "Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                     12,
                     y + 16,
                     textColor
                 )
 
                 screen.print(
-                    "Maximum: " + this.sensorMinsAndMaxs[i][1],
+                    "Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                     12,
                     y + 32,
                     textColor
