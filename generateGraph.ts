@@ -55,7 +55,7 @@ namespace microcode {
         /** Each row is one sensor, the columns within the row are the raw readings from the tabular data viewer. */
         private rawCoordinates: ISensorReadingLookup
         /** Normalise readings for the current screen size: invoked upon UP, DOWN, LEFT, RIGHT */
-        private normalisedCoordinates: number[][];
+        private processedCoordinates: number[][];
         /** Sensors can be turned on & off: only showSensors[n] == true are shown */
         private drawSensorStates: {[sensorName: string]: boolean};
 
@@ -368,9 +368,9 @@ namespace microcode {
          * Since they will fill via index access instead of pushing.
          */
         private resetNormalisedReadings() {
-            this.normalisedCoordinates = []
+            this.processedCoordinates = []
             for (let i = 0; i < this.sensors.length; i++)
-                this.normalisedCoordinates[i] = this.rawCoordinates[this.sensors[i].getName()].map(_ => undefined)
+                this.processedCoordinates[i] = this.rawCoordinates[this.sensors[i].getName()].map(_ => undefined)
         }
 
         /**
@@ -385,7 +385,7 @@ namespace microcode {
                 // Start at 1 since first readings are [x1,y1,x2,y2,....]:
                 for (let i = 0; i < this.rawCoordinates[sensorName].length - 1; i+=2) {                    
                     const norm1 = ((this.rawCoordinates[sensorName][i] - minimum) / range) * (Screen.WIDTH - this.windowRightBuffer - this.windowLeftBuffer - 2);
-                    this.normalisedCoordinates[sensor][i] = this.windowLeftBuffer + norm1;
+                    this.processedCoordinates[sensor][i] = this.windowLeftBuffer + norm1;
                 }
             }
         }
@@ -404,7 +404,7 @@ namespace microcode {
                 // Start at 0 since first readings are [x1,y1,x2,y2,....]:
                 for (let i = 1; i < this.rawCoordinates[sensorName].length - 1; i+=2) {   
                     const norm1 = ((this.rawCoordinates[sensorName][i] - minimum) / range) * (BUFFERED_SCREEN_HEIGHT - fromY);
-                    this.normalisedCoordinates[sensor][i] = Math.round(Screen.HEIGHT - norm1) - fromY;
+                    this.processedCoordinates[sensor][i] = Math.round(Screen.HEIGHT - norm1) - fromY;
                 }
             }
         }
@@ -421,7 +421,7 @@ namespace microcode {
             this.sensorsIndicesForYAxis = []
 
             for (let i = 0; i < this.sensors.length; i++) {
-                const y = this.normalisedCoordinates[i][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                const y = this.processedCoordinates[i][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
                 const minOverlap = Math.abs(globalSensorMinimumDraw - y) < boundary;
                 const maxOverlap = Math.abs(globalSensorMaximumDraw - y) < boundary;
 
@@ -435,7 +435,7 @@ namespace microcode {
                 for (let j = 0; j < this.sensorsIndicesForYAxis.length; j++) {
                     if (this.sensorsIndicesForYAxis[j] != i) {
                         const index = this.sensorsIndicesForYAxis[j];
-                        const otherY = this.normalisedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                        const otherY = this.processedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
                         
                         const otherOverlap = Math.abs(y - otherY) < boundary;
                         const minOverlap = Math.abs(globalSensorMinimumDraw - otherY) < boundary;
@@ -474,16 +474,16 @@ namespace microcode {
                 // Draw the data from each sensor, as a separate coloured line: sensors may have variable quantities of data:
                 for (let sensor = 0; sensor < this.sensors.length; sensor++) {
                     // Each coord in [x1, y1, x2, y2, x3, y3, ...]:
-                    for (let i = 0; i < this.normalisedCoordinates[sensor].length - 4; i+=2) {
+                    for (let i = 0; i < this.processedCoordinates[sensor].length - 4; i+=2) {
                         // Not disabled:
                         if (this.drawSensorStates[this.sensors[sensor].getName()]) {
                             // Duplicate the line along the y axis to smooth out aliasing:
                             for (let j = -(PLOT_SMOOTHING_CONSTANT / 2); j < PLOT_SMOOTHING_CONSTANT / 2; j++) {
                                 screen.drawLine(
-                                    this.normalisedCoordinates[sensor][i]   + 1,
-                                    this.normalisedCoordinates[sensor][i+1] + j,
-                                    this.normalisedCoordinates[sensor][i+2] + 1,
-                                    this.normalisedCoordinates[sensor][i+3] + j,
+                                    this.processedCoordinates[sensor][i]   + 1,
+                                    this.processedCoordinates[sensor][i+1] + j,
+                                    this.processedCoordinates[sensor][i+2] + 1,
+                                    this.processedCoordinates[sensor][i+3] + j,
                                     SENSOR_COLORS[sensor % SENSOR_COLORS.length]
                                 );
                             }
@@ -611,7 +611,7 @@ namespace microcode {
                         const index = this.sensorsIndicesForYAxis[i]
                         if (this.drawSensorStates[this.sensors[index].getName()]) {
                             const yWrite: string = this.rawCoordinates[this.sensors[index].getName()][1].toString().slice(0, 5);
-                            const yDraw = this.normalisedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                            const yDraw = this.processedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
                             screen.print(
                                 yWrite,
                                 (6 * font.charWidth) - (yWrite.length * font.charWidth),
