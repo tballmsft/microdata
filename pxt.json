@@ -7,7 +7,7 @@
         "radio": "*",
         "microphone": "*",
         "datalogger": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.4",
         "jacdac": "github:tballmsft/pxt-jacdac",
         "jacdac-light-level": "github:tballmsft/pxt-jacdac/tree/master/light-level",
         "jacdac-soil-moisture": "github:tballmsft/pxt-jacdac/tree/master/soil-moisture",

@@ -1,5 +1,5 @@
 namespace microcode {
-    let extraImage: SImage = null
+    let extraImage: Bitmap = null
 
     //% shim=TD_NOOP
     function extraSamples(name: string) {
@@ -7,7 +7,7 @@ namespace microcode {
     }
 
     export class icons {
-        public static get(name: string, nullIfMissing = false): SImage {
+        public static get(name: string, nullIfMissing = false): Bitmap {
             // editor icons
             if (name == "rule_arrow") return icondb.rule_arrow
             if (name == "rule_handle") return icondb.rule_handle
@@ -62,7 +62,7 @@ namespace microcode {
         }
     }
 
-    export const wordLogo = img` 
+    export const wordLogo = bmp` 
     ....111111.......111111...1111................................................11111111111.........................1111.................................
     ...11bbbbbb.....11bbbbbb.11bbbb...............................................1bbbbbbbbbbff......................11bbbb................................
     ...1bbbbbbbb...11bbbbbbbf1bbbbbf..............................................1bbbbbbbbbbbff.....................1bbbbbf...............................
@@ -87,7 +87,7 @@ namespace microcode {
     .....fffff.........fffff...ffff......fffffff......ffff.............fffffff....fffffffffff.........ffffffffffffff....ffffffffffff....ffffffffffffffff...
     `
 
-    export const microbitLogo = img`
+    export const microbitLogo = bmp`
         ............................
         ......5555555555555555......
         ....55555555555555555555....
@@ -106,7 +106,7 @@ namespace microcode {
         .......4444444444444444.....
     `
 
-    export const editorBackground = img`
+    export const editorBackground = bmp`
     8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
     8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
     8888888888888888888888188888881888888888881888888888888888888888888888888888888888888888888888888888885888888888888888888881888888888888888888818888888888888188
@@ -127,15 +127,15 @@ namespace microcode {
 }
 
 namespace icondb {
-    const note4x3 = img`
+    const note4x3 = bmp`
     . f f .
     f c c .
     f c c .
 `
 
     // - upscale 5x5 image to 16 x 16, add halo
-    export function renderMicrobitLEDs(led55: SImage) {
-        const ret = simage.create(16, 16)
+    export function renderMicrobitLEDs(led55: Bitmap) {
+        const ret = bitmap.create(16, 16)
         ret.fill(15)
         for (let row = 0; row < 5; row++) {
             for (let col = 0; col < 5; col++) {
@@ -167,7 +167,7 @@ namespace icondb {
     }
 
 
-    export const iconEditor = img`
+    export const iconEditor = bmp`
     f f f f f f f f f f f f f f f f 
     f f f f f f f f f f f f f f f f 
     f f f f f f f f f f f f f f f f 
@@ -186,7 +186,7 @@ namespace icondb {
     f f f f e e f e e f e e f f f f 
     `
 
-    function renderImg(i: SImage) {
+    function renderImg(i: Bitmap) {
         let r = ""
         for (let y = 0; y < i.height; ++y) {
             let line = ""
@@ -197,7 +197,7 @@ namespace icondb {
         console.log(`\nimg\`\n${r}\``)
     }
 
-    export const melodyEditor = img`
+    export const melodyEditor = bmp`
     1111111111111111
     111111111ff11111
     11111111fcc11111
@@ -216,7 +216,7 @@ namespace icondb {
     fcc111111111fcc1    
     `
 
-    export const microbitLogoWhiteBackground = img`
+    export const microbitLogoWhiteBackground = bmp`
     11111111111111111
     11115555555551111
     11155555555555111
@@ -235,7 +235,7 @@ namespace icondb {
     11111444444441111
 `
 
-    export const disk = img`
+    export const disk = bmp`
     . . . . . . . . . . . . . . . .
     . . 8 d d d d 8 8 d d 8 . . . .
     . . 8 d d d d 8 8 d d 8 8 . . .
@@ -254,7 +254,7 @@ namespace icondb {
     . . . . . . . . . . . . . . . .
 `
 
-    export const disk1 = img`
+    export const disk1 = bmp`
     . . . . . . . . . . . . . . . .
     . . 8 d d d d 8 8 d d 8 . . . .
     . . 8 d d d d 8 8 d d 8 8 . . .
@@ -273,7 +273,7 @@ namespace icondb {
     . . . . . . . . . . . . . . . .
 `
 
-    export const largeDiskIcon = img`
+    export const largeDiskIcon = bmp`
     .666666666666666666666666666666.
     66666666666666666666666666666666
     66666666666666666666666666666666
@@ -309,7 +309,7 @@ namespace icondb {
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
 `
 
-export const largeMetaDataIcon = img`
+export const largeMetaDataIcon = bmp`
     .666666666666666666666666666666.
     66666666666666666666666666666666
     66666666666666666666666666666666
@@ -345,7 +345,7 @@ export const largeMetaDataIcon = img`
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
 `
 
-    export const MISSING = img`
+    export const MISSING = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
@@ -364,7 +364,7 @@ export const largeMetaDataIcon = img`
         . . . . . . . . . . . . . . . .
     `
 
-    export const rule_arrow = img`
+    export const rule_arrow = bmp`
         d d d . . . . . . . . . . .
         d d d d . . . . . . . . . .
         d d d d d . . . . . . . . .
@@ -387,7 +387,7 @@ export const largeMetaDataIcon = img`
         d d d . . . . . . . . . . .
     `
 
-    export const showScreen = img`
+    export const showScreen = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . 2 4 . .
         . . . . 2 . . . . . . 2 4 4 2 .
@@ -407,7 +407,7 @@ export const largeMetaDataIcon = img`
         `
 
 
-    export const green_tick = img`
+    export const green_tick = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 6 6 1
@@ -430,7 +430,7 @@ export const largeMetaDataIcon = img`
     ///
     /// HARDWARE-SPECIFIC LANGUAGE TILES
     ///
-    export const tile_button_a = img`
+    export const tile_button_a = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . 8 . . .
@@ -448,7 +448,7 @@ export const largeMetaDataIcon = img`
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
     `
-    export const tile_button_b = img`
+    export const tile_button_b = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . .
         . . 8 8 8 8 8 8 8 8 8 8 8 . . .
@@ -467,7 +467,7 @@ export const largeMetaDataIcon = img`
         . . . . . . . . . . . . . . . .
     `
 
-    export const pin_0 = img`
+    export const pin_0 = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 4 4 4 4 4 1 1 1 4 4 1 1 1
@@ -486,7 +486,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-    export const pin_1 = img`
+    export const pin_1 = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 4 4 4 4 4 1 1 4 4 4 4 1 1
@@ -504,7 +504,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
-    export const pin_2 = img`
+    export const pin_2 = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 4 4 4 4 4 1 1 4 4 4 4 1 1
@@ -523,7 +523,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
 
-    export const compass = img`
+    export const compass = bmp`
         1 1 1 1 5 5 5 5 5 5 5 1 1 1 1
         1 1 1 5 5 5 5 5 5 5 5 5 1 1 1
         1 1 5 5 5 f f f f f 5 5 5 1 1
@@ -542,7 +542,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 5 5 5 5 5 5 5 1 1 1 1
     `
 
-    export const car_right_turn = img`
+    export const car_right_turn = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 c c c 1 1 1 1 1
         1 1 1 1 1 1 1 1 c 7 7 c 1 1 1 1
@@ -561,7 +561,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-    export const car_right_spin = img`
+    export const car_right_spin = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 c c c c c 1 1 1 1 1 1
@@ -580,7 +580,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1    
     `
 
-    export const moveTiltRight = img`
+    export const moveTiltRight = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . 8 . . . . . . . . . .
         . . . . . 8 8 . f f . . . . . .
@@ -599,7 +599,7 @@ export const largeMetaDataIcon = img`
         . . . . . . . . . . . . . . . .
     `
 
-    export const rule_handle = img`
+    export const rule_handle = bmp`
         . f f f f f f f .
         f 1 1 1 1 1 1 1 f
         f 1 1 1 1 1 1 1 f
@@ -611,7 +611,7 @@ export const largeMetaDataIcon = img`
         . f f f f f f f .
     `
 
-    export const microbit_logo = img`
+    export const microbit_logo = bmp`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
@@ -629,7 +629,7 @@ export const largeMetaDataIcon = img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
 `
-    export const microbit_logo_btn = img`
+    export const microbit_logo_btn = bmp`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
@@ -648,7 +648,7 @@ export const largeMetaDataIcon = img`
     . . . . . . . . . . . . . . . .
 `
 
-    export const finger_press = img`
+    export const finger_press = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
@@ -666,7 +666,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
-    export const finger_release = img`
+    export const finger_release = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . f . . . . . . . .
         . . . . . . f f f . . . . . . .
@@ -685,7 +685,7 @@ export const largeMetaDataIcon = img`
         . . . . . . . . . . . . . . . .
     `
 
-    export const magnet = img`
+    export const magnet = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 6 1 1 1 
     1 1 1 1 1 1 1 1 1 1 6 1 1 1 6 1 
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
@@ -703,7 +703,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 5 5 4 
     1 1 1 1 1 1 1 1 1 1 6 1 1 4 4 1 
     `
-    export const thermometer = img`
+    export const thermometer = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 f d f 1 1 1 1 1 1 1
@@ -722,7 +722,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-    export const led_light_sensor = img`
+    export const led_light_sensor = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 8 8 8 8 5 5 5 8 8 8 8 1 1 1
     1 1 8 8 8 5 4 4 4 5 8 8 8 1 1 1
@@ -741,7 +741,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
 
-    export const light_sensor = img`
+    export const light_sensor = bmp`
 . . . . . . . . . . . . . . . .
 . . 8 8 8 8 5 5 5 8 8 8 8 . . .
 . . 8 8 8 5 4 4 4 5 8 8 8 . . .
@@ -760,7 +760,7 @@ export const largeMetaDataIcon = img`
 . . . . . . . . . . . . . 4 4 .
 `
 
-    export const microphone = img`
+    export const microphone = bmp`
 . . . . . . . . . . . . . . . .
 . . . . . . . . . . . . . . . .
 . . . . . . . b c . . . . . . .
@@ -779,7 +779,7 @@ export const largeMetaDataIcon = img`
 . . . . . . . . . . . . . . . .
 `
 
-    export const speaker = img`
+    export const speaker = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
@@ -798,7 +798,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-    export const accelerometer = img`
+    export const accelerometer = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 8 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 8 8 8 1 1 1 1 1 1
@@ -817,7 +817,7 @@ export const largeMetaDataIcon = img`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-    export const moveTiltDown = img`
+    export const moveTiltDown = bmp`
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . 8 8 8 8 . . . . .
@@ -835,7 +835,7 @@ export const largeMetaDataIcon = img`
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
 `
-    export const moveTiltUp = img`
+    export const moveTiltUp = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 8 8 8 8 1 1 1 1 1 1
@@ -853,7 +853,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
-    export const moveTiltLeft = img`
+    export const moveTiltLeft = bmp`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     1 1 1 1 1 1 1 1 1 1 8 1 1 1 1 1
     1 1 1 1 1 1 f f 1 8 8 1 1 1 1 1
@@ -872,7 +872,7 @@ export const largeMetaDataIcon = img`
     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 `
 
-    export const largeEditIcon = img`
+    export const largeEditIcon = bmp`
     .666666666666666666666666666666.
     66666666666666666666666666666666
     66666666666666666666666666666666
@@ -910,7 +910,7 @@ export const largeMetaDataIcon = img`
 
 
 
-export const largeSettingsGear = img`
+export const largeSettingsGear = bmp`
     66666666666666666666666666666666
     66666666666666666666666666666666
     666666666666666dd666666666666666
@@ -945,7 +945,7 @@ export const largeSettingsGear = img`
     66666666666666666666666666666666
     `
 
-    export const largeNewProgramIcon = img`
+    export const largeNewProgramIcon = bmp`
     .11111111..............11111111.
     1bbbbbbbb..............bbbbbbbb1
     1..............................1
@@ -982,7 +982,7 @@ export const largeSettingsGear = img`
     `
 
 
-export const linearGraph1 = img`
+export const linearGraph1 = bmp`
     .111111111111111111111111111111.
     11111111111111111111111111111111
     11ff1111111111111111111111111111
@@ -1018,7 +1018,7 @@ export const linearGraph1 = img`
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
     `
 
-export const linearGraph2 = img`
+export const linearGraph2 = bmp`
     .111111111111111111111111111111.
     11111111111111111111111111111111
     11ff1111111111111111111111111111
@@ -1054,7 +1054,7 @@ export const linearGraph2 = img`
     .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
     `
 
-    export const settingsGear = img`
+    export const settingsGear = bmp`
         . . . . . . . . . . . . . . . .
         . . . . . . . d d . . . . . . .
         . . . d d . d b b c . d d . . .
@@ -1072,7 +1072,7 @@ export const linearGraph2 = img`
         . . . . . . . c c . . . . . . .
         . . . . . . . . . . . . . . . .
     `
-    export const servo_set_angle = img`
+    export const servo_set_angle = bmp`
     . . . . . . . . . . . . . . . . 
     . . . 8 8 8 . . . . 4 . . . . . 
     . . 8 8 8 8 8 . . . 2 . . . . . 

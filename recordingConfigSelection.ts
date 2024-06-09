@@ -665,7 +665,7 @@ namespace microcode {
                 Screen.HALF_WIDTH - 30,
                 Screen.HALF_HEIGHT + 15,
                 1,
-                simage.font8
+                bitmap.font8
             )
 
             screen.print(
@@ -689,7 +689,7 @@ namespace microcode {
                 Screen.HALF_WIDTH + 30,
                 Screen.HALF_HEIGHT + 15,
                 1,
-                simage.font8
+                bitmap.font8
             )
 
             screen.print(

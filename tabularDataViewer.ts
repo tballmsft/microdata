@@ -406,7 +406,7 @@ namespace microcode {
                         Screen.LEFT_EDGE + cumulativeColOffset + (this.headerStringLengths[colID] / 2) - ((font.charWidth * value.length) / 2),
                         Screen.TOP_EDGE + (row * tabularRowBufferSize) + (tabularRowBufferSize / 2) - 4,
                         0xb,
-                        simage.font8
+                        bitmap.font8
                     )
 
                     cumulativeColOffset += this.headerStringLengths[colID]
