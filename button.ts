@@ -120,7 +120,7 @@ namespace microcode {
             return xfrm
         }
 
-        public buildSprite(img: SImage) {
+        public buildSprite(img: Bitmap) {
             this.icon = new Sprite({
                 parent: this,
                 img,
@@ -195,12 +195,13 @@ namespace microcode {
     }
 
     export class Button extends ButtonBase {
-        private iconId: string | SImage
+        private iconId: string | Bitmap
         private _ariaId: string
         public onClick?: (button: Button) => void
         public selected: boolean
         private dynamicBoundaryColorsOn: boolean
         private boundaryColor: number
+        public pressable: boolean
 
         public get ariaId(): string {
             return (
@@ -225,7 +226,7 @@ namespace microcode {
         constructor(opts: {
             parent?: IPlaceable
             style?: ButtonStyle
-            icon: string | SImage
+            icon: string | Bitmap
             ariaId?: string
             x: number
             y: number
@@ -245,6 +246,7 @@ namespace microcode {
             this.buildSprite(this.image_())
 
             this.selected = false
+            this.pressable = true
 
             if (opts.dynamicBoundaryColorsOn == null) {
                 opts.dynamicBoundaryColorsOn = false
@@ -264,6 +266,9 @@ namespace microcode {
             return this.iconId
         }
 
+        public toggleDynamicBoundaryColors() {
+            this.dynamicBoundaryColorsOn = !this.dynamicBoundaryColorsOn
+        }
 
         public toggleSelected(): void {
             this.selected = !this.selected
@@ -274,18 +279,19 @@ namespace microcode {
                 ? icons.get(this.iconId)
                 : this.iconId
         }
-        public setIcon(iconId: string, img?: SImage) {
+        
+        public setIcon(iconId: string, img?: Bitmap) {
             this.iconId = iconId
             if (img) this.icon.setImage(img)
             else this.buildSprite(this.image_())
         }
 
         public clickable() {
-            return this.visible() && this.onClick != null
+            return this.visible() && this.pressable
         }
 
         public click() {
-            if (!this.visible()) {
+            if (!this.clickable()) {
                 return
             }
             if (this.onClick) {
@@ -293,15 +299,11 @@ namespace microcode {
             }
         }
 
-
         public draw() {
             super.draw()
 
             if (this.dynamicBoundaryColorsOn) {
-                let boundaryColour = this.boundaryColor // Red
-                if (this.selected) {
-                    boundaryColour = 7 // green
-                }
+                const boundaryColour = (this.selected && this.pressable) ? 7: this.boundaryColor 
 
                 for (let dist = 1; dist <= 3; dist++) {
                     Screen.outlineBoundsXfrm(

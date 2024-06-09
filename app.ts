@@ -24,23 +24,7 @@ namespace microcode {
             profile()
             settings.writeBuffer(slot, buf)
         }
-
-        public save(slot: string, prog: ProgramDefn) {
-            this.saveBuffer(slot, prog.toBuffer())
-        }
-
-        public load(slot: string): ProgramDefn {
-            try {
-                let buf = settings.readBuffer(slot)
-                if (buf) {
-                    return ProgramDefn.fromBuffer(new BufferReader(buf))
-                }
-            } catch (e) {
-                console.log(e)
-            }
-            return undefined
-        }
-
+        
         public pushScene(scene: Scene) {
             this.sceneManager.pushScene(scene)
         }
