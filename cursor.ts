@@ -93,7 +93,7 @@ namespace microcode {
 
         public click(): boolean {
             let target = this.navigator.getCurrent() //.sort((a, b) => a.z - b.z);
-            if (target) {
+            if (target && target.clickable()) {
                 target.toggleSelected()
                 target.click()
                 profile()

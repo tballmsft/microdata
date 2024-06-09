@@ -19,11 +19,7 @@ namespace microcode {
             super.startup()
 
             // Includes the header:
-            this.dataloggerEmpty = true
-            // TODO
-            // if (datalogger.getNumberOfRows() > 1) {
-            //    this.dataloggerEmpty = false
-            //}
+            this.dataloggerEmpty = datalogger.getNumberOfRows() <= 1
             
             //---------
             // Control:

@@ -38,6 +38,8 @@ namespace microcode {
         else if (id === "F2") res = "touch pin 2";
         else if (id === "F3") res = "A Button";
         else if (id === "F4") res = "B Button";
+        else if (id === "F3") res = "A Button";
+        else if (id === "F4") res = "B Button";
         else if (id === "F5") res = "key 1";
         else if (id === "F6") res = "key 2";
         else if (id === "F7") res = "logo";
@@ -167,6 +169,12 @@ namespace microcode {
         else if (id == "Jacdac Flex") res = "Jacdac Flex"
         else if (id == "Jacdac Temperature") res = "Jacdac Temperature"
         else if (id == "Jacdac Humidity") res = "Jacdac Humidity"
+        else if (id == "Jacdac Light") res = "Jacdac Light"
+        else if (id == "Jacdac Moisture") res = "Jacdac Moisture"
+        else if (id == "Jacdac Distance") res = "Jacdac Distance"
+        else if (id == "Jacdac Flex") res = "Jacdac Flex"
+        else if (id == "Jacdac Temperature") res = "Jacdac Temperature"
+        else if (id == "Jacdac Humidity") res = "Jacdac Humidity"
 
         // icons do not yet exist:
         else if (id == "Record") res = "Record"
@@ -185,6 +193,9 @@ namespace microcode {
         else if (id == "View Graph") res = "View Graph"
         else if (id == "Measurement Mode") res = "Measurement Mode"
         else if (id == "Event Mode") res = "Event Mode"
+        else if (id == "Reset Datalogger") res = "Reset Datalogger"
+        else if (id == "Yes") res = "Yes"
+        else if (id == "No") res = "No"
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"

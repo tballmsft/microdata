@@ -8,13 +8,13 @@
         "microphone": "*",
         "datalogger": "*",
         "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.1",
-        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
-        "jacdac-light-level": "github:microsoft/pxt-jacdac/tree/master/light-level#v1.9.28",
-        "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
-        "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
-        "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
-        "jacdac-humidity": "github:microsoft/pxt-jacdac/tree/master/humidity#v1.9.28",
-        "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
+        "jacdac": "github:tballmsft/pxt-jacdac",
+        "jacdac-light-level": "github:tballmsft/pxt-jacdac/tree/master/light-level",
+        "jacdac-soil-moisture": "github:tballmsft/pxt-jacdac/tree/master/soil-moisture",
+        "jacdac-distance": "github:tballmsft/pxt-jacdac/tree/master/distance",
+        "jacdac-temperature": "github:tballmsft/pxt-jacdac/tree/master/temperature",
+        "jacdac-humidity": "github:tballmsft/pxt-jacdac/tree/master/humidity",
+        "jacdac-flex": "github:tballmsft/pxt-jacdac/tree/master/flex"
     },
     "files": [
         "keymap.ts",
@@ -43,15 +43,17 @@
         "utils.ts",
         "liveDataViewer.ts",
         "tabularDataViewer.ts",
+        "sensorFactory.ts",
         "sensorSelect.ts",
+        "sensors.ts",
+        "sensorEvent.ts",
         "dataViewSelect.ts",
         "recordingConfig.ts",
         "recordingConfigSelection.ts",
-        "sensors.ts",
         "dataRecorder.ts",
-        "sensorEvent.ts",
         "clearDataloggerScreen.ts",
-        "generateGraph.ts"
+        "generateGraph.ts",
+        "tutorialWindow.ts"
     ],
     "testFiles": [],
     "supportedTargets": [

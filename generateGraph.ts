@@ -1,8 +1,40 @@
 namespace microcode {
-    /** Number of columns used for the datalogger */
-    const NUMBER_OF_COLS = 4;
     /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
+
+    /** How many times should a line be duplicated when drawn? */
+    const PLOT_SMOOTHING_CONSTANT: number = 4
+
+    /** At what point should the UI behaviour change to graph view vs sensor selection? */
+    const Y_SCROLL_GRAPH_MODE_CUT_OFF: number = -60
+
+
+    /**
+     * Indice access alias into datalogger's columns.
+     */
+    enum SENSOR_COLUMNS {
+        NAME = 0,
+        TIME = 1,
+        READING = 2,
+        EVENT = 3
+    }
+
+    /**
+     * Indice access alias into this.sensorMinsAndMaxs columns.
+     */
+    enum MIN_MAX_COLUMNS {
+        MIN = 0,
+        MAX = 1
+    }
+
+    /**
+     * Used by this.rawCoordinates; interface for type optimisation.
+     * Used since readings need to be sorted by their sensor, but the values from the datalogger may be in an unpredictable order,
+     * Thus indexing by the sensorName - which is at the start of each row simplifies access.
+     */
+    interface ISensorReadingLookup {
+        [sensorName: string]: number[];
+    }
 
     /**
      * Is the graph or the sensors being shown?
@@ -20,44 +52,47 @@ namespace microcode {
     /**
      * Takes the datalogger logs and generates a labelled graph.
      * Each sensor is a unique coloured line, sensor information is detailed below.
-     * 
-     * GRAPH GENERATION IS NOT PERFECT:
-     *      IF LOGGED DATA HAS VARIABLE MEASUREMENTS THERE IS A CHANCE THE GRAPH COULD BE WRONG
-     *      THERE NEED TO BE MORE CHECKS ON EACH ROW OF DATA TO SOLVE THIS.
      */
     export class GraphGenerator extends Scene {
         private windowWidth: number;
         private windowHeight: number;
 
-        private windowLeftBuffer: number; 
+        private windowLeftBuffer: number;
         private windowRightBuffer: number;
         private windowTopBuffer: number;
         private windowBotBuffer: number;
 
+        /** Progressed via UP & DOWN. Causes the UI to scroll - UI elements are scaled appropriately via recalculation of normalisedCoordinate Y-values. */
         private yScrollOffset: number;
+        /** Progressed via LEFT & RIGHT. Causes the next chunk of data to be loaded into rawCoordinates & normalisedCoordinates to update. */
         private xScrollOffset: number;
-        private xCoordinateScalar: number;
+        /** UI interaction behaviour changes if this.yScrollOffset descends past Y_SCROLL_GRAPH_MODE_CUT_OFF */
         private uiState: UI_STATE;
+        /** Reconstructed from the datalogger: needed for accessing minimum and maximum readings for normalisation & y-axis. */
+        private sensors: Sensor[]
+        /** Each row is one sensor, the columns within the row are the raw readings from the tabular data viewer. */
+        private rawCoordinates: ISensorReadingLookup
+        /** Normalise rawCoordinates for the current screen size: invoked upon UP, DOWN, LEFT, RIGHT */
+        private processedCoordinates: number[][];
+        /** Sensors can be turned on & off when this.ui_state is SENSOR_SELECTION, by boxes below the graph. Only showSensors[n] == true are shown */
+        private drawSensorStates: {[sensorName: string]: boolean};
 
-        /** Chunk of 10 data points from the datalogger */
-        private dataRows: string[][];
-        /** Normalise dataRows for the current screen size: invoked upon UP, DOWN, LEFT, RIGHT */
-        private processedReadings: number[][];
-        /** Use the sensor names to write information about them below the plot */
-        private sensorNames: string[];
-        /** Sensors can be turned on & off: only showSensors[n] == true are shown */
-        private drawSensorStates: boolean[];
+        /** Indices of sensors that should have their first reading shown on the y-axis */
+        private sensorsIndicesForYAxis: number[]
+        /** Index into the datalogger that reads should begin at, indexed by this.xScrollOffset */
+        private startReadingAt: number[];
+        /** Lower bound for range that x-values are normalised to. Also displayed in bot left of the x-axis */
+        private lowestPeriod: number
+        /** Upper bound for range that x-values are normalised to. Also displayed in bot right of the x-axis */
+        private greatestPeriod: number
         /** Use the sensor minimum and maximum data to wwrite information about them below the plot */
         private sensorMinsAndMaxs: number[][];
         /** After scrolling past the plot the user can select a sensor to disable/enable */
         private currentlySelectedSensorIndex: number;
-        
-        /** Required to be able to find the index of the next reading quickly from processedReadings */
-        private numberOfSensors: number;
         /** Lowest of sensor.minimum for all sensors: required to write at the bottom of the y-axis */
-        private lowestSensorMinimum: number;
+        private globalSensorMinimum: number;
         /** Greatest of sensor.maximum for all sensors: required to write at the top of the y-axis */
-        private highestSensorMaximum: number;
+        private globalSensorMaximum: number;
 
         constructor(app: App) {
             super(app, "graphGeneration")
@@ -75,74 +110,49 @@ namespace microcode {
             this.yScrollOffset = 0
             this.xScrollOffset = 0
 
-            this.getNextDataChunk()
-            this.sensorNames = []
-            this.drawSensorStates = []
+            this.findSensors()
+
+            this.drawSensorStates = {}
             this.sensorMinsAndMaxs = []
-
-            // Get the minimum and maximum sensor readings and the number of sensors:
-            const firstSensorName: string = this.dataRows[0][0]
-            const sensor: Sensor = SENSOR_LOOKUP_TABLE[firstSensorName]
-
-            this.sensorNames.push(firstSensorName)
-            this.drawSensorStates.push(true)
-            this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
-            this.numberOfSensors = 1
+            this.startReadingAt = [0]
             
-            this.lowestSensorMinimum = SENSOR_LOOKUP_TABLE[firstSensorName].getMinimum()
-            this.highestSensorMaximum = SENSOR_LOOKUP_TABLE[firstSensorName].getMaximum()
+            this.sensors.forEach((sensor) => {
+                this.drawSensorStates[sensor.getName()] = true
+                this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
+            })
 
-            // Count until sensor name is repeated:
-            // Go from second sensor onward (3rd row):
-            for (let rowID = 1; rowID < this.dataRows.length; rowID++) {
-                const sensorName = this.dataRows[rowID][0]
+            // Unbind all controls - since .processReadings() may take some time if there are an immense amount of readings:
+            // Pressing a button during this early stage of processing may crash:
+            control.onEvent(ControllerButtonEvent.Pressed, controller.up.id, () => {});
+            control.onEvent(ControllerButtonEvent.Pressed,controller.down.id,() => {});
+            control.onEvent(ControllerButtonEvent.Pressed,controller.left.id,() => {});
+            control.onEvent(ControllerButtonEvent.Pressed,controller.right.id,() => {});
+            control.onEvent(ControllerButtonEvent.Pressed,controller.A.id,() => {});
+            control.onEvent(ControllerButtonEvent.Pressed,controller.B.id,() => {});
 
-                if (sensorName != firstSensorName) {
-                    const sensor: Sensor = SENSOR_LOOKUP_TABLE[sensorName]
+            this.lowestPeriod = 0;
+            this.greatestPeriod = 0;
+            this.setGlobalMinAndMax();
+            this.processReadings();
+            this.setupSensorsToShowOnYAxis()
 
-                    this.sensorNames.push(sensorName)
-                    this.drawSensorStates.push(true)
-                    this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
-                    this.numberOfSensors += 1
-                    
-                    if (sensor.getMinimum() < this.lowestSensorMinimum) {
-                        this.lowestSensorMinimum = sensor.getMinimum()
-                    }
-
-                    if (sensor.getMaximum() > this.highestSensorMaximum) {
-                        this.highestSensorMaximum = sensor.getMaximum()
-                    }
-                }
-
-                else {
-                    break
-                }
-            }
-
-            // Requires sensor names:
-            this.processReadings()
-
-            this.xCoordinateScalar = 1
-            if (this.dataRows.length < Screen.WIDTH) {
-                this.xCoordinateScalar = Math.round(
-                    (Screen.WIDTH - this.windowLeftBuffer + this.windowRightBuffer) /
-                    (this.dataRows.length / this.numberOfSensors)
-                ) - 1
-            }
+            //---------------
+            // Bind Controls:
+            //---------------
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
                     this.yScrollOffset = Math.min(this.yScrollOffset + GRAPH_Y_AXIS_SCROLL_RATE, 0)
-                    if (this.yScrollOffset <= -60) {
+                    if (this.yScrollOffset <= Y_SCROLL_GRAPH_MODE_CUT_OFF) {
                         this.uiState = UI_STATE.SENSOR_SELECTION
                         this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / GRAPH_Y_AXIS_SCROLL_RATE
                     }
-                    else {
+                    else
                         this.uiState = UI_STATE.GRAPH
-                    }
-                    this.processReadings();
+                    this.normaliseReadingsOnYAxis();
+                    this.setupSensorsToShowOnYAxis();
                     this.update() // For fast response to the above change
                 }
             )
@@ -152,14 +162,15 @@ namespace microcode {
                 controller.down.id,
                 () => {
                     this.yScrollOffset = Math.max(this.yScrollOffset - GRAPH_Y_AXIS_SCROLL_RATE, -(this.windowHeight + 40))
-                    if (this.yScrollOffset <= -60) {
+                    if (this.yScrollOffset <= Y_SCROLL_GRAPH_MODE_CUT_OFF) {
                         this.uiState = UI_STATE.SENSOR_SELECTION
                         this.currentlySelectedSensorIndex = Math.abs(this.yScrollOffset + 60) / GRAPH_Y_AXIS_SCROLL_RATE
                     }
-                    else {
+                    else
                         this.uiState = UI_STATE.GRAPH
-                    }
-                    this.processReadings();
+
+                    this.normaliseReadingsOnYAxis();
+                    this.setupSensorsToShowOnYAxis();
                     this.update() // For fast response to the above change
                 }
             )
@@ -168,10 +179,12 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    this.xScrollOffset = Math.max(0, this.xScrollOffset - 1)
-                    this.getNextDataChunk()
-                    this.processReadings()
-                    this.update() // For fast response to the above changes
+                    if (this.xScrollOffset > 0) {
+                        this.xScrollOffset -= 1;
+                        this.processReadings();
+                        this.setupSensorsToShowOnYAxis();
+                        this.update() // For fast response to the above changes
+                    }
                 }
             )
 
@@ -179,22 +192,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    basic.showNumber(6)
-                    const dataRows = this.dataRows
-                    this.xScrollOffset += 1
-                    this.getNextDataChunk()
-                    basic.showNumber(7)
-
-                    // basic.showNumber(x)
-                    if (this.dataRows.length > 1) {
-                        this.xScrollOffset += 1
+                    if (datalogger.getNumberOfRows(this.startReadingAt[this.xScrollOffset + 1]) > 1) {
+                        this.xScrollOffset += 1;
                         this.processReadings();
+                        this.setupSensorsToShowOnYAxis();
                         this.update(); // For fast response to the above changes
-                    }
-
-                    else {
-                        this.xScrollOffset -= 1
-                        this.dataRows = dataRows
                     }
                 }
             )
@@ -205,85 +207,269 @@ namespace microcode {
                 controller.A.id,
                 () => {
                     if (this.uiState == UI_STATE.SENSOR_SELECTION) {
-                        this.drawSensorStates[this.currentlySelectedSensorIndex] = !this.drawSensorStates[this.currentlySelectedSensorIndex]
+                        const sensorName = this.sensors[this.currentlySelectedSensorIndex].getName()
+                        this.drawSensorStates[sensorName] = !this.drawSensorStates[sensorName]
+                        this.setGlobalMinAndMax()
                     }
+                }
+            )
+
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => {
+                    this.app.popScene()
+                    this.app.pushScene(new DataViewSelect(this.app))
                 }
             )
         }
 
         /**
-         * Used to retrieve the next chunk of data
-         * Can be used to intialise this.dataRows
-         * Invoked when this.xScrollOffset changes (Left or Right is pressed)
-         *@returns dataRows where each row contains 4 columns [Sensor Name, Time(ms), Reading, Events]
+         * Build this.sensors with the same sensors that are logged.
+         * This is neccessary for getMinimum() & getMaximum() which are required for normalisation & display.
          */
-        private getNextDataChunk() {
-            this.dataRows = []
-            const tokens = ["BAR"] // TODO datalogger.getRows(this.xScrollOffset * 10, (this.xScrollOffset * 10) + 10).split("_");
+        private findSensors() {
+            this.sensors = []
+            let sensorNames: string[] = []
+            const stdChunkSize = this.windowWidth - this.windowLeftBuffer - this.windowRightBuffer;
 
-            // First row returned is the header: Skip it:
-            if (this.xScrollOffset == 0) {
-                for (let i = NUMBER_OF_COLS; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
-                    this.dataRows[(i / NUMBER_OF_COLS) - 1] = tokens.slice(i, i + NUMBER_OF_COLS);
+            let dataStart = 1
+            while (datalogger.getNumberOfRows(dataStart) > 0) {
+                const rows = datalogger.getRows(Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
+
+                for (let i = 0; i < rows.length - 1; i++) {
+                    const sensorName = rows[i].split(",", 1)[SENSOR_COLUMNS.NAME]
+                    let sensorNameAlreadyKnown = false
+
+                    for (let j = 0; j < sensorNames.length; j++) {
+                        if (sensorName == sensorNames[j]) {
+                            sensorNameAlreadyKnown = true
+                            break;
+                        }
+                    }
+
+                    if (!sensorNameAlreadyKnown) {
+                        sensorNames.push(sensorName)
+                    }
                 }
+                dataStart += rows.length
             }
+            this.sensors = sensorNames.map((name) => SensorFactory.getFromSensorName(name))
+        }
 
-            else {
-                for (let i = 0; i < tokens.length - NUMBER_OF_COLS; i += NUMBER_OF_COLS) {
-                    this.dataRows[i / NUMBER_OF_COLS] = tokens.slice(i, i + NUMBER_OF_COLS);
+        /**
+         * Looks through the current active sensors and finds the lowest minimum & highest maximum among them.
+         * Sets: this.globalSensorMinimum & this.globalSensorMaximum.
+         * Re-invoked upon disabling a sensor.
+         * These two variables will then be displayed at the bot & top of the y-axis.
+         */
+        private setGlobalMinAndMax() {
+            this.globalSensorMinimum = null
+            this.globalSensorMaximum = null
+            
+            // Get the minimum and maximum sensor readings:
+            for (let i = 0; i < this.sensors.length; i++) {
+                const sensor: Sensor = this.sensors[i]
+                if (this.drawSensorStates[sensor.getName()]) {
+                    // Minimum and Maximum sensor readings for the y-axis markers
+                    if (sensor.getMinimum() < this.globalSensorMinimum || this.globalSensorMinimum == null)
+                        this.globalSensorMinimum = sensor.getMinimum()
+
+                    if (sensor.getMaximum() > this.globalSensorMaximum || this.globalSensorMaximum == null)
+                        this.globalSensorMaximum = sensor.getMaximum()
                 }
             }
         }
-
 
         /**
          * Normalise the readings in this.dataRows relative to the screen.
          * Invoked upon UP, DOWN, LEFT, RIGHT.
-         * Mutates: this.processedReadings
+         * Fills this.readings, then invokes this.normaliseReadings() to setup this.normalisedReadings
          */
         private processReadings() {
-            // Makes it easier to write to:
-            interface ISensorReadings {
-                [index: string]: number[];
+            this.rawCoordinates = {};
+            this.startReadingAt[this.xScrollOffset + 1] = 0;
+            this.lowestPeriod = 0;
+
+            /**
+             * Keep track of the last period & reading recorded
+             * Since if there is only 1 element on a new chunk (after scrolling right) the last reading of that prior chunk should be used.
+             * This creates the graphical effect that the new chunk is a direct continuation of the prior via a contigious line.
+             */
+            let lastRawCoordinate: ISensorReadingLookup = {};
+            for (let i = 0; i < this.sensors.length; i++) {
+                this.rawCoordinates[this.sensors[i].getName()] = [];
+                lastRawCoordinate[this.sensors[i].getName()] = [0, 0];
             }
-            let readings = {} as ISensorReadings;
 
-            for (let sensor = 0; sensor < this.sensorNames.length; sensor++) {
-                readings[this.sensorNames[sensor]] = []
-            }
+            // Aim to fill the graphical window area:
+            const targetNumberOfReadings = this.windowWidth - this.windowLeftBuffer - this.windowRightBuffer;
 
-            const fromY = this.windowBotBuffer - (2 * this.yScrollOffset)
-            for (let row = 0; row < this.dataRows.length - this.numberOfSensors; row++) {
-                if (this.drawSensorStates[row % this.numberOfSensors]) {
-                    const sensorName: string = this.dataRows[row][0];
-                    const sensor: Sensor = SENSOR_LOOKUP_TABLE[sensorName];
-                    const minimum: number = sensor.getMinimum();
-                    const maximum: number = sensor.getMaximum();
+            let dataStart = this.startReadingAt[this.xScrollOffset] + 1 // Skip header
+            let currentPeriod: number = 0  // X-axis component of coordinate
+            let currentReading: number = 0 // Y-axis component of coordinate
 
-                    // Find the next reading (each sensor can have a different number of measurements)
-                    // So they may not neccessarily be spaced by this.numberOfSensors
-                    const reading1 = this.dataRows[row][2];
-                    let reading2 = this.dataRows[row + this.numberOfSensors][2]
-                    for (let offset = 1; offset < this.numberOfSensors; offset++) {
-                        if (this.dataRows[row + offset][0] == sensorName) {
-                            reading2 = this.dataRows[row + offset][2]
-                        } 
+            let foundAllReadings = false
+            while (!foundAllReadings && datalogger.getNumberOfRows(dataStart) > 0) {
+                const rows = datalogger.getRows(Math.min(targetNumberOfReadings, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
+
+                for (let i = 0; i < rows.length; i++) {
+                    const cols = rows[i].split(",") // [name, time, reading, event]
+                    lastRawCoordinate[cols[SENSOR_COLUMNS.NAME]] = [currentReading, currentPeriod]
+                    currentPeriod = +cols[SENSOR_COLUMNS.TIME]
+                    currentReading = +cols[SENSOR_COLUMNS.READING]
+
+                    // Setup the lowestPeriod if at the start:
+                    if (dataStart == this.startReadingAt[this.xScrollOffset] + 1 && i == 0)
+                        this.lowestPeriod = currentPeriod
+
+                    // Add reading & period; check if full:
+                    if (this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].length / 2 < targetNumberOfReadings) {
+                        this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].push(currentPeriod)  // X
+                        this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].push(currentReading) // Y
+
+                        // rawCoordinates for this sensor is full: Thus start reading next chunk (where next RIGHT press starts) here:
+                        if ((this.rawCoordinates[cols[SENSOR_COLUMNS.NAME]].length / 2) >= targetNumberOfReadings && this.startReadingAt[this.xScrollOffset + 1] == 0)
+                            this.startReadingAt[this.xScrollOffset + 1] = dataStart + i
+                        
+                        // Check if all are done:
+                        foundAllReadings = true
+                        for (let j = 0; j < this.sensors.length; j++) {
+                            if ((this.rawCoordinates[this.sensors[j].getName()].length / 2) < targetNumberOfReadings) {
+                                foundAllReadings = false
+                                break
+                            }
+                        }
+
+                        if (foundAllReadings)
+                            break
                     }
+                }
+                dataStart += rows.length
+            }
 
-                    const norm1 = ((+reading1 - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
-                    const norm2 = ((+reading2 - minimum) / (Math.abs(minimum) + maximum)) * (screen.height - fromY);
-                    
-                    readings[sensorName].push(Math.round(screen.height - norm1) - fromY)
-                    readings[sensorName].push(Math.round(screen.height - norm2) - fromY)
+            // this.startReadingAt was never set (this occurs in the case where the none of this.rawCoordinates were filled up)
+            // This means that all values were read; so just put the pointer at the end:
+            // This means that datalogger.getNumberOfRows(this.startReadingAt[this.xScrollOffset + 1]) returns 0
+            if (this.startReadingAt[this.xScrollOffset + 1] == 0) {
+                this.startReadingAt[this.xScrollOffset + 1] = dataStart; // this.rawCoordinates[sensorName].length
+            }
+
+            // Setup this.greatestPeriod & prepend the last read value if neccessary:
+            this.greatestPeriod = 0
+            for (let i = 0; i < this.sensors.length; i++) {
+                const sensorName = this.sensors[i].getName()
+                const lastPeriodIndex = this.rawCoordinates[sensorName].length - 2
+
+                if (this.rawCoordinates[sensorName][lastPeriodIndex] > this.greatestPeriod)
+                    this.greatestPeriod = this.rawCoordinates[sensorName][lastPeriodIndex]
+
+                // If there is only one element add the last one from the prior screen,
+                // This makes it look like a smooth continuation.
+                if (this.rawCoordinates[sensorName].length == 1) {
+                    const period = this.rawCoordinates[sensorName][0]
+                    const reading = this.rawCoordinates[sensorName][1]
+                    this.rawCoordinates[sensorName].push(period)
+                    this.rawCoordinates[sensorName].push(reading)
                 }
             }
 
-            this.processedReadings = []
-            for (let sensor = 0; sensor < this.sensorNames.length; sensor++) {
-                this.processedReadings[sensor] = readings[this.sensorNames[sensor]];
+            this.resetProcessedCoordinates()
+            this.normaliseReadingsOnXAxis()
+            this.normaliseReadingsOnYAxis()
+        }
+
+
+        /**
+         * Reset this.normalisedCoordinates & fill to the same size as this.rawCoordinates - except all elements are undefined.
+         * This is neccessary for this.normaliseReadingsOnXAxis() && this.normaliseReadingsOnYAxis() to fill them,
+         * Since they will fill via index access instead of pushing.
+         */
+        private resetProcessedCoordinates() {
+            this.processedCoordinates = []
+            for (let i = 0; i < this.sensors.length; i++)
+                this.processedCoordinates[i] = this.rawCoordinates[this.sensors[i].getName()].map(_ => undefined)
+        }
+
+        /**
+         * Calculate the x-axis position of each of these readings for use in .draw()
+         */
+        private normaliseReadingsOnXAxis() {
+            for (let sensor = 0; sensor < this.sensors.length; sensor++) {
+                const sensorName: string = this.sensors[sensor].getName();
+                const minimum: number = this.lowestPeriod;
+                const range: number = minimum + this.greatestPeriod;
+                
+                // Start at 1 since first readings are [x1,y1,x2,y2,....]:
+                for (let i = 0; i < this.rawCoordinates[sensorName].length - 1; i+=2) {                    
+                    const norm1 = ((this.rawCoordinates[sensorName][i] - minimum) / range) * (Screen.WIDTH - this.windowRightBuffer - this.windowLeftBuffer - 2);
+                    this.processedCoordinates[sensor][i] = this.windowLeftBuffer + norm1;
+                }
             }
         }
-        
+
+        /**
+         * Calculate the y-axis position of each of these readings for use in .draw()
+         */
+        private normaliseReadingsOnYAxis() {
+            const fromY = this.windowBotBuffer - (2 * this.yScrollOffset);
+
+            for (let sensor = 0; sensor < this.sensors.length; sensor++) {
+                const sensorName: string = this.sensors[sensor].getName();
+                const minimum: number = this.sensors[sensor].getMinimum();
+                const range: number = Math.abs(minimum) + this.sensors[sensor].getMaximum();
+                
+                // Start at 0 since first readings are [x1,y1,x2,y2,....]:
+                for (let i = 1; i < this.rawCoordinates[sensorName].length - 1; i+=2) {   
+                    const norm1 = ((this.rawCoordinates[sensorName][i] - minimum) / range) * (BUFFERED_SCREEN_HEIGHT - fromY);
+                    this.processedCoordinates[sensor][i] = Math.round(Screen.HEIGHT - norm1) - fromY;
+                }
+            }
+        }
+
+        /**
+         * Fill this.sensorsToShowOnYAxis with indices of senosrs that are permissable to draw without overlapping.
+         * Invoked after scrolling LEFT or RIGHT.
+         */
+        private setupSensorsToShowOnYAxis() {
+            const boundary: number = 5;
+            const globalSensorMinimumDraw: number = this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4
+            const globalSensorMaximumDraw: number = Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset)
+            
+            this.sensorsIndicesForYAxis = []
+
+            for (let i = 0; i < this.sensors.length; i++) {
+                const y = this.processedCoordinates[i][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                const minOverlap = Math.abs(globalSensorMinimumDraw - y) < boundary;
+                const maxOverlap = Math.abs(globalSensorMaximumDraw - y) < boundary;
+
+                if (!this.drawSensorStates[this.sensors[i].getName()] || minOverlap || maxOverlap)
+                    continue
+
+                if (this.sensorsIndicesForYAxis.length == 0)
+                    this.sensorsIndicesForYAxis.push(i);
+
+                let isOverlap = false;
+                for (let j = 0; j < this.sensorsIndicesForYAxis.length; j++) {
+                    if (this.sensorsIndicesForYAxis[j] != i) {
+                        const index = this.sensorsIndicesForYAxis[j];
+                        const otherY = this.processedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                        
+                        const otherOverlap = Math.abs(y - otherY) < boundary;
+                        const minOverlap = Math.abs(globalSensorMinimumDraw - otherY) < boundary;
+                        const maxOverlap = Math.abs(globalSensorMaximumDraw - otherY) < boundary;
+                        
+                        if (minOverlap || maxOverlap || (this.drawSensorStates[this.sensors[i].getName()] && otherOverlap)) {
+                            isOverlap = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isOverlap)
+                    this.sensorsIndicesForYAxis.push(i);
+            }
+        }
+
         update() {
             screen.fill(this.backgroundColor);
             
@@ -296,32 +482,40 @@ namespace microcode {
                 0
             );
 
+            // Markers & axes:
+            this.draw_axes();
             
             //------------------
             // Draw sensor data:
             //------------------
-
-            // Draw the data from each sensor, as a separate coloured line: sensors may have variable quantities of data:
-            for (let sensor = 0; sensor < this.numberOfSensors; sensor++) {
-                for (let row = 0; row < this.processedReadings[sensor].length; row+=2) {
-                    const xOffset = ((row / 2) * this.xCoordinateScalar);
-                    screen.drawLine(
-                        this.windowLeftBuffer + xOffset,
-                        this.processedReadings[sensor][row],
-                        this.windowLeftBuffer + xOffset + this.xCoordinateScalar,
-                        this.processedReadings[sensor][row + this.numberOfSensors],
-                        SENSOR_COLORS[sensor % SENSOR_COLORS.length]
-                    );
+            if (this.yScrollOffset > Y_SCROLL_GRAPH_MODE_CUT_OFF) {
+                // Draw the data from each sensor, as a separate coloured line: sensors may have variable quantities of data:
+                for (let sensor = 0; sensor < this.sensors.length; sensor++) {
+                    // Each coord in [x1, y1, x2, y2, x3, y3, ...]:
+                    for (let i = 0; i < this.processedCoordinates[sensor].length - 4; i+=2) {
+                        // Not disabled:
+                        if (this.drawSensorStates[this.sensors[sensor].getName()]) {
+                            // Duplicate the line along the y axis to smooth out aliasing:
+                            for (let j = -(PLOT_SMOOTHING_CONSTANT / 2); j < PLOT_SMOOTHING_CONSTANT / 2; j++) {
+                                screen.drawLine(
+                                    this.processedCoordinates[sensor][i]   + 1,
+                                    this.processedCoordinates[sensor][i+1] + j,
+                                    this.processedCoordinates[sensor][i+2] + 1,
+                                    this.processedCoordinates[sensor][i+3] + j,
+                                    SENSOR_COLORS[sensor % SENSOR_COLORS.length]
+                                );
+                            }
+                        }
+                    }
                 }
             }
-
             
             //---------------
             // Sensor blocks:
             //---------------
 
             let y = this.windowHeight - 2 + (2 * this.yScrollOffset)
-            for (let i = 0; i < this.numberOfSensors; i++) {
+            for (let i = 0; i < this.sensors.length; i++) {
                 // Black edges:
                 screen.fillRect(
                     5,
@@ -332,9 +526,10 @@ namespace microcode {
                 )
 
                 // Sensor is disabled:
-                let blockColor: number = SENSOR_COLORS[(i % this.numberOfSensors) % SENSOR_COLORS.length]
+                let blockColor: number = SENSOR_COLORS[(i % this.sensors.length) % SENSOR_COLORS.length]
                 let textColor: number = 15; // black
-                if (!this.drawSensorStates[i]) {
+
+                if (!this.drawSensorStates[this.sensors[i].getName()]) {
                     blockColor = 15; // black
                     textColor = 1;   // white
                 }
@@ -367,21 +562,21 @@ namespace microcode {
                 //--------------------
 
                 screen.print(
-                    this.sensorNames[i],
+                    this.sensors[i].getName(),
                     12,
                     y + 2,
                     textColor
                 )
 
                 screen.print(
-                    "Minimum: " + this.sensorMinsAndMaxs[i][0],
+                    "Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                     12,
                     y + 16,
                     textColor
                 )
 
                 screen.print(
-                    "Maximum: " + this.sensorMinsAndMaxs[i][1],
+                    "Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                     12,
                     y + 32,
                     textColor
@@ -389,8 +584,6 @@ namespace microcode {
 
                 y += 55
             }
-            // Markers & axes:
-            this.draw_axes()
         }
 
         /**
@@ -416,41 +609,63 @@ namespace microcode {
             }
 
             // Y axis:
-            if (this.yScrollOffset > -60) {
-                // Bot:
-                screen.print(
-                    this.lowestSensorMinimum.toString(),
-                    (6 * font.charWidth) - (this.lowestSensorMinimum.toString().length * font.charWidth),
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
-                    15
-                )
+            if (this.yScrollOffset > Y_SCROLL_GRAPH_MODE_CUT_OFF) {
+                if (this.globalSensorMinimum != null && this.globalSensorMaximum != null) {
+                    const globalSensorMinimum: string = this.globalSensorMinimum.toString()
+                    const globalSensorMaximum: string = this.globalSensorMaximum.toString()
+                    const globalSensorMinimumDraw: number = this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4
+                    const globalSensorMaximumDraw: number = Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset)
 
-                // Top:
-                screen.print(
-                    this.highestSensorMaximum.toString(),
-                    (6 * font.charWidth) - (this.highestSensorMaximum.toString().length * font.charWidth),
-                    Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset),
-                    15
-                )
+                    // Bot:
+                    screen.print(
+                        globalSensorMinimum,
+                        (6 * font.charWidth) - (globalSensorMinimum.length * font.charWidth),
+                        globalSensorMinimumDraw,
+                        15
+                    );
+
+                    // Middle y-axis values: one per sensor: skip if too close to others:
+                    for (let i = 0; i < this.sensorsIndicesForYAxis.length; i++) {
+                        const index = this.sensorsIndicesForYAxis[i]
+                        if (this.drawSensorStates[this.sensors[index].getName()]) {
+                            const yWrite: string = this.rawCoordinates[this.sensors[index].getName()][1].toString().slice(0, 5);
+                            const yDraw = this.processedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
+                            screen.print(
+                                yWrite,
+                                (6 * font.charWidth) - (yWrite.length * font.charWidth),
+                                yDraw,
+                                15
+                            );
+                        }
+                    }
+
+                    // Top:
+                    screen.print(
+                        globalSensorMaximum,
+                        (6 * font.charWidth) - (globalSensorMaximum.length * font.charWidth),
+                        globalSensorMaximumDraw,
+                        15
+                    )
+                }
             }
 
             // X axis:
             // Start
             screen.print(
-                (this.xScrollOffset * 10).toString(),
+                this.lowestPeriod / 1000 + "s",
                 this.windowLeftBuffer - 2,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
 
             // End:
+            const end: string = this.greatestPeriod / 1000 + "s";
             screen.print(
-                ((this.xScrollOffset + 1) * 10).toString(),
-                Screen.WIDTH - this.windowRightBuffer - 3,
+                end,
+                Screen.WIDTH - this.windowRightBuffer - (end.length * font.charWidth),
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
                 15
             )
         }
     }
 }
-
