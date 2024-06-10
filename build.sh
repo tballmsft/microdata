@@ -1,0 +1,1 @@
+powershell.exe cp built/binary.hex F:
