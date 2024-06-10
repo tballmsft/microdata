@@ -71,7 +71,11 @@ cd Microdata
 npm install --ignore-scripts
 pxt install
 ```
-10. Local build.
+10. Build and copy to microbit via build.sh script.
+```
+./build.sh
+```
+11. Local build without copy:
 ```
 pxt build --local
 ```
