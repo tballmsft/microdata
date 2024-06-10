@@ -31,7 +31,6 @@ namespace microcode {
             this.numberOfSensors = sensors.length
 
             this.sensors = sensors
-            this.sensorWaitTimes = []
 
             this.sensorIndexOffset = 0 
             this.currentSensorIndex = 0
