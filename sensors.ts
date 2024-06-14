@@ -184,6 +184,8 @@ namespace microcode {
          */
         private dataBuffer: number[]
 
+        private lastLoggedReading: number;
+
         /**
          * Holds what the Y axis position should be for the corresponding read value, relative to a granted fromY value.
          * Filled alongside dataBuffer alongside .readIntoBufferOnce()
@@ -200,6 +202,7 @@ namespace microcode {
 
             this.lastLoggedEventDescription = ""
             this.dataBuffer = []
+            this.lastLoggedReading = 0
             this.normalisedDataBuffer = []
         }
 
@@ -225,7 +228,8 @@ namespace microcode {
             return [
                 this.getPeriod() / 1000 + " second period", 
                 this.config.measurements.toString() + " measurements left",
-                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left"
+                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
+                "Last log was " + this.lastLoggedReading,
             ]
         }
 
@@ -233,10 +237,10 @@ namespace microcode {
             return [
                 this.config.measurements.toString() + " events left",
                 "Logging " + this.config.inequality + " " + this.config.comparator + " events",
+                "Last log was " + this.lastLoggedReading,
                 this.lastLoggedEventDescription
             ]
         }
-
 
         /**
          * Change the size of the buffer used for this.dataBuffer & this.normalisedBuffer
@@ -310,16 +314,16 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number) {
-            const reading = this.getReading()
+        log(time: number): void {
+            this.lastLoggedReading = this.getReading()
             
             if (this.isInEventMode) {
-                if (sensorEventFunctionLookup[this.config.inequality](reading, this.config.comparator)) {
+                if (sensorEventFunctionLookup[this.config.inequality](this.lastLoggedReading, this.config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.getName()),
                         datalogger.createCV("Time (ms)", time),
-                        datalogger.createCV("Reading", reading.toString()),
-                        datalogger.createCV("Event", reading + " " + this.config.inequality + " " + this.config.comparator)
+                        datalogger.createCV("Reading", this.lastLoggedReading.toString()),
+                        datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
                 }
@@ -329,7 +333,7 @@ namespace microcode {
                 datalogger.log(
                     datalogger.createCV("Sensor", this.getName()),
                     datalogger.createCV("Time (ms)", time.toString()),
-                    datalogger.createCV("Reading", reading.toString()),
+                    datalogger.createCV("Reading", this.lastLoggedReading.toString()),
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1

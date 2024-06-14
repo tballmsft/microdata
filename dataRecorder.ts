@@ -13,24 +13,23 @@ namespace microcode {
     export class DataRecorder extends Scene {
         /** Ordered sensor periods */
         private schedule: {sensor: Sensor, waitTime: number}[];
+        
+        private sensors: Sensor[];
         private numberOfSensors: number;
 
-        // UI:
-        private sensors: Sensor[]
         /** Sensor to be shown */
-        private currentSensorIndex: number
+        private currentSensorIndex: number;
         /** Last sensor on the screen */
-        private sensorIndexOffset: number
+        private sensorIndexOffset: number;
         /** For the currentSensorIndex */
-        private sensorBoxColor: number
+        private sensorBoxColor: number;
 
         constructor(app: App, sensors: Sensor[]) {
             super(app, "dataRecorder")
 
             this.schedule = []
-            this.numberOfSensors = sensors.length
-
             this.sensors = sensors
+            this.numberOfSensors = sensors.length
 
             this.sensorIndexOffset = 0 
             this.currentSensorIndex = 0
@@ -174,19 +173,20 @@ namespace microcode {
                 let y = 16
 
                 for (let i = this.sensorIndexOffset; i < this.numberOfSensors; i++) {
-                    if (i - this.sensorIndexOffset > MAX_SENSORS_ON_SCREEN) {
+                    if (i - this.sensorIndexOffset > MAX_SENSORS_ON_SCREEN)
                         break
-                    }
                     
                     // Get the colour for this box
                     this.sensorBoxColor = SENSOR_BOX_COLORS[i % SENSOR_BOX_COLORS.length]
+
+                    const boxWidth: number = 142
 
                     // Draw box as collapsed:
                     if (i != this.currentSensorIndex) {
                         screen.fillRect(
                             5,
                             y,
-                            142,
+                            boxWidth,
                             16,
                             16
                         )
@@ -194,7 +194,7 @@ namespace microcode {
                         screen.fillRect(
                             7,
                             y,
-                            145,
+                            boxWidth + 3,
                             14,
                             this.sensorBoxColor
                         )
@@ -212,16 +212,16 @@ namespace microcode {
                         screen.fillRect(
                             5,
                             y,
-                            142,
-                            47,
-                            16
+                            boxWidth,
+                            62,
+                            15
                         )
 
                         screen.fillRect(
                             7,
                             y,
-                            145,
-                            45,
+                            boxWidth + 3,
+                            60,
                             this.sensorBoxColor
                         )
 
