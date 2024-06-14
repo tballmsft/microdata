@@ -23,7 +23,7 @@ namespace microcode {
         private jacdacSensorSelected: boolean
         
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
-            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))});
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5));
             this.btns = [];
             this.selectedSensorAriaIDs = [];
             this.nextSceneEnum = nextSceneEnum;
@@ -45,6 +45,11 @@ namespace microcode {
                 "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
                 "Jacdac Moisture", "Jacdac Distance"
             ]
+
+
+            //-----------------------------------------------------
+            // Organise buttons in 4x5 grid: same as GridNavigator:
+            //-----------------------------------------------------
 
             let x: number = -60;
             let y: number = -40;
@@ -129,9 +134,6 @@ namespace microcode {
                         return
                     }
                     const sensors = this.selectedSensorAriaIDs.map((ariaID) => SensorFactory.getFromAriaID(ariaID))
-                    const sensorSelectTutorialOpts = {
-
-                    }
 
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {

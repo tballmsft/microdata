@@ -151,54 +151,42 @@ namespace microcode {
         
         constructor(height: number, width: number) {
             super()
-            // basic.showString("1")
             this.height = height
             this.width = width
         }
 
         public move(dir: CursorDir) {
-            this.makeGood()
             switch (dir) {
                 case CursorDir.Up: {
-                    if (this.row == 0)
-                        throw new NavigationError(BACK_BUTTON_ERROR_KIND)
-                    this.row--
-                    // because the column in new row may be out of bounds
-                    this.makeGood()
+                    this.row = (((this.row - 1) % this.height) + this.height) % this.height; // Non-negative modulo
                     break
                 }
 
                 case CursorDir.Down: {
-                    if (this.row == this.buttonGroups.length - 1)
-                        throw new NavigationError(FORWARD_BUTTON_ERROR_KIND)
-                    this.row++
-                    // because the column in new row may be out of bounds
-                    this.makeGood()
+                    this.row = (this.row + 1) % this.height;
                     break
                 }
 
                 case CursorDir.Left: {
                     if (this.col == 0) {
-                        if (this.row > 0) {
-                            this.row--
-                        } else {
-                            this.row = this.buttonGroups.length - 1
-                        }
-                        this.col = this.buttonGroups[this.row].length - 1
-                    } else this.col--
+                        this.col = this.width - 1
+                        this.row = (((this.row - 1) % this.height) + this.height) % this.height; // Non-negative modulo
+                    }
+
+                    else
+                        this.col -= 1
+
                     break
                 }
 
                 case CursorDir.Right: {
-                    if (this.col == this.buttonGroups[this.row].length - 1) {
-                        if (this.row < this.buttonGroups.length - 1) {
-                            this.row++
-                        } else {
-                            this.row = 0
-                        }
-                        this.col = -1
+                    if (this.col == this.width) {
+                        this.col = 0
+                        this.row = Math.min(this.row + 1, this.height)
                     }
-                    this.col++
+                    else 
+                        this.col = (this.col + 1) % this.width
+
                     break
                 }
 
@@ -210,10 +198,13 @@ namespace microcode {
                 }
             }
 
-            // basic.showNumber(5)
-            const btn = this.buttonGroups[this.row][this.col]
+            const btn = this.buttonGroups[0][(this.row * this.width) + this.col]
             this.reportAria(btn)
             return btn
+        }
+
+        public getCurrent(): Button {
+            return this.buttonGroups[0][(this.row * this.width) + this.col]
         }
     }
 
