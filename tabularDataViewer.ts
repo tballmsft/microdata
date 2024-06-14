@@ -52,7 +52,7 @@ namespace microcode {
          * Pressing A sets to Filtered
          * Pressing B sets to Unfiltered
          */
-        private guiState: DATA_VIEW_DISPLAY_MODE
+        private guiState: DATA_VIEW_DISPLAY_MODE;
 
 
         //---------
@@ -387,8 +387,9 @@ namespace microcode {
                     const colID = col + this.currentCol
                     let value: string = this.dataRows[row][colID]
 
-                    // If the column of readings and not the header:
-                    if ((NUMBER_OF_COLS - this.currentCol == 2) || (NUMBER_OF_COLS - this.currentCol == 3) && value.length > 8)
+                    // Never cut events, dont cut readings if also showing time.
+                    // If showing readings and events, cut readings.
+                    if (col == 0 && this.currentCol == 2)
                         value = value.slice(0, 5)
 
                     if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
