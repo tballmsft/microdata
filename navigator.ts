@@ -144,6 +144,79 @@ namespace microcode {
         }
     }
 
+
+    export class GridNavigator extends RowNavigator {
+        private height: number;
+        private width: number;
+        
+        constructor(height: number, width: number) {
+            super()
+            // basic.showString("1")
+            this.height = height
+            this.width = width
+        }
+
+        public move(dir: CursorDir) {
+            this.makeGood()
+            switch (dir) {
+                case CursorDir.Up: {
+                    if (this.row == 0)
+                        throw new NavigationError(BACK_BUTTON_ERROR_KIND)
+                    this.row--
+                    // because the column in new row may be out of bounds
+                    this.makeGood()
+                    break
+                }
+
+                case CursorDir.Down: {
+                    if (this.row == this.buttonGroups.length - 1)
+                        throw new NavigationError(FORWARD_BUTTON_ERROR_KIND)
+                    this.row++
+                    // because the column in new row may be out of bounds
+                    this.makeGood()
+                    break
+                }
+
+                case CursorDir.Left: {
+                    if (this.col == 0) {
+                        if (this.row > 0) {
+                            this.row--
+                        } else {
+                            this.row = this.buttonGroups.length - 1
+                        }
+                        this.col = this.buttonGroups[this.row].length - 1
+                    } else this.col--
+                    break
+                }
+
+                case CursorDir.Right: {
+                    if (this.col == this.buttonGroups[this.row].length - 1) {
+                        if (this.row < this.buttonGroups.length - 1) {
+                            this.row++
+                        } else {
+                            this.row = 0
+                        }
+                        this.col = -1
+                    }
+                    this.col++
+                    break
+                }
+
+                case CursorDir.Back: {
+                    if (this.col > 0) this.col = 0
+                    else if (this.row > 0) this.row--
+                    else return undefined
+                    break
+                }
+            }
+
+            // basic.showNumber(5)
+            const btn = this.buttonGroups[this.row][this.col]
+            this.reportAria(btn)
+            return btn
+        }
+    }
+
     // mostly a matrix, except for last row, which may be ragged
     // also supports delete button
     // add support for aria

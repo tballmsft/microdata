@@ -23,11 +23,11 @@ namespace microcode {
         private jacdacSensorSelected: boolean
         
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
-            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}) 
-            this.btns = []
-            this.selectedSensorAriaIDs = []
-            this.nextSceneEnum = nextSceneEnum
-            this.jacdacSensorSelected = false
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))});
+            this.btns = [];
+            this.selectedSensorAriaIDs = [];
+            this.nextSceneEnum = nextSceneEnum;
+            this.jacdacSensorSelected = false;
         }
 
         /* override */ startup() {
@@ -127,13 +127,46 @@ namespace microcode {
                         return
                     }
                     const sensors = this.selectedSensorAriaIDs.map((ariaID) => SensorFactory.getFromAriaID(ariaID))
-                    this.app.popScene()
-                    if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(this.app, sensors))
+                    const sensorSelectTutorialOpts = {
+
                     }
 
+                    this.app.popScene()
+                    if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
+                        this.app.pushScene(new TutorialWindow(this.app, {
+                            tips: [
+                                {text: "The next screen\nshows live\nsensor readings."},
+                                {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
+                                {text: "Press A on the\ngraph zoom in.", keywords: [" A "], keywordColors: [6]},
+                                {text: "Press A when below\nthe graph to\ntoggle a\nsensor on/off.", keywords: [" A "], keywordColors: [6]},
+                                {text: "Press A to see\nsome data!", keywords: [" A "], keywordColors: [6]}, // Red
+                            ],
+                            backFn: () => {
+                                this.app.popScene()
+                                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                            }
+                        },
+                        new LiveDataViewer(this.app, sensors)))
+                    }
+                    
                     else {
-                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
+                        this.app.pushScene(new TutorialWindow(this.app, {
+                            tips: [
+                                {text: "The next screen is\nwhere you configure\nsensors."},
+                                {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
+                                {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
+                                {text: "A sensor can record\nevents or data."},
+                                {text: "A period is how frequently\na log will occur."},
+                                {text: "Configured sensors\nare green.", keywords: [" green"], keywordColors: [7]}, // Green
+                                {text: "Unconfigured sensors\nare red.", keywords: [" red"], keywordColors: [2]}, // Red
+                                {text: "Press A to configure\nsome sensors!", keywords: [" A "], keywordColors: [6]}, // Blue
+                            ],
+                            backFn: () => {
+                                this.app.popScene()
+                                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
+                            }
+                        },
+                        new RecordingConfigSelection(this.app, sensors)))
                     }
                 }
             }))

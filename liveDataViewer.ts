@@ -12,13 +12,20 @@ namespace microcode {
      * Is the graph or the sensors being shown? Is the graph zoomed in on?
     */
     enum GUI_STATE {
-        TUTORIAL,
-        /** Graph is being shown */
         GRAPH,
         /** The sensors are being shown */
         SENSOR_SELECTION,
         /** GUI Buffers are removed, sensor read buffer is increased */
         ZOOMED_IN
+    }
+
+
+    /**
+     * Indice access alias into this.sensorMinsAndMaxs columns.
+     */
+    enum MIN_MAX_COLUMNS {
+        MIN = 0,
+        MAX = 1
     }
 
     /**
@@ -27,7 +34,7 @@ namespace microcode {
      *      Multiple sensors may be plotted at once
      *      Display modes may be toggled per sensor
      */
-    export class LiveDataViewer extends Scene implements IHasTutorial {
+    export class LiveDataViewer extends Scene {
         /** Same as the Screen.HEIGHT. But reduced when entering GUI_STATE.ZOOMED_IN. */
         private windowWidth: number
         /** Same as the Screen.HEIGHT. But reduced when entering GUI_STATE.ZOOMED_IN. */
@@ -48,9 +55,6 @@ namespace microcode {
 
         /** Show the graph or show the sensor information below the graph? */
         private guiState: GUI_STATE;
-
-        /** Sub-menu filled with tips about how to use the live-data viewer. First thing seen. */
-        private tutorialWindow: TutorialWindow
 
         //--------------------------------
         // Oscilloscope control variables:
@@ -81,7 +85,6 @@ namespace microcode {
         constructor(app: App, sensors: Sensor[]) {
             super(app, "liveDataViewer")
             this.backgroundColor = 3
-            this.backgroundColor = 3
 
             this.windowWidth = Screen.WIDTH
             this.windowHeight = Screen.HEIGHT
@@ -94,22 +97,8 @@ namespace microcode {
             this.windowTopBuffer = 5
             this.windowBotBuffer = 20
 
-            this.guiState = GUI_STATE.TUTORIAL
-            this.tutorialWindow = new TutorialWindow({tips: [
-                {text: "This screen shows a\ngraph of the live\nsensor readings."},
-                {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
-                {text: "Use UP and DOWN to\nsee sensor\ninfo. Try it now!"},
-                {text: "Use A on the graph\nzoom in", keywords: [" A "], keywordColors: [6]},
-                {text: "Use A on the graph\nto toggle a\n sensor on/off.", keywords: [" A "], keywordColors: [6]},
-                {text: "Press A to see\nsome data!", keywords: [" A "], keywordColors: [6]}, // Red
-                ],
-                backFn: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-                },
-                owner: this
-            })
-
+            this.guiState = GUI_STATE.GRAPH
+            
             this.yScrollOffset = 0
             this.yScrollRate = 20
             this.maxYScrollOffset = -60 - ((sensors.length - 1) * 28)
@@ -127,20 +116,14 @@ namespace microcode {
             })
             this.setGlobalMinAndMax()
         }
-        
-        //--------------------
-        // INTERFACE FUNCTION:
-        //--------------------
 
-        public finishTutorial(): void {
-            this.guiState = GUI_STATE.GRAPH
-            this.setupControls()
-        }
 
-        private setupControls() {
+        /* override */ startup() {
+            super.startup()
+
             //--------------------------------
             // Oscilloscope Movement Controls:
-            //--------------------------------  
+            //--------------------------------
 
             // Zoom in:
             control.onEvent(
@@ -148,23 +131,23 @@ namespace microcode {
                 controller.A.id,
                 () => {
                     if (this.guiState == GUI_STATE.SENSOR_SELECTION) {
-                        this.drawSensorStates[this.informationSensorIndex] = !this.drawSensorStates[this.informationSensorIndex]
-                        this.setGlobalMinAndMax() // Re-calculate
+                        this.drawSensorStates[this.informationSensorIndex] = !this.drawSensorStates[this.informationSensorIndex];
+                        this.setGlobalMinAndMax(); // Re-calculate
                     }
                     else {
-                        this.guiState = GUI_STATE.ZOOMED_IN
-                        this.sensors.forEach((sensor) => sensor.setBufferSize(140))
+                        this.guiState = GUI_STATE.ZOOMED_IN;
+                        this.sensors.forEach((sensor) => sensor.setBufferSize(140));
 
-                        const sensor = this.sensors[this.oscSensorIndex]
-                        this.oscXCoordinate = Math.round(sensor.getNormalisedBufferLength() / 2)
-                        this.oscReading = sensor.getNthNormalisedReading(this.oscXCoordinate)
+                        const sensor = this.sensors[this.oscSensorIndex];
+                        this.oscXCoordinate = Math.round(sensor.getNormalisedBufferLength() / 2);
+                        this.oscReading = sensor.getNthNormalisedReading(this.oscXCoordinate);
+;
+                        this.windowLeftBuffer = 0;
+                        this.windowRightBuffer = 0;
+                        this.windowTopBuffer = 0;
+                        this.windowBotBuffer = 0;
 
-                        this.windowLeftBuffer = 0
-                        this.windowRightBuffer = 0
-                        this.windowTopBuffer = 0
-                        this.windowBotBuffer = 0
-
-                        this.update()
+                        this.update();
                     }
                 }
             )
@@ -280,7 +263,6 @@ namespace microcode {
             )
         }
 
-
         /**
          * Looks through the current active sensors and finds the lowest minimum & highest maximum among them.
          * Sets: this.globalSensorMinimum & this.globalSensorMaximum.
@@ -322,11 +304,6 @@ namespace microcode {
                 this.windowHeight - this.windowBotBuffer - ((this.guiState == GUI_STATE.ZOOMED_IN) ? 0 : 4),
                 0
             );
-
-            if (this.guiState == GUI_STATE.TUTORIAL) {
-                this.tutorialWindow.draw()
-                return
-            }
 
             //-------------------------------
             // Load the buffer with new data:
@@ -474,14 +451,14 @@ namespace microcode {
                     )
 
                     screen.print(
-                        "Minimum: " + this.sensorMinsAndMaxs[i][0],
+                        "Sensor Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                         12,
                         y + 16,
                         textColor
                     )
 
                     screen.print(
-                        "Maximum: " + this.sensorMinsAndMaxs[i][1],
+                        "Sensor Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                         12,
                         y + 32,
                         textColor
@@ -521,7 +498,6 @@ namespace microcode {
                     5
                 );
             }
-
 
             if (this.guiState != GUI_STATE.ZOOMED_IN) {
                 //----------

@@ -13,38 +13,42 @@ namespace microcode {
 
 
     /**
-     * Used to inform the owner of this TutorialWindow the user has progressed on (By pressing A).
-     * The owner should restate their control schema: UP, DOWN, A, B are used by the TutorialWindow
-     */
-    export interface IHasTutorial {
-        finishTutorial(): void;
-    }
-
-    /**
      * Owned via composition by the live-data-viewer and the recordingConfigSelection.
      * Displays a scrollable sub-window filled with custom & coloured text - specified by the TutorialTip
      * The owner should restate their control schema: UP, DOWN, A, B are used by the TutorialWindow.
      */
-    export class TutorialWindow implements IHasTutorial {
-        private tutorialTextTips: TutorialTip[]
-        private tutorialTextIndexOffset: number
-        private tutorialOwner: IHasTutorial
-        private backFn: () => void
+    export class TutorialWindow extends Scene {
+        private tutorialTextTips: TutorialTip[];
+        private numberOfTips: number
+        private tutorialTextIndexOffset: number;
+        private nextScene: Scene;
+        private backFn: () => void;
 
-        constructor(opts: {tips: TutorialTip[], backFn: () => void, owner: IHasTutorial}) {
-            this.tutorialTextTips = opts.tips
-            this.tutorialTextIndexOffset = 0
-            this.backFn = opts.backFn
-            this.tutorialOwner = opts.owner
+        constructor(
+            app: App,
+            opts: {tips: TutorialTip[], backFn: () => void}, 
+            nextScene: Scene,
+        ){
+            super(app, "tutorialWindow")
+            this.tutorialTextTips = opts.tips;
+            this.numberOfTips = opts.tips.length;
+            this.tutorialTextIndexOffset = 0;
+            this.nextScene = nextScene;
+            this.backFn = opts.backFn;
 
-            //----------
-            // CONTROLS:
-            //----------
+            basic.pause(5)
+        }
 
+        /* override */ startup() {
+            super.startup()
+            
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
-                () => this.finishTutorial()
+                () => {
+                    this.app.popScene()
+                    this.app.pushScene(this.nextScene)
+                }
             )
 
             control.onEvent(
@@ -53,7 +57,6 @@ namespace microcode {
                 () => this.backFn()
             )
 
-
             // Unbind:
             control.onEvent(ControllerButtonEvent.Pressed, controller.left.id, () => {})
             control.onEvent(ControllerButtonEvent.Pressed, controller.right.id, () => {})
@@ -61,50 +64,58 @@ namespace microcode {
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
-                () => {
-                    this.tutorialTextIndexOffset = Math.max(this.tutorialTextIndexOffset - 1, 0)
-                }
+                () => this.tutorialTextIndexOffset = Math.max(this.tutorialTextIndexOffset - 1, 0)
             )
 
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
-                () => {
-                    this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialTextTips.length - MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)
-                }
+                () => this.tutorialTextIndexOffset = Math.min(this.tutorialTextIndexOffset + 1, this.tutorialTextTips.length - MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)
             )
         }
 
-
-        /**
-         * Invoked the owner's .finishTutorial(): allowing this TutorialWindow to be moved on from/destroyed.
-         * The owner should restate their control schema: UP, DOWN, A, B are used by the TutorialWindow
-         */
-        finishTutorial(): void {
-            this.tutorialOwner.finishTutorial()
-        }
-
         draw() {
+            Screen.fillRect(
+                Screen.LEFT_EDGE,
+                Screen.TOP_EDGE,
+                Screen.WIDTH,
+                Screen.HEIGHT,
+                0xC
+            )
+
             const headerX = Screen.HALF_WIDTH
             const headerY = Screen.HALF_HEIGHT - 60 + 8
+
+            //-------------
+            // Draw Window:
+            //-------------
+
+            const subWindowRightEdge = Screen.HALF_WIDTH + 70;
+            const subWindowTopEdge = Screen.HALF_HEIGHT - 60
+            const subWindowWidth = 140
+            const subWindowHeight = 120
 
             // Sub-window:
             // Outline:
             screen.fillRect(
                 Screen.HALF_WIDTH - 70,
-                Screen.HALF_HEIGHT - 60,
-                140,
-                120,
+                subWindowTopEdge,
+                subWindowWidth,
+                subWindowHeight,
                 15 // Black
             )
 
             screen.fillRect(
                 Screen.HALF_WIDTH - 70 + 3,
-                Screen.HALF_HEIGHT - 60 + 3,
-                140 - 6,
-                120 - 6,
+                subWindowTopEdge + 3,
+                subWindowWidth - 6,
+                subWindowHeight - 6,
                 3 // Pink
             )
+
+            //------------
+            // Draw Title:
+            //------------
 
             const tutorialTextLength = ("Tutorial".length * font.charWidth)
             screen.print(
@@ -116,15 +127,31 @@ namespace microcode {
                 
             // Underline the title:
             screen.fillRect(
-                headerX - (tutorialTextLength / 2) - 4,
-                Screen.HALF_HEIGHT - 60 + 17,
+                headerX - (tutorialTextLength / 2) - 3,
+                subWindowTopEdge + 16,
                 tutorialTextLength + 4,
                 1,
                 15 // Black
             )
 
-            // Print the tutorial tips as bulletpoints:
-            // Some tutorials have coloured keywords, the tip is printed in all black first, then the keyword is printed ontop:
+            //-----------
+            // Scrollbar:
+            //-----------
+
+            screen.fillRect(
+                subWindowRightEdge - 8,
+                subWindowTopEdge + 10 + (this.tutorialTextIndexOffset / (this.numberOfTips - MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)) * (subWindowHeight - 20),
+                3,
+                6,
+                15 // Black
+            )
+
+
+            //---------------------
+            // Write Tutorial Tips:
+            //---------------------
+
+            // Some tutorials have coloured keywords, the text is printed in all black first, then the keyword is printed ontop:
 
             let tutorialTextYOffset = 25
             const tipsOnScreen = Math.min(this.tutorialTextTips.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)

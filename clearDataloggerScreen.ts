@@ -15,7 +15,7 @@ namespace microcode {
             // Data logger already empty:
             if (datalogger.getNumberOfRows() <= 1) {
                 this.app.popScene()
-                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
             }
 
             this.yesBtn = new Sprite({img: icons.get("tile_button_a")})
@@ -50,7 +50,7 @@ namespace microcode {
                     datalogger.deleteLog(datalogger.DeleteType.Fast)
 
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                 }
             )
 
@@ -59,7 +59,7 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                 }
             )
         }

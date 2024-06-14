@@ -2,7 +2,7 @@ namespace microcode {
     export enum CursorSceneEnum {
         LiveDataViewer,
         SensorSelect,
-        MeasurementConfigSelect,
+        RecordingConfigSelect,
         RecordData,
     }
     
@@ -145,10 +145,18 @@ namespace microcode {
     export class CursorSceneWithPriorPage extends CursorScene {
         private goBack1PageFn: () => void;
 
-        constructor(app: App, goBack1PageFn: () => void) {
+        constructor(app: App, goBack1PageFn: () => void, navigator?: INavigator) {
             super(app)
             this.backgroundColor = 11
-
+            
+            if (navigator) {
+                // basic.showString("2")
+                this.navigator = navigator
+            }
+            else {
+                // basic.showString("3")
+                this.navigator = null
+            }
             this.goBack1PageFn = goBack1PageFn
         }
 
@@ -163,7 +171,11 @@ namespace microcode {
 
             this.cursor = new Cursor()
             this.picker = new Picker(this.cursor)
-            this.navigator = new RowNavigator()
+
+            if (this.navigator == null) {
+                this.navigator = new RowNavigator()
+                // basic.showString("4")
+            }
             this.cursor.navigator = this.navigator
         }
     }

@@ -1,20 +1,13 @@
 namespace microcode {
     const enum GUI_STATE {
-        /** The tutorial text is being displayed to the user */
-        /** The tutorial text is being displayed to the user */
-        TUTORIAL,
-        /** User is selecting a sensor to modify */
         /** User is selecting a sensor to modify */
         SELECTING_SENSOR,
         /** User has selected a sensor and is has now selected to write recordingConfig settings to it (period, measurements, inequality, etc) */
         SELECTING_WRITE_MODE,
         /** User has confirmed the recordingConfig settings */
-        /** User has confirmed the recordingConfig settings */
         CONFIRM_CONFIGURATION,
         /** User is modifying a setting */
-        /** User is modifying a setting */
         WRITING,
-        /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         /** User is not changing any settings & PROMPT_SHARED_CONFIG has occured. */
         DEFAULT
     }
@@ -53,7 +46,7 @@ namespace microcode {
      * 
      * After submission the DataRecorder is loaded & these sensor configs excercised.
      */
-    export class RecordingConfigSelection extends Scene implements IHasTutorial {
+    export class RecordingConfigSelection extends Scene {
         private guiState: GUI_STATE
         private writingMode: WRITE_MODE
 
@@ -106,16 +99,9 @@ namespace microcode {
         */
         private configHasChanged: boolean[]
 
-        /**
-         * 
-         * @param app 
-         * @param sensors 
-         */
-        private tutorialWindow: TutorialWindow
-
         constructor(app: App, sensors: Sensor[]) {
             super(app, "measurementConfigSelect")
-            this.guiState = GUI_STATE.TUTORIAL
+            this.guiState = GUI_STATE.SELECTING_SENSOR
             this.writingMode = WRITE_MODE.RECORDING_SETTINGS
 
             this.guiRecordingConfigText = [
@@ -159,37 +145,12 @@ namespace microcode {
             this.currentConfigCol = 0
             this.currentWriteModeRow = 0
             this.currentEventCol = 0
-
-            // Optional keyword colouring:
-            this.tutorialWindow = new TutorialWindow({tips: [
-                {text: "This screen is where\nyou configure your\nsensors."},
-                {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
-                {text: "Use UP and DOWN to\nscroll through\nmenus. Try it now!"},
-                {text: "The current sensor\nwill be yellow Press\nA to select it!", keywords: [" yellow ", "A "], keywordColors: [5, 6]}, // Yellow and Red
-                {text: "A sensor can record\nevents or data."},
-                {text: "Configured sensors\nare green.", keywords: [" green"], keywordColors: [7]}, // Green
-                {text: "Unconfigured sensors\nare red.", keywords: [" red"], keywordColors: [2]}, // Red
-                {text: "Press A to configure\nsome sensors!", keywords: [" A "], keywordColors: [6]}, // Blue
-                ],
-                backFn: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
-                },
-                owner: this
-            })
         }
 
 
-        //--------------------
-        // INTERFACE FUNCTION:
-        //--------------------
+        /* override */ startup() {
+            super.startup()
 
-        public finishTutorial(): void {
-            this.guiState = GUI_STATE.SELECTING_SENSOR
-            this.setupControls()
-        }
-
-        private setupControls() {
             control.onEvent(
                 ControllerButtonEvent.Pressed,
                 controller.A.id,
@@ -255,14 +216,9 @@ namespace microcode {
                 controller.B.id,
                 () => {
                     switch (this.guiState) {
-                        case GUI_STATE.TUTORIAL:
-                            this.app.popScene()
-                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))   
-                            break;
-
                         case GUI_STATE.SELECTING_SENSOR:
-                            // Upon entering check if all sensors are set: set the gui to allow the user to confirm their selection if so:
-                            this.guiState = GUI_STATE.TUTORIAL
+                            this.app.popScene()
+                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))  
                             break;
 
                         case GUI_STATE.SELECTING_WRITE_MODE:
@@ -488,11 +444,7 @@ namespace microcode {
             screen.printCenter("Recording Settings", 2)
             this.drawSensorSelection()
 
-            if (this.guiState == GUI_STATE.TUTORIAL) {
-                this.tutorialWindow.draw()
-            }
-
-            else if (this.guiState == GUI_STATE.CONFIRM_CONFIGURATION) {
+            if (this.guiState == GUI_STATE.CONFIRM_CONFIGURATION) {
                 this.drawConfirmationWindow()
             }
 

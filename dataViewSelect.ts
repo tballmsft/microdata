@@ -32,7 +32,7 @@ namespace microcode {
                     controller.A.id,
                     () => {
                         this.app.popScene()
-                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                     }
                 )
             }
@@ -53,7 +53,7 @@ namespace microcode {
                         controller.A.id,
                         () => {
                             this.app.popScene()
-                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                         }
                     )
                 },
@@ -88,7 +88,7 @@ namespace microcode {
                 boundaryColor: 7,
             })
 
-            this.navigator.addButtons([this.resetDataLoggerBtn, this.dataViewBtn, this.graphViewBtn])
+            this.navigator.addButtons([this.dataViewBtn, this.graphViewBtn, this.resetDataLoggerBtn])
         }
 
         draw() {

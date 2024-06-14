@@ -16,12 +16,11 @@ namespace microcode {
                 case("Logo Pressed") : return new LogoPressSensor();
                 case("Volume")       : return new VolumeSensor();
                 case("Compass")      : return new CompassHeadingSensor();
-                case("Jac Light")     : return new JacdacLightSensor();
-                case("Jac Moist")     : return new JacdacSoilMoistureSensor();
-                case("Jac Dist")    : return new JacdacDistanceSensor();
-                case("Jac Flex")    : return new JacdacFlexSensor();
+                case("Jac Light")    : return new JacdacLightSensor();
+                case("Jac Moist")    : return new JacdacSoilMoistureSensor();
+                case("Jac Dist")     : return new JacdacDistanceSensor();
+                case("Jac Flex")     : return new JacdacFlexSensor();
                 case("Jac Temp")     : return new JacdacTemperatureSensor();
-
                 default              : return new AccelerometerXSensor()
             }
         }
@@ -47,7 +46,6 @@ namespace microcode {
                 case("Jacdac Distance")     : return new JacdacDistanceSensor();
                 case("Jacdac Flex")         : return new JacdacFlexSensor();
                 case("Jacdac Temperature")  : return new JacdacTemperatureSensor();
-
                 default                     : return new AccelerometerXSensor()
             }
         }
