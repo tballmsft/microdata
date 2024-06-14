@@ -41,7 +41,7 @@ namespace microcode {
             ]
 
             const ariaIDs: string[] = [
-                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "Pin 0", "Pin 1", "Pin 2", "led_light_sensor",
+                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "led_light_sensor",
                 "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
                 "Jacdac Moisture", "Jacdac Distance"
             ]

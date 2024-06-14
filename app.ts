@@ -16,6 +16,7 @@ namespace microcode {
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
             this.pushScene(new Home(this))
+            // this.pushScene(new RadioTesting(this))
         }
 
         public saveBuffer(slot: string, buf: Buffer) {
