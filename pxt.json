@@ -53,7 +53,9 @@
         "dataRecorder.ts",
         "clearDataloggerScreen.ts",
         "generateGraph.ts",
-        "tutorialWindow.ts"
+        "tutorialWindow.ts",
+
+        "radioTesting.ts"
     ],
     "testFiles": [],
     "supportedTargets": [

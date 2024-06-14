@@ -435,31 +435,22 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP0Sensor extends Sensor {
+    export class TouchPinP0Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
 
-            PinP0Sensor.pinStatus = 0;
-            PinP0Sensor.isActive = !(PinP1Sensor.isActive && PinP2Sensor.isActive);
-
-            if (PinP0Sensor.isActive) {
-                input.onPinPressed(TouchPin.P0, function () {
-                    PinP0Sensor.pinStatus = (PinP0Sensor.pinStatus == 0) ? 1 : 0
-                })
-
-                input.onPinReleased(TouchPin.P0, function () {
-                    
-                })
-            }
+            TouchPinP0Sensor.pinStatus = 0;
+            input.onPinPressed(TouchPin.P0, function () {
+                TouchPinP0Sensor.pinStatus = (TouchPinP0Sensor.pinStatus == 1) ? 0 : 1
+            })
         }
 
-        public static getName(): string {return "Pin 0"}
-        public static getReading(): number {return PinP0Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 0"}
+        public static getReading(): number {return TouchPinP0Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }
@@ -467,27 +458,22 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP1Sensor extends Sensor {
+    export class TouchPinP1Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
 
-            PinP1Sensor.pinStatus = 0;
-            PinP1Sensor.isActive = !(PinP0Sensor.isActive && PinP2Sensor.isActive);
-
-            if (PinP1Sensor.isActive) {
-                input.onPinReleased(TouchPin.P1, () => {
-                    PinP1Sensor.pinStatus = (PinP1Sensor.pinStatus == 0) ? 1 : 0
-                })
-            }
+            TouchPinP1Sensor.pinStatus = 0;
+            input.onPinReleased(TouchPin.P1, () => {
+                TouchPinP1Sensor.pinStatus = (TouchPinP1Sensor.pinStatus == 0) ? 1 : 0
+            })
         }
 
-        public static getName(): string {return "Pin 1"}
-        public static getReading(): number {return PinP1Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 1"}
+        public static getReading(): number {return TouchPinP1Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }
@@ -495,27 +481,58 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP2Sensor extends Sensor {
+    export class TouchPinP2Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
             
-            PinP2Sensor.pinStatus = 0;
-            PinP2Sensor.isActive = !(PinP0Sensor.isActive && PinP1Sensor.isActive);
-
-            if (PinP2Sensor.isActive) {
-                input.onPinPressed(TouchPin.P2, function () {
-                    PinP2Sensor.pinStatus = (PinP2Sensor.pinStatus == 1) ? 0 : 1
-                })
-            }
+            TouchPinP2Sensor.pinStatus = 0;
+            input.onPinPressed(TouchPin.P2, function () {
+                TouchPinP2Sensor.pinStatus = (TouchPinP2Sensor.pinStatus == 1) ? 0 : 1
+            })
         }
 
-        public static getName(): string {return "Pin 2"}
-        public static getReading(): number {return PinP2Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 2"}
+        public static getReading(): number {return TouchPinP2Sensor.pinStatus}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P0 pin
+     */
+    export class AnalogPinP0Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 0"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P0) / 1023}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P1 pin
+     */
+    export class AnalogPinP1Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 1"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P1) / 1023}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P2 pin
+     */
+    export class AnalogPinP2Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 2"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P2) / 1023}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }
