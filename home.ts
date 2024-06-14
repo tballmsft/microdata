@@ -12,6 +12,7 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
             
+            // datalogger.deleteLog()
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
             datalogger.setColumns([
                 "Sensor",
@@ -19,6 +20,15 @@ namespace microcode {
                 "Reading",
                 "Event"
             ])
+
+            // for (let i = 0; i < 10; i++) {
+            //     datalogger.log(
+            //         datalogger.createCV("Sensor", "e"),
+            //         datalogger.createCV("Time (ms)", i * 10),
+            //         datalogger.createCV("Reading", "17.232323"),
+            //         datalogger.createCV("Event", "10 >= -20")
+            //     )
+            // }
 
             const sensorSelectTutorialOpts = {
                 tips: [

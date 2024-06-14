@@ -33,6 +33,7 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            this.cursor.resetOutlineColourOnMove = true
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
                 "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
@@ -74,6 +75,7 @@ namespace microcode {
 
                         // Addition:
                         else if (this.selectedSensorAriaIDs.length < MAX_NUMBER_OF_SENSORS) {
+                            this.cursor.setOutlineColour(7)
                             if (SensorFactory.getFromAriaID(button.ariaId).isJacdac()) {
                                 if (!this.jacdacSensorSelected) {
                                     this.selectedSensorAriaIDs.push(button.ariaId)

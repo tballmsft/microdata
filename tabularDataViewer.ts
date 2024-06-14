@@ -384,22 +384,21 @@ namespace microcode {
 
                 // Skip the first column: Time (Seconds)
                 for (let col = 0; col < NUMBER_OF_COLS - this.currentCol; col++) {
-                    const colID = col + this.currentCol
-                    let value: string = this.dataRows[row][colID]
+                    const colID: number = col + this.currentCol;
+                    let value: string = this.dataRows[row][colID];
 
                     // Never cut events, dont cut readings if also showing time.
                     // If showing readings and events, cut readings.
                     if (col == 0 && this.currentCol == 2)
-                        value = value.slice(0, 5)
+                        value = value.slice(0, 5);
 
-                    if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH) {
+                    if (cumulativeColOffset + this.headerStringLengths[colID] > Screen.WIDTH)
                         break;
-                    }
 
                     // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                     // This will align the text to the center of this column space
                     if (colID == NUMBER_OF_COLS - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
-                        cumulativeColOffset += ((Screen.WIDTH - cumulativeColOffset) / 2) - (this.headerStringLengths[colID] / 2)
+                        cumulativeColOffset += ((Screen.WIDTH - cumulativeColOffset) / 2) - (this.headerStringLengths[colID] / 2);
                     }
 
                     Screen.print(
