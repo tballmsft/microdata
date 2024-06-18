@@ -15,6 +15,7 @@ namespace microcode {
             basic.pause(30)
             reportEvent("app.start")
             this.sceneManager = new SceneManager()
+            // this.pushScene(new RecordingConfigSelection(this, [new AccelerometerXSensor(), new AccelerometerYSensor(), new AccelerometerZSensor()]))
             this.pushScene(new Home(this))
             // this.pushScene(new RadioTesting(this))
         }

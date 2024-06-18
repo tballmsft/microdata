@@ -134,7 +134,7 @@ namespace microcode {
          * @param config see recordingConfigSelection
          * @param isInEventMode will this sensor be used to track events?
          */
-        setConfig(config: RecordingConfig, isInEventMode: boolean): void;
+        setConfig(config: RecordingConfig): void;
 
         /**
          * Records a sensor's reading to the datalogger.
@@ -302,7 +302,8 @@ namespace microcode {
          * @param config see recordingConfigSelection.
          * @param isInEventMode will this sensor be used to track events?
          */
-        setConfig(config: RecordingConfig, isInEventMode: boolean) {
+        setConfig(config: RecordingConfig) {
+            const isInEventMode = config.comparator != null && config.inequality != null
             this.config = config
             this.totalMeasurements = this.config.measurements
             this.isInEventMode = isInEventMode

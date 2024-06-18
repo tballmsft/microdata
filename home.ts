@@ -4,21 +4,19 @@ namespace microcode {
         private liveDataBtn: Button
         private viewBtn: Button
 
-        constructor(app: App) {
-            super(app)
-        }
+        constructor(app: App) {super(app)}
 
         /* override */ startup() {
             super.startup()
             
             // datalogger.deleteLog()
-            datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
-            datalogger.setColumns([
-                "Sensor",
-                "Time (ms)",
-                "Reading",
-                "Event"
-            ])
+            // datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
+            // datalogger.setColumns([
+            //     "Sensor",
+            //     "Time (ms)",
+            //     "Reading",
+            //     "Event"
+            // ])
 
             // for (let i = 0; i < 10; i++) {
             //     datalogger.log(

@@ -426,7 +426,6 @@ export const largeMetaDataIcon = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     `
 
-
     ///
     /// HARDWARE-SPECIFIC LANGUAGE TILES
     ///
