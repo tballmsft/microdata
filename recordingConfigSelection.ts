@@ -2,8 +2,7 @@ namespace microcode {
     const enum GUI_STATE {
         SENSOR_SELECT,
         SENSOR_SELECT_CONFIG_ROW,
-        SENSOR_MODIFY_CONFIG_ROW,
-        ALL_SENSORS_CONFIGURED
+        SENSOR_MODIFY_CONFIG_ROW
     }
 
     const enum CONFIG_ROW {
@@ -12,18 +11,26 @@ namespace microcode {
         DONE = 2
     }
 
-    const CONFIG_ROW_DISPLAY_NAME_LOOKUP = [
-        "Measurements", // MEASUREMENT_QTY
-        "Period   Event", // PERIOD_OR_EVENT
-        "Done" // DONE
-    ]
-
-    const GUI_TEXT_EVENT_CONFIG = ["choose inequality", "compared against", "number of events"]
-
     const enum CONFIG_MODE {
         PERIOD,
         EVENT
     }
+
+    const CONFIG_ROW_DISPLAY_NAME_LOOKUP = [
+        "Measurements", // MEASUREMENT_QTY
+        "Period   Event", // PERIOD_OR_EVENT; Allow for space to account for the line that separates them when drawn - this is drawn as a switch.
+        "Done" // DONE
+    ]
+
+    
+    const GUI_TEXT_EVENT_CONFIG = ["choose inequality", "compared against"]
+    const enum GUI_TEXT_EVENT_INDEX {
+        INEQUALITY,
+        COMPARATOR
+    }
+
+    const GUI_TEXT_PERIOD_CONFIG = ["number of milliseconds", "number of seconds", "number of minutes", "number of hours", "number of days"]
+    const GUI_PERIOD_DEFAULTS = [0, 1, 0, 0, 0] // ms, Seconds, Minutes, Hours, Days
 
     /**
      * The (ms, second, minute, hour, day) ui elements kept in RecordingSettingsGUIColumn.value are converted into ms using this:
@@ -42,10 +49,10 @@ namespace microcode {
         private sensors: Sensor[];
         private sensorConfigs: RecordingConfig[]
 
-        private currentSensorRow: number;
-        private currentConfigurationRow: CONFIG_ROW;
-        private currentEventOrPeriodTextCol: number
-        private configIndices: number[][]
+        private sensorIndex: number;
+        private configurationIndex: CONFIG_ROW;
+        private eventOrPeriodIndex: number
+        private guiConfigValues: number[][]
 
         private currentConfigMode: CONFIG_MODE
         private sensorConfigIsSet: boolean[]
@@ -56,20 +63,20 @@ namespace microcode {
 
             this.sensors = sensors
             this.sensorConfigs = []
-            this.configIndices = []
+            this.guiConfigValues = []
 
-            this.currentSensorRow = 0
-            this.currentConfigurationRow = CONFIG_ROW.MEASUREMENT_QTY
-            this.currentEventOrPeriodTextCol = 0
+            this.sensorIndex = 0
+            this.configurationIndex = CONFIG_ROW.MEASUREMENT_QTY
+            this.eventOrPeriodIndex = 0
             this.currentConfigMode = CONFIG_MODE.PERIOD
             this.sensorConfigIsSet = []
 
             for (let i = 0; i < this.sensors.length; i++) {
                 this.sensorConfigIsSet.push(false)
-                this.sensorConfigs.push({measurements: 10, period: 1000}) // Defaults per sensor
+                this.sensorConfigs.push({measurements: 10, period: 1000, inequality: null, comparator: null}) // Defaults per sensor
 
-                this.setConfigIndicesForSensor(i, CONFIG_MODE.PERIOD)
-                this.configIndices.push([0, Math.abs(this.sensors[i].getMaximum()) - Math.abs(this.sensors[i].getMinimum())])
+                this.guiConfigValues[i] = GUI_PERIOD_DEFAULTS
+                // this.guiConfigValues[i] = [0, Math.abs(this.sensors[i].getMaximum()) - Math.abs(this.sensors[i].getMinimum())]
             }
         }
 
@@ -83,55 +90,78 @@ namespace microcode {
                 () => {
                     switch (this.guiState) {
                         case GUI_STATE.SENSOR_SELECT: {
-                            this.guiState = GUI_STATE.SENSOR_SELECT_CONFIG_ROW
+                            this.guiState = GUI_STATE.SENSOR_SELECT_CONFIG_ROW;
                             this.update();
                             break;
                         }
 
                         case GUI_STATE.SENSOR_SELECT_CONFIG_ROW: {
                             // User selects DONE:
-                            if (this.currentConfigurationRow == CONFIG_ROW.DONE) {
-                                this.currentConfigurationRow = CONFIG_ROW.MEASUREMENT_QTY 
+                            if (this.configurationIndex == CONFIG_ROW.DONE) {
+                                this.sensorConfigIsSet[this.sensorIndex] = true
 
-                                this.sensorConfigIsSet[this.currentSensorRow] = true
-
-                                this.sensorConfigIsSet.forEach(configIsSet => {
-                                    if (!configIsSet) {
+                                for (let i = 0; i < this.sensors.length; i++) {
+                                    if (!this.sensorConfigIsSet[i]) {
+                                        // Reset GUI state:
+                                        this.configurationIndex = CONFIG_ROW.MEASUREMENT_QTY 
+                                        this.eventOrPeriodIndex = 0        
                                         this.guiState = GUI_STATE.SENSOR_SELECT 
                                         return
                                     }
-                                }); 
-                                this.guiState = GUI_STATE.ALL_SENSORS_CONFIGURED 
+                                }
+
+                                // All sensors are configured, pass them their config and move to the DataRecording screen:
+                                this.sensors.map((sensor, index) => {
+                                    sensor.setConfig(this.sensorConfigs[index])
+                                })
+    
+                                this.app.popScene()
+                                this.app.pushScene(new DataRecorder(this.app, this.sensors))
                             }
 
-                            else
-                                this.guiState = GUI_STATE.SENSOR_MODIFY_CONFIG_ROW
+                            else if (this.currentConfigMode == CONFIG_MODE.EVENT && this.sensorConfigs[this.sensorIndex].inequality == null) {
+                                this.eventOrPeriodIndex = 0
+
+                                this.sensorConfigs[this.sensorIndex].period = SENSOR_EVENT_POLLING_PERIOD_MS
+                                this.guiConfigValues[this.sensorIndex] = [0, Math.abs(this.sensors[this.sensorIndex].getMaximum()) - Math.abs(this.sensors[this.sensorIndex].getMinimum())]
+                            }
+
+                            else if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
+                                this.eventOrPeriodIndex = 0
+
+                                this.sensorConfigs[this.sensorIndex].inequality = null
+                                this.sensorConfigs[this.sensorIndex].comparator = null
+                                this.guiConfigValues[this.sensorIndex] = GUI_PERIOD_DEFAULTS
+                            }
+
+                            this.guiState = GUI_STATE.SENSOR_MODIFY_CONFIG_ROW
                             break;
                         }
 
                         case GUI_STATE.SENSOR_MODIFY_CONFIG_ROW: {
-                            switch (this.currentConfigurationRow) {
+                            switch (this.configurationIndex) {
                                 case CONFIG_ROW.MEASUREMENT_QTY: {
-                                    this.guiState = GUI_STATE.SENSOR_SELECT_CONFIG_ROW
+                                    this.guiState = GUI_STATE.SENSOR_SELECT_CONFIG_ROW;
                                     break;
                                 }
 
                                 case CONFIG_ROW.PERIOD_OR_EVENT: {
+                                    if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
+                                        this.sensorConfigs[this.sensorIndex].period = 0
+                                        for (let col = 0; col < this.guiConfigValues.length; col++)
+                                            this.sensorConfigs[this.sensorIndex].period += this.guiConfigValues[this.sensorIndex][col] * TIME_CONVERSION_TABLE[col];
+                                    }
+
+                                    else if (this.currentConfigMode == CONFIG_MODE.EVENT) {
+                                        this.sensorConfigs[this.sensorIndex].inequality = sensorEventSymbols[this.guiConfigValues[this.sensorIndex][GUI_TEXT_EVENT_INDEX.INEQUALITY]];
+                                        this.sensorConfigs[this.sensorIndex].comparator = this.guiConfigValues[this.sensorIndex][GUI_TEXT_EVENT_INDEX.COMPARATOR];
+                                        this.sensorConfigs[this.sensorIndex].period = SENSOR_EVENT_POLLING_PERIOD_MS;
+                                    }
                                     this.guiState = GUI_STATE.SENSOR_SELECT_CONFIG_ROW
                                     break;
                                 }              
                             }
                             break
-                        }
-
-                        case GUI_STATE.ALL_SENSORS_CONFIGURED: {
-                            // Pass each sensor its config:
-                            this.sensors.map((sensor, index) => {
-                                sensor.setConfig(this.sensorConfigs[index])
-                            })
-
-                            this.app.popScene()
-                            this.app.pushScene(new DataRecorder(this.app, this.sensors))
                         }
                     }
                     this.update();
@@ -172,10 +202,27 @@ namespace microcode {
 
                         // Non-Negative modulo support:
                         if (this.guiState == GUI_STATE.SENSOR_SELECT)
-                            this.currentSensorRow = (((this.currentSensorRow - 1) % qty) + qty) % qty
+                            this.sensorIndex = (((this.sensorIndex - 1) % qty) + qty) % qty
                         else
-                            this.currentConfigurationRow = (((this.currentConfigurationRow - 1) % qty) + qty) % qty
+                            this.configurationIndex = (((this.configurationIndex - 1) % qty) + qty) % qty
                     }
+
+                    else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
+                        switch (this.configurationIndex) {
+                            case CONFIG_ROW.PERIOD_OR_EVENT: {
+                                if (this.currentConfigMode == CONFIG_MODE.EVENT) {
+                                    const qty = (this.eventOrPeriodIndex == GUI_TEXT_EVENT_INDEX.INEQUALITY) ? sensorEventSymbols.length : this.sensors[this.sensorIndex].getMaximum()
+                                    this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] = (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] + 1) % qty
+                                }
+
+                                else if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
+                                    this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] += 1
+                                }
+                                break;
+                            }                       
+                        }
+                    }
+                    this.update()
                 }
             )
 
@@ -187,10 +234,35 @@ namespace microcode {
                         const qty = (this.guiState == GUI_STATE.SENSOR_SELECT) ? this.sensors.length : CONFIG_ROW_DISPLAY_NAME_LOOKUP.length
 
                         if (this.guiState == GUI_STATE.SENSOR_SELECT)
-                            this.currentSensorRow = (this.currentSensorRow + 1) % qty
+                            this.sensorIndex = (this.sensorIndex + 1) % qty
                         else
-                            this.currentConfigurationRow = (this.currentConfigurationRow + 1) % qty
+                            this.configurationIndex = (this.configurationIndex + 1) % qty
                     }
+
+                    else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
+                        switch (this.configurationIndex) {
+                            case CONFIG_ROW.PERIOD_OR_EVENT: {
+                                if (this.currentConfigMode == CONFIG_MODE.EVENT) {
+                                    if (this.eventOrPeriodIndex == GUI_TEXT_EVENT_INDEX.COMPARATOR ) {
+                                        if (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] - 1 < this.sensors[this.sensorIndex].getMinimum())
+                                            this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] = this.sensors[this.sensorIndex].getMaximum()
+                                        else
+                                            this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] -= 1  
+                                    }
+                                    else if (this.eventOrPeriodIndex == GUI_TEXT_EVENT_INDEX.INEQUALITY) {
+                                        const qty = sensorEventSymbols.length
+                                        this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] = (((this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] - 1) % qty) + qty) % qty
+                                    }
+                                }
+
+                                else if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
+                                    this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] = Math.max(this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex] - 1, 0)
+                                }
+                                break;
+                            }                       
+                        }
+                    }
+                    this.update()
                 }
             )
 
@@ -198,20 +270,21 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    if (this.guiState == GUI_STATE.SENSOR_SELECT_CONFIG_ROW && this.currentConfigurationRow == CONFIG_ROW.PERIOD_OR_EVENT) {
+                    if (this.guiState == GUI_STATE.SENSOR_SELECT_CONFIG_ROW && this.configurationIndex == CONFIG_ROW.PERIOD_OR_EVENT)
                         this.currentConfigMode = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? CONFIG_MODE.EVENT : CONFIG_MODE.PERIOD
-                        this.setConfigIndicesForSensor(this.currentSensorRow, this.currentConfigMode)
-                        this.sensorConfigIsSet[this.currentSensorRow] = false
-                    }
 
                     else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
-                        switch (this.currentConfigurationRow) {
+                        switch (this.configurationIndex) {
                             case CONFIG_ROW.MEASUREMENT_QTY: {
-                                this.sensorConfigs[this.currentSensorRow].measurements = Math.max(this.sensorConfigs[this.currentSensorRow].measurements - 1, 0)
+                                this.sensorConfigs[this.sensorIndex].measurements = Math.max(this.sensorConfigs[this.sensorIndex].measurements - 1, 0)
                                 break;
                             }
                             case CONFIG_ROW.PERIOD_OR_EVENT: {
-                                
+                                const qty = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? GUI_PERIOD_DEFAULTS.length : GUI_TEXT_EVENT_CONFIG.length
+                                if (this.currentConfigMode == CONFIG_MODE.PERIOD)
+                                    this.eventOrPeriodIndex = (((this.eventOrPeriodIndex - 1) % qty) + qty) % qty
+                                else if (this.currentConfigMode == CONFIG_MODE.EVENT)
+                                    this.eventOrPeriodIndex = (((this.eventOrPeriodIndex - 1) % qty) + qty) % qty
                                 break;
                             }                       
                         }
@@ -224,20 +297,20 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.guiState == GUI_STATE.SENSOR_SELECT_CONFIG_ROW && this.currentConfigurationRow == CONFIG_ROW.PERIOD_OR_EVENT) {
-                        this.currentConfigMode = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? CONFIG_MODE.EVENT : CONFIG_MODE.PERIOD
-                        this.setConfigIndicesForSensor(this.currentSensorRow, this.currentConfigMode)
-                        this.sensorConfigIsSet[this.currentSensorRow] = false
-                    }
+                    if (this.guiState == GUI_STATE.SENSOR_SELECT_CONFIG_ROW && this.configurationIndex == CONFIG_ROW.PERIOD_OR_EVENT)
+                        this.currentConfigMode = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? CONFIG_MODE.EVENT : CONFIG_MODE.PERIOD;
 
                     if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
-                        switch (this.currentConfigurationRow) {
+                        switch (this.configurationIndex) {
                             case CONFIG_ROW.MEASUREMENT_QTY: {
-                                this.sensorConfigs[this.currentSensorRow].measurements += 1
+                                this.sensorConfigs[this.sensorIndex].measurements += 1
                                 break;
                             }
                             case CONFIG_ROW.PERIOD_OR_EVENT: {
-                                  
+                                if (this.currentConfigMode == CONFIG_MODE.PERIOD)
+                                    this.eventOrPeriodIndex = (this.eventOrPeriodIndex + 1) % GUI_PERIOD_DEFAULTS.length
+                                else if (this.currentConfigMode == CONFIG_MODE.EVENT)
+                                    this.eventOrPeriodIndex = (this.eventOrPeriodIndex + 1) % GUI_TEXT_EVENT_CONFIG.length
                                 break;
                             }                       
                         }
@@ -245,14 +318,6 @@ namespace microcode {
                     this.update()
                 }
             )
-        }
-
-
-        private setConfigIndicesForSensor(sensorIndex: number, configMode: CONFIG_MODE) {
-            if (configMode == CONFIG_MODE.PERIOD)
-                this.configIndices[sensorIndex] = [0, 1, 0, 0, 0] // ms, Seconds, Minutes, Hours, Days
-            else if (configMode == CONFIG_MODE.EVENT)
-                this.configIndices[sensorIndex] = [0, Math.abs(this.sensors[sensorIndex].getMaximum()) - Math.abs(this.sensors[sensorIndex].getMinimum())]
         }
         
         update() {
@@ -275,7 +340,7 @@ namespace microcode {
 
 
         private drawConfigurationWindow() {
-            const sensorName = this.sensors[this.currentSensorRow].getName()
+            const sensorName = this.sensors[this.sensorIndex].getName()
 
             screen.printCenter(sensorName, 1)
 
@@ -316,12 +381,12 @@ namespace microcode {
 
 
             // Bounding box in blue:
-            if (this.currentConfigurationRow == CONFIG_ROW.MEASUREMENT_QTY && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
+            if (this.configurationIndex == CONFIG_ROW.MEASUREMENT_QTY && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 3; thickness++) {
                     screen.drawRect(
                         0,
                         yStart + thickness - 1,
-                        ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY].length + 1) * font.charWidth) + 5 - thickness,
+                        ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY].length + 1) * font.charWidth) - thickness,
                         font.charHeight + 10 - thickness,
                         6
                     ) // Highlight selected in blue
@@ -336,7 +401,7 @@ namespace microcode {
     
             // Push to just above Done if Measurements selected, if selected push to just below Measurements:
             if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
-                if (this.currentConfigurationRow == CONFIG_ROW.MEASUREMENT_QTY)
+                if (this.configurationIndex == CONFIG_ROW.MEASUREMENT_QTY)
                     periodEventStart = Screen.HEIGHT - 39
                 else
                     periodEventStart = yStart - 3 + font.charHeight + 9 + 5
@@ -425,7 +490,7 @@ namespace microcode {
                 )
 
             // Bounding box in blue if selected:
-            if (this.currentConfigurationRow == CONFIG_ROW.PERIOD_OR_EVENT && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
+            if (this.configurationIndex == CONFIG_ROW.PERIOD_OR_EVENT && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 3; thickness++) {
                     screen.drawRect(
                         0,
@@ -436,6 +501,7 @@ namespace microcode {
                     ) // Highlight selected in blue
                 }
             }
+
 
             //-------------
             // Done button:
@@ -465,7 +531,7 @@ namespace microcode {
             ) // Value
 
             // Bounding box in blue if selected:
-            if (this.currentConfigurationRow == CONFIG_ROW.DONE && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
+            if (this.configurationIndex == CONFIG_ROW.DONE && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 3; thickness++) {
                     screen.drawRect(
                         0,
@@ -482,9 +548,10 @@ namespace microcode {
             //--------------------------------------------------
 
             if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW)
-                switch (this.currentConfigurationRow) {
+                switch (this.configurationIndex) {
                     case CONFIG_ROW.MEASUREMENT_QTY: {
                         const yWindowStart = yStart + font.charHeight + 11
+                        
                         screen.fillRect(
                             2,
                             yWindowStart,
@@ -501,35 +568,32 @@ namespace microcode {
                             6
                         ) // Blue menu
 
-
-                        // screen.print(
-                        //     "- 1",
-                        //     Screen.HALF_WIDTH - 17 - ("- 1".length * font.charWidth),
-                        //     yWindowStart + 23,
-                        //     5,
-                        //     bitmap.font8
-                        // )
-
+                        // Prompt text:
                         screen.printCenter(
-                            this.sensorConfigs[this.currentSensorRow].measurements.toString(),
-                            yWindowStart + 21,
-                            5,
-                            bitmap.font12
+                            "How many measurements?",
+                            yWindowStart + 6,
+                            15
+                        )
+                        
+                        const measurementsText = this.sensorConfigs[this.sensorIndex].measurements.toString()
+                        screen.printCenter(
+                            measurementsText,
+                            yWindowStart + 24,
+                            15
                         )
 
-                        // screen.print(
-                        //     "+ 1",
-                        //     Screen.HALF_WIDTH + 10,
-                        //     yWindowStart + 23,
-                        //     5,
-                        //     bitmap.font8
-                        // )
+                        screen.drawRect(
+                            Screen.HALF_WIDTH - ((measurementsText.length * font.charWidth) / 2) - 4,
+                            yWindowStart + 21,
+                            (measurementsText.length * font.charWidth) + 8,
+                            14,
+                            5
+                        ) // Yellow bounding box
 
                         break;
                     }
                 
                     case CONFIG_ROW.PERIOD_OR_EVENT: {
-
                         screen.fillRect(
                             2,
                             periodEventStart + font.charHeight + 11,
@@ -549,55 +613,85 @@ namespace microcode {
                         if (this.currentConfigMode == CONFIG_MODE.EVENT) {
                             // Prompt text:
                             screen.printCenter(
-                                GUI_TEXT_EVENT_CONFIG[this.currentEventOrPeriodTextCol],
-                                Screen.HALF_HEIGHT - 32 + 6,
+                                GUI_TEXT_EVENT_CONFIG[this.eventOrPeriodIndex],
+                                Screen.HALF_HEIGHT - 3,
                                 15
                             )
 
-                            // This temporary object creation is very inefficient; it can be rectified in the future by creating the sensors and then loading their configs at the end:
-                            const sensor: Sensor = this.sensors[this.currentSensorRow]
-                            const inequalitySymbol: string = sensorEventSymbols[this.configIndices[this.currentSensorRow][0]]
-                            const inequalityOperand: string = this.configIndices[this.currentSensorRow][1].toString()
+                            const sensor: Sensor = this.sensors[this.sensorIndex]
+                            const inequalitySymbol: string = sensorEventSymbols[this.guiConfigValues[this.sensorIndex][0]]
+                            const inequalityOperand: string = this.guiConfigValues[this.sensorIndex][1].toString()
 
-                            const xOffset = 8
+                            const expression = sensor.getName() + " " + inequalitySymbol + " " + inequalityOperand
+
+                            // Write Event expression:
+                            screen.printCenter(
+                                expression,
+                                Screen.HALF_HEIGHT + 15,
+                                15 // black
+                            )
 
                             // Box around selected element:
-                            switch (this.currentEventOrPeriodTextCol) {
+                            switch (this.eventOrPeriodIndex) {
                                 case 0:
                                     screen.drawRect(
-                                        xOffset + 8 + (sensor.getName().length * font.charWidth) + 9,
-                                        Screen.HALF_HEIGHT + 7,
-                                        (inequalitySymbol.length * font.charWidth) + 5,
-                                        12,
-                                        6
+                                        Screen.HALF_WIDTH - ((expression.length * font.charWidth) / 2) + ((sensor.getName().length + 1) * font.charWidth) - 4,
+                                        Screen.HALF_HEIGHT + 12,
+                                        (inequalitySymbol.length * font.charWidth) + 8,
+                                        14,
+                                        5
                                     )
                                     break;
 
                                 case 1:
                                     screen.drawRect(
-                                        xOffset + 8 + (sensor.getName().length * font.charWidth) + 16 + (inequalitySymbol.length * font.charWidth),
-                                        Screen.HALF_HEIGHT + 7,
-                                        (inequalityOperand.length * font.charWidth) + 5,
-                                        12,
-                                        6
+                                        Screen.HALF_WIDTH - ((expression.length * font.charWidth) / 2) + ((sensor.getName() + " " + inequalitySymbol + " ").length * font.charWidth) - 4,
+                                        Screen.HALF_HEIGHT + 12,
+                                        (inequalityOperand.length * font.charWidth) + 8,
+                                        14,
+                                        5
                                     )
                                     break;
                             
                                 default:
                                     break;
                             }
-
-                            // Write Event expression:
-                            screen.print(
-                                "(" + sensor.getName() + " " + inequalitySymbol + " " + inequalityOperand + ")",
-                                xOffset * 2,
-                                Screen.HALF_HEIGHT - 5,
-                                15 // black
-                            )
                         }
 
                         else if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
+                            // Prompt text:
+                            screen.printCenter(
+                                GUI_TEXT_PERIOD_CONFIG[this.eventOrPeriodIndex],
+                                Screen.HALF_HEIGHT - 3,
+                                15
+                            )
 
+                            let periodConfigString = ""
+                            for (let col = 0; col < this.guiConfigValues[this.sensorIndex].length; col++) {
+                                periodConfigString += this.guiConfigValues[this.sensorIndex][col] + ((col + 1 != this.guiConfigValues[this.sensorIndex].length) ? " + " : "")
+                            }
+
+                            let distance = 0
+                            for (let col = 0; col < this.guiConfigValues[this.sensorIndex].length; col++) {
+                                if (col == this.eventOrPeriodIndex) {
+                                    screen.drawRect(
+                                        Screen.HALF_WIDTH - ((periodConfigString.length * font.charWidth) / 2) + (distance * font.charWidth) - 4,
+                                        Screen.HALF_HEIGHT + 8,
+                                        (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex].toString().length * font.charWidth) + 8,
+                                        12,
+                                        5
+                                    )
+                                    break
+                                }
+
+                                distance += (this.guiConfigValues[this.sensorIndex][col].toString() + " + ").length
+                            }
+
+                            screen.printCenter(
+                                periodConfigString,
+                                Screen.HALF_HEIGHT + 10,
+                                15
+                            )
                         }
 
                         break;
@@ -605,51 +699,43 @@ namespace microcode {
                 }
         }
 
-        private updateSensorConfig(): void {
-            // for (let sensorRow = 0; sensorRow < this.sensors.length; sensorRow++) {
-            //     else {
-            //         let period: number = 0
-            //         for (let col = 1; col < this.guiRecordingConfigText.length; col++) {
-            //             period += this.guiRecordingConfigValues[sensorRow][col] * TIME_CONVERSION_TABLE[col - 1]
-            //         }
-
-            //         this.sensorConfigs[sensorRow].period = period
-            //         this.sensorConfigs[sensorRow].measurements = this.guiRecordingConfigValues[sensorRow][0]
-            //     }
-            // }
-        }
-
         private drawSensorSelection() {
             const headerX = 4
+            const headerY = 22
             const rowSize = Screen.HEIGHT / (this.sensors.length + 1)
 
-            let boxColor = 2
             for (let row = 0; row < this.sensors.length; row++) {
-                // Select the color for the bounding box:
-                boxColor = 2 // red: unchanged
-                if (row == this.currentSensorRow) {
-                    boxColor = 5 // yellow: selected
-                }
-
-                else if (this.sensorConfigIsSet[row]) {
-                    boxColor = 7 // green: changed
-                }
+                // Colour for the box:
+                const boxColor = (this.sensorConfigIsSet[row]) ? 7 : 2 // green: set, red: unset
 
                 screen.fillRect(
                     0,
-                    22 + (row * rowSize) - 3,
-                    (this.sensors[row].getName().length) * font.charWidth + 4,
+                    headerY + (row * rowSize) - 3,
+                    (this.sensors[row].getName().length * font.charWidth) + 4,
                     font.charHeight + 9,
                     16
                 )
     
                 screen.fillRect(
                     1,
-                    22 + (row * rowSize) - 3,
-                    (this.sensors[row].getName().length) * font.charWidth + 5,
+                    headerY + (row * rowSize) - 3,
+                    (this.sensors[row].getName().length * font.charWidth) + 5,
                     font.charHeight + 6,
                     boxColor
                 )
+
+                // Bounding box in blue if selected:
+                if (row == this.sensorIndex) {
+                    for (let thickness = 0; thickness < 3; thickness++) {
+                        screen.drawRect(
+                            0,
+                            headerY + (row * rowSize) - 4 + thickness,
+                            (this.sensors[row].getName().length * font.charWidth) + 7 - thickness,
+                            font.charHeight + 8,
+                            6
+                        ) // Highlight selected in blue
+                    }
+                }
 
                 screen.print(
                     this.sensors[row].getName(),
