@@ -153,25 +153,8 @@ namespace microcode {
                         new LiveDataViewer(this.app, sensors)))
                     }
                     
-                    else {
-                        this.app.pushScene(new TutorialWindow(this.app, {
-                            tips: [
-                                {text: "The next screen is\nwhere you configure\nsensors."},
-                                {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
-                                {text: "Use A & B to move\nthrough menus.", keywords: [" A ", " B "], keywordColors: [6, 2]}, // Red and Blue to copy controller colours
-                                {text: "A sensor can record\nevents or data."},
-                                {text: "A period is how frequently\na log will occur."},
-                                {text: "Configured sensors\nare green.", keywords: [" green"], keywordColors: [7]}, // Green
-                                {text: "Unconfigured sensors\nare red.", keywords: [" red"], keywordColors: [2]}, // Red
-                                {text: "Press A to configure\nsome sensors!", keywords: [" A "], keywordColors: [6]}, // Blue
-                            ],
-                            backFn: () => {
-                                this.app.popScene()
-                                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
-                            }
-                        },
-                        new RecordingConfigSelection(this.app, sensors)))
-                    }
+                    else
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
                 }
             }))
             this.navigator.addButtons(this.btns)
