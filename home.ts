@@ -1,7 +1,8 @@
 namespace microcode {
     export class Home extends CursorScene {
-        private recordDataBtn: Button
         private liveDataBtn: Button
+        private recordDataBtn: Button
+        private distributedLoggingBtn: Button
         private viewBtn: Button
 
         constructor(app: App) {super(app)}
@@ -46,11 +47,12 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
-                x: -50,
+                x: -60,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
                 },
             })
 
@@ -59,12 +61,29 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "edit_program",
                 ariaId: "Record",
-                x: 0,
+                x: -20,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
                     if (datalogger.getNumberOfRows() <= 1)
-                        this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.SensorSelect)))
+                        // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.SensorSelect)))
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordData))
+                    else
+                        this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                },
+            })
+
+            this.distributedLoggingBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "radio_set_group",
+                ariaId: "Command Mode",
+                x: 20,
+                y: 30,
+                onClick: () => {
+                    this.app.popScene()
+                    if (datalogger.getNumberOfRows() <= 1)
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                     else
                         this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
@@ -75,7 +94,7 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "largeDisk",
                 ariaId: "View",
-                x: 50,
+                x: 60,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
@@ -83,15 +102,15 @@ namespace microcode {
                 },
             })
 
-            const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.viewBtn]
+            const btns: Button[] = [this.liveDataBtn, this.recordDataBtn, this.distributedLoggingBtn, this.viewBtn]
             this.navigator.addButtons(btns)
         }
 
         private drawVersion() {
             const font = bitmap.font5
             Screen.print(
-                "v1.4",
-                Screen.RIGHT_EDGE - font.charWidth * "v1.4".length,
+                "v1.5",
+                Screen.RIGHT_EDGE - font.charWidth * "v1.5".length,
                 Screen.BOTTOM_EDGE - font.charHeight - 2,
                 0xb,
                 font
@@ -148,8 +167,9 @@ namespace microcode {
                 )
             }
 
-            this.recordDataBtn.draw()
             this.liveDataBtn.draw()
+            this.recordDataBtn.draw()
+            this.distributedLoggingBtn.draw()
             this.viewBtn.draw()
 
             this.drawVersion()

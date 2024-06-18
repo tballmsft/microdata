@@ -1,7 +1,7 @@
 namespace microcode {
-    export class RadioTesting extends CursorScene {
+    export class RadioTesting extends Scene {
         constructor(app: App) {
-            super(app)
+            super(app, "radioTesting")
         }
 
         /* override */ startup() {
@@ -10,7 +10,6 @@ namespace microcode {
             radio.setGroup(1)
             radio.setTransmitPower(7)
             radio.setFrequencyBand(0)
-
             
             // datalogger.deleteLog()
             // datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
@@ -29,6 +28,22 @@ namespace microcode {
             //         datalogger.createCV("Event", "10 >= -20")
             //     )
             // }
+        }
+
+
+        draw() {
+            Screen.fillRect(
+                Screen.LEFT_EDGE,
+                Screen.TOP_EDGE,
+                Screen.WIDTH,
+                Screen.HEIGHT,
+                0xc
+            )
+
+            basic.showNumber(Screen.WIDTH)
+            basic.showNumber(Screen.HEIGHT)
+
+            super.draw()
         }
     }
 }

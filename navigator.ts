@@ -168,25 +168,18 @@ namespace microcode {
                 }
 
                 case CursorDir.Left: {
-                    if (this.col == 0) {
+                    if (this.col == 0)
                         this.col = this.width - 1
-                        this.row = (((this.row - 1) % this.height) + this.height) % this.height; // Non-negative modulo
-                    }
-
                     else
                         this.col -= 1
-
                     break
                 }
 
                 case CursorDir.Right: {
-                    if (this.col == this.width) {
+                    if (this.col == this.width)
                         this.col = 0
-                        this.row = Math.min(this.row + 1, this.height)
-                    }
                     else 
                         this.col = (this.col + 1) % this.width
-
                     break
                 }
 
