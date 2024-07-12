@@ -57,12 +57,10 @@ pxt clean
 ```
 7. Build pxt-microbit. 
 ```
-git checkout feature/datalogger-get-rows
 pxt buildtarget --local
 ```
-8. Installing MicroData. Make a projects directory if absent.
+8. Installing MicroData.
 ```
-cd projects
 git clone https://github.com/KierPalin/MicroData
 cd Microdata
 ```
