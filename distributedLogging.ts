@@ -45,38 +45,14 @@ namespace microcode {
         private microbitID: number;
         private nextMicrobitIDToIssue: number;
 
-        constructor(app: App) {
+        private readonly arcadeShieldIsConnected: boolean;
+
+        constructor(app: App, arcadeShieldIsConnected: boolean) {
             super(app, "distributedLogging")
 
             this.microbitID = UNINITIALISED_MICROBIT_ID
+            this.arcadeShieldIsConnected = arcadeShieldIsConnected
             this.initialiseCommunication()
-
-            // this.sendMessage(createMessage(this.microbitID, NETWORK_COMMAND.JOIN_REQUEST))
-
-            // // radio.onReceivedString(function(receivedString) {
-            // //     const message = receivedString.split(",")
-
-            // //     // Check if there are other Microbits and if one is the Controller already:
-            // //     if (this.microbitID == UNINITIALISED_MICROBIT_ID) {
-            // //         let message = receivedString.split(",")
-            // //         // Timeout:
-            // //         for (let _ = 0; _ < 3; _++) {
-            // //             if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
-            // //                 basic.showString(message[MESSAGE_COMPONENT.DATA])
-            // //                 break
-            // //             }
-            // //             basic.pause(10)
-            // //         }
-            // //     }
-
-                // const message = receivedString.split(",")
-                // if (message[0] == NETWORK_JOIN_PHRASE && this.microbitMode == MICROBIT_MODE.CONTROLLER) {
-
-                // }
-
-                // basic.showString(receivedString)
-                // radio.sendNumber(receivedNumber + 1)
-            // })
         }
 
         private sendMessage(message: string) {
@@ -87,7 +63,6 @@ namespace microcode {
             radio.setGroup(RADIO_GROUP)
             radio.setTransmitPower(TRANSMIT_POWER)
             radio.setFrequencyBand(FREQUENCY_BAND)
-
 
             //------------------------------------------------------
             // Need to contact the controller & get an ID from them:
@@ -111,7 +86,6 @@ namespace microcode {
                 }
             })
 
-            
             // Timeout:
             const joinMessage: string = createMessage(this.microbitID, NETWORK_COMMAND.JOIN_REQUEST) // microbitID == UNINITIALISED_MICROBIT_ID currently
             for (let _ = 0; _ < 3; _++) {
@@ -125,12 +99,12 @@ namespace microcode {
             }
 
 
-            //----------------------------------------------
-            // Setup the radio to for Control or for Target:
-            //----------------------------------------------
+            //---------------------------------------
+            // Setup the radio for Control or Target:
+            //---------------------------------------
             
             // Become the Target:
-            if (responseReceived) {
+            if (responseReceived || !this.arcadeShieldIsConnected) {
                 this.microbitMode = MICROBIT_MODE.TARGET
 
                 radio.onReceivedString(function(receivedString) {

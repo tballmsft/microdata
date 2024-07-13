@@ -1,3 +1,1 @@
-// add code here
-// add code here
-new microcode.App() 
+new microcode.App();

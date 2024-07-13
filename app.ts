@@ -14,10 +14,14 @@ namespace microcode {
             // One interval delay to ensure all static constructors have executed.
             basic.pause(10)
             reportEvent("app.start")
+
             this.sceneManager = new SceneManager()
-            // this.pushScene(new RecordingConfigSelection(this, [new AccelerometerXSensor(), new AccelerometerYSensor(), new AccelerometerZSensor()]))
-            // this.pushScene(new Home(this))
-            this.pushScene(new DistributedLogging(this))
+
+            const arcadeShieldConnected = _screen_internal.displayPresent();
+            if (arcadeShieldConnected)
+                this.pushScene(new Home(this))
+            else
+                this.pushScene(new DistributedLogging(this, false)) // Since there is no arcade shield just listen for radio commands.
         }
 
         public saveBuffer(slot: string, buf: Buffer) {

@@ -83,7 +83,7 @@ namespace microcode {
                 onClick: () => {
                     this.app.popScene()
                     if (datalogger.getNumberOfRows() <= 1)
-                        this.app.pushScene(new DistributedLogging(this.app))
+                        this.app.pushScene(new DistributedLogging(this.app, true))
                     else
                         this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
