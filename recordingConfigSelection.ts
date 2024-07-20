@@ -57,7 +57,9 @@ namespace microcode {
         private currentConfigMode: CONFIG_MODE
         private sensorConfigIsSet: boolean[]
 
-        constructor(app: App, sensors: Sensor[]) {
+        private nextSceneEnum: CursorSceneEnum
+
+        constructor(app: App, sensors: Sensor[], nextSceneEnum?: CursorSceneEnum) {
             super(app, "measurementConfigSelect")
             this.guiState = GUI_STATE.SENSOR_SELECT
 
@@ -70,6 +72,8 @@ namespace microcode {
             this.eventOrPeriodIndex = 0
             this.currentConfigMode = CONFIG_MODE.PERIOD
             this.sensorConfigIsSet = []
+
+            this.nextSceneEnum = nextSceneEnum
 
             for (let i = 0; i < this.sensors.length; i++) {
                 this.sensorConfigIsSet.push(false)
@@ -114,9 +118,9 @@ namespace microcode {
                                 this.sensors.map((sensor, index) => {
                                     sensor.setConfig(this.sensorConfigs[index])
                                 })
-    
+                                
                                 this.app.popScene()
-                                this.app.pushScene(new DataRecorder(this.app, this.sensors))
+                                this.app.pushScene(new DataRecorder(this.app, this.sensors))       
                             }
 
                             else if (this.currentConfigMode == CONFIG_MODE.EVENT && this.sensorConfigs[this.sensorIndex].inequality == null) {
@@ -501,7 +505,6 @@ namespace microcode {
                     ) // Highlight selected in blue
                 }
             }
-
 
             //-------------
             // Done button:

@@ -10,4 +10,15 @@ namespace microcode {
         inequality?: string,
         comparator?: number
     };
+
+
+    export function serializeRecordingConfig(config: RecordingConfig): string {
+        if (config == null)
+            return ""
+
+        if (config.inequality == null || config.comparator == null)
+            return "PERIOD, " + config.measurements + ", " + config.period
+
+        return "EVENT, " + config.measurements + ", " + config.inequality + ", " + config.comparator
+    }
 }
