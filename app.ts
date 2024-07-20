@@ -17,11 +17,13 @@ namespace microcode {
 
             this.sceneManager = new SceneManager()
 
+            datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
+            
             const arcadeShieldConnected = _screen_internal.displayPresent();
             if (arcadeShieldConnected)
                 this.pushScene(new Home(this))
             else
-                this.pushScene(new DistributedLogging(this, false)) // Since there is no arcade shield just listen for radio commands.
+                new RadioLoggingProtocol(this, false);
         }
 
         public saveBuffer(slot: string, buf: Buffer) {
