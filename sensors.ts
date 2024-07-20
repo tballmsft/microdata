@@ -81,6 +81,11 @@ namespace microcode {
          * Not overriden by any concrete sensor implmentation.
          */
         getPeriod(): number;
+
+        /**
+         * Not overriden by any concrete sensor implmentation.
+         */
+        getMeasurements(): number;
         
         /**
          * Not overriden by any concrete sensor implmentation.
@@ -151,7 +156,7 @@ namespace microcode {
      * These are implmented by the 
      */
     export abstract class Sensor implements ISensorable {
-        /** Set upon the first reading */
+        /** Set inside .setConfig() */
         public totalMeasurements: number
 
         /** Increased on the event of the graph zooming in for example. */
@@ -222,6 +227,7 @@ namespace microcode {
         getBufferLength(): number {return this.dataBuffer.length}
         getNormalisedBufferLength(): number {return this.normalisedDataBuffer.length}
         getPeriod(): number {return this.config.period;}
+        getMeasurements(): number {return this.config.measurements}
         hasMeasurements(): boolean {return this.config.measurements > 0;}
 
         getRecordingInformation(): string[] {

@@ -4,6 +4,7 @@ namespace microcode {
         SensorSelect,
         RecordingConfigSelect,
         RecordData,
+        CommandTargetLogging
     }
     
     export class CursorScene extends Scene {

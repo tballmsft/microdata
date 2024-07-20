@@ -196,7 +196,7 @@ namespace microcode {
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
-        else if (id == "Reset Datalogger") res = "Reset Datalogger"
+        else if (id == "Start target logging") res = "Start target logging"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
         

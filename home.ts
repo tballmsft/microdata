@@ -9,24 +9,6 @@ namespace microcode {
 
         /* override */ startup() {
             super.startup()
-            
-            // datalogger.deleteLog()
-            // datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
-            // datalogger.setColumns([
-            //     "Sensor",
-            //     "Time (ms)",
-            //     "Reading",
-            //     "Event"
-            // ])
-
-            // for (let i = 0; i < 10; i++) {
-            //     datalogger.log(
-            //         datalogger.createCV("Sensor", "e"),
-            //         datalogger.createCV("Time (ms)", i * 10),
-            //         datalogger.createCV("Reading", "17.232323"),
-            //         datalogger.createCV("Event", "10 >= -20")
-            //     )
-            // }
 
             const sensorSelectTutorialOpts = {
                 tips: [
@@ -51,8 +33,8 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-                    // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
+                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                    this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
                 },
             })
 
@@ -65,11 +47,11 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    if (datalogger.getNumberOfRows() <= 1)
+                    // if (datalogger.getNumberOfRows() <= 1)
                         // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.SensorSelect)))
-                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordData))
-                    else
-                        this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
+                    // else
+                        // this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
             })
 
@@ -82,10 +64,10 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    if (datalogger.getNumberOfRows() <= 1)
-                        this.app.pushScene(new DistributedLogging(this.app, true))
-                    else
-                        this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                    // if (datalogger.getNumberOfRows() <= 1)
+                        this.app.pushScene(new RadioLoggingScreen(this.app))
+                    // else
+                        // this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
             })
 

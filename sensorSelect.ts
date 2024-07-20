@@ -46,7 +46,6 @@ namespace microcode {
                 "Jacdac Moisture", "Jacdac Distance"
             ]
 
-
             //-----------------------------------------------------
             // Organise buttons in 4x5 grid: same as GridNavigator:
             //-----------------------------------------------------
@@ -153,8 +152,13 @@ namespace microcode {
                         new LiveDataViewer(this.app, sensors)))
                     }
                     
-                    else
+                    else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect) {
                         this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
+                    }
+
+                    else if (this.nextSceneEnum === CursorSceneEnum.CommandTargetLogging) {
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors, this.nextSceneEnum))
+                    }
                 }
             }))
             this.navigator.addButtons(this.btns)
