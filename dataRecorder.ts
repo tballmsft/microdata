@@ -11,12 +11,12 @@ namespace microcode {
      * Sensors are logged via a scheduler
      */
     export class DataRecorder extends Scene {
-        /** Ordered sensor periods */
-        private schedule: {sensor: Sensor, waitTime: number}[];
-        
-        private sensors: Sensor[];
+        /**  */
+        private scheduler: SensorScheduler;
+        /** For displaying their status on the screen and passing to the scheduler. */
+        private sensors: Sensor[]
+        /** For faster looping, modulo calculation when pressing UP or DOWN */
         private numberOfSensors: number;
-
         /** Sensor to be shown */
         private currentSensorIndex: number;
         /** Last sensor on the screen */
@@ -27,23 +27,13 @@ namespace microcode {
         constructor(app: App, sensors: Sensor[]) {
             super(app, "dataRecorder")
 
-            this.schedule = []
+            this.scheduler = new SensorScheduler(sensors)
             this.sensors = sensors
             this.numberOfSensors = sensors.length
 
             this.sensorIndexOffset = 0 
             this.currentSensorIndex = 0
             this.sensorBoxColor = 15
-
-            /**
-             * There are more efficient methods of intialising this.
-             * It only occurs once and typically the number of sensors is small
-             *      So the cost is minimal
-             * But improvements are possible
-             */
-
-            sensors.sort((a, b) => a.getPeriod() - b.getPeriod())
-            this.schedule = sensors.map((sensor) => {return {sensor, waitTime: sensor.getPeriod()}})
 
             //---------------
             // User Controls:
@@ -99,57 +89,7 @@ namespace microcode {
             this.log()
         }
  
-        /**
-         * Schedules the sensors and orders them to .log()
-         * Runs within a separate fiber.
-         * Mutates this.schedule
-        */
-        log() {
-            control.inBackground(() => {
-                let currentTime = 0;                
-
-                // Log all sensors once:
-                for (let i = 0; i < this.schedule.length; i++) {
-                    this.schedule[i].sensor.log(0)
-
-                    // Clear from schedule (A sensor may only have 1 reading):
-                    if (!this.schedule[i].sensor.hasMeasurements())
-                        this.schedule.splice(i, 1);
-                }
-
-                while (this.schedule.length > 0) {
-                    const nextLogTime = this.schedule[0].waitTime;
-                    const sleepTime = nextLogTime - currentTime;
-
-                    basic.pause(sleepTime)
-                    currentTime += sleepTime
-
-                    for (let i = 0; i < this.schedule.length; i++) {
-                        // Clear from schedule:
-                        if (!this.schedule[i].sensor.hasMeasurements()) {
-                            this.schedule.splice(i, 1);
-                        }
-
-                        // Log sensors:
-                        else if (currentTime % this.schedule[i].waitTime == 0) {
-                            this.schedule[i].sensor.log(currentTime)
-
-                            // Update schedule with when they should next be logged:
-                            if (this.schedule[i].sensor.hasMeasurements()) {
-                                this.schedule[i].waitTime = nextLogTime + this.schedule[i].sensor.getPeriod()
-                            }
-                        }
-                    }
-
-                    // Ensure the schedule remains ordely after these potential deletions & recalculations:
-                    this.schedule.sort((
-                        a: {sensor: Sensor; waitTime: number;}, 
-                        b: {sensor: Sensor; waitTime: number;}) =>
-                        a.waitTime - b.waitTime
-                    )
-                }
-            })
-        }
+        log() {this.scheduler.start()}
 
         update(): void {
             Screen.fillRect(
@@ -161,9 +101,7 @@ namespace microcode {
             )
 
             // Check if all sensors have finished their work:
-            let recordingsComplete = !(this.schedule.length > 0)
-
-            if (recordingsComplete) {
+            if (this.scheduler.loggingComplete()) {
                 screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);
                 screen.printCenter("Press B to back out.", screen.height / 2);
             }
