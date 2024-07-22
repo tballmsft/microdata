@@ -46,7 +46,7 @@ namespace microcode {
                 // Log all sensors once:
                 for (let i = 0; i < this.schedule.length; i++) {
                     if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
-                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
+                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements(), 200)
 
                     this.schedule[i].sensor.log(0)
 
@@ -91,7 +91,7 @@ namespace microcode {
                 }
 
                 // Done:
-                if (this.showOnBasicScreen)
+                if (this.showOnBasicScreen) {
                     basic.showLeds(`
                         . # . # .
                         . # . # .
@@ -99,6 +99,7 @@ namespace microcode {
                         # . . . #
                         . # # # .
                     `)
+                }
             })
         }
     }

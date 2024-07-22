@@ -56,8 +56,8 @@ namespace microcode {
             }
         }
 
-        public static getFromRadioName(ariaID: string): Sensor {
-            switch (ariaID) {
+        public static getFromRadioName(sensorShorthandName: string): Sensor {
+            switch (sensorShorthandName) {
                 case("AX")  : return new AccelerometerXSensor();
                 case("AY")  : return new AccelerometerYSensor();
                 case("AZ")  : return new AccelerometerZSensor();
