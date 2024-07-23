@@ -34,12 +34,15 @@ namespace microcode {
 
         loggingComplete(): boolean {return !(this.schedule.length > 0)}
 
+
         /**
          * Schedules the sensors and orders them to .log()
          * Runs within a separate fiber.
          * Mutates this.schedule
         */
-        start() {
+        start(callbackObj?: ITargetHasLoggedDataCallback) {
+            const callbackAfterLog: boolean = (callbackObj == null) ? false : true
+
             control.inBackground(() => {
                 let currentTime = 0;                
 
@@ -48,7 +51,10 @@ namespace microcode {
                     if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
                         basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements(), 200)
 
-                    this.schedule[i].sensor.log(0)
+                    // Make the datalogger log the data:
+                    const logAsCSV = this.schedule[i].sensor.log(0)
+                    if (callbackAfterLog)
+                        callbackObj.callback(logAsCSV)
 
                     // Clear from schedule (A sensor may only have 1 reading):
                     if (!this.schedule[i].sensor.hasMeasurements())
@@ -73,7 +79,10 @@ namespace microcode {
                             if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
                                 basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements(), 200)
 
-                            this.schedule[i].sensor.log(currentTime)
+                            // Make the datalogger log the data:
+                            const logAsCSV = this.schedule[i].sensor.log(currentTime)
+                            if (callbackAfterLog)
+                                callbackObj.callback(logAsCSV)
 
                             // Update schedule with when they should next be logged:
                             if (this.schedule[i].sensor.hasMeasurements()) {

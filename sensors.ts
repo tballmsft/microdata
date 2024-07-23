@@ -147,7 +147,7 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number): void;
+        log(time: number): string;
     }
 
 
@@ -306,7 +306,6 @@ namespace microcode {
         /**
          * Set inside of recordingConfigSelection.
          * @param config see recordingConfigSelection.
-         * @param isInEventMode will this sensor be used to track events?
          */
         setConfig(config: RecordingConfig) {
             const isInEventMode = config.comparator != null && config.inequality != null
@@ -321,7 +320,7 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number): void {
+        log(time: number): string {
             this.lastLoggedReading = this.getReading()
             
             if (this.isInEventMode) {
@@ -333,6 +332,7 @@ namespace microcode {
                         datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
+                    return this.getName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator
                 }
             }
 
@@ -344,7 +344,9 @@ namespace microcode {
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1
+                return this.getName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + "N/A"
             }
+            return ""
         }
 
         /**
