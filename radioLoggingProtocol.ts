@@ -91,6 +91,7 @@ namespace microcode {
         private ackReceived: boolean
         private numberOfMessagesExpected: number
         private numberOfMessagesReceived: number
+        private outgoingBuffer: string[]
 
         //--------------------------
         // Commander only Variables:
@@ -98,9 +99,9 @@ namespace microcode {
         
         public numberOfTargetsConnected: number;
         public logMessageSent: boolean;
-
         private nextMicrobitIDToIssue: number;
         private callbackObj: ITargetHasLoggedDataCallback
+        private streamDataBack: boolean
 
         constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetHasLoggedDataCallback) {
             this.app = app
@@ -120,6 +121,7 @@ namespace microcode {
             this.ackReceived = false
             this.numberOfMessagesExpected = 0
             this.numberOfMessagesReceived = 0
+            this.outgoingBuffer = []
 
             //--------------------------
             // Commander only Variables:
@@ -129,6 +131,7 @@ namespace microcode {
             this.logMessageSent = false
             this.nextMicrobitIDToIssue = 0
             this.callbackObj = callbackObj
+            this.streamDataBack = false
 
 
             // Default Microbit display when unconnected (not a target):
@@ -179,7 +182,8 @@ namespace microcode {
             radio.sendString(message)
         }
 
-        // private sendAck(): void {radio.sendString(NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK])}
+        private sendAck(): void {radio.sendString(NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK])}
+
 
         //------------------------------
         // Communication Initialisation:
@@ -264,7 +268,6 @@ namespace microcode {
             // The default state; the target returns to this function after completing every call:
             radio.onReceivedString(targetControlFlowFn)
 
-
             //---------------------------------------------------------------------------------------
             // The rest of .becomeTarget() specifies the internal controlFlow and handling functions:
             //---------------------------------------------------------------------------------------
@@ -283,6 +286,7 @@ namespace microcode {
                  */
                 if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.START_LOGGING]) {
                     this.numberOfMessagesExpected = +receivedString.split(",").slice(MESSAGE_COMPONENT.DATA_START)[0]
+                    this.streamDataBack = receivedString.split(",").slice(MESSAGE_COMPONENT.DATA_START)[1] == "1"
                     this.numberOfMessagesReceived = 0
 
                     // this.sendAck()
@@ -344,13 +348,17 @@ namespace microcode {
                                     }
                                     else {
                                         const scheduler = new SensorScheduler(configuredSensors, true)
-                                        scheduler.start(this)
+                                        scheduler.start(((this.streamDataBack) ? this : null))
                                     }
                                 }
                             }
                         } // end of handleStartLoggingRequest
                     )
-                } 
+                }
+
+                // else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
+                    
+                // }
             } // end of targetControlFlowFn
         }
 
@@ -391,16 +399,16 @@ namespace microcode {
 
                     const becomeTargetMessage = this.createMessage(NETWORK_COMMAND.BECOME_TARGET, [this.nextMicrobitIDToIssue])
                     // for (let _ = 0; _ < 3; _++) {
-                        if (!this.ackReceived) {
+                        // if (!this.ackReceived) {
                             this.sendMessage(becomeTargetMessage)
                             basic.pause(MESSAGE_LATENCY_MS)
-                        }
+                        // }
 
-                        else {
+                        // else {
                             this.nextMicrobitIDToIssue += 1
                             this.numberOfTargetsConnected += 1
                             // break
-                        }
+                        // }
                     // }
                     // radio.onReceivedString(commanderControlFlowFn) //  Return to default
                 }
@@ -428,33 +436,40 @@ namespace microcode {
             }
 
             radio.onReceivedString(commanderControlFlowFn)
+        }
 
-            control.onEvent(
-                ControllerButtonEvent.Pressed,
-                controller.A.id,
-                () => {
-                    this.logMessageSent = true
-                    const numberOfSensors = 2
+        public commandLogging(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+            const numberOfSensors = sensors.length
 
-                    const messages: string[] = [
-                        this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors]),
-                        "Light," + serializeRecordingConfig({measurements: 12, period: 1000}),
-                        "Temp.," + serializeRecordingConfig({measurements: 10, period: 1000})
-                    ]
+            let messages: string[] = [
+                this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors, ((streamItBack) ? "1" : "0")])
+            ]
 
-                    this.ackReceived = true
-                    for (let i = 0; i < messages.length; i++) {
-                        // for (let _ = 0; _ < 3; _++) {
-                            // while (!this.ackReceived) {
-                                this.sendMessage(messages[i])
-                                basic.pause(MESSAGE_LATENCY_MS)
-                            // }
-                            // basic.showNumber(i)
-                            // this.ackReceived = false
-                        // }
-                    }
-                }
-            )
+            for (let i = 0; i < numberOfSensors; i++) {
+                messages.push(
+                    sensors[i].getName() + "," + serializeRecordingConfig(configs[i])
+                )
+            }
+
+            for (let i = 0; i < messages.length; i++) {
+                this.sendMessage(messages[i])
+                basic.pause(MESSAGE_LATENCY_MS)
+            }   
+
+            // this.logMessageSent = true
+            // const numberOfSensors = 2
+
+            // const messages: string[] = [
+            //     this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors]),
+            //     "Light," + serializeRecordingConfig({measurements: 12, period: 1000}),
+            //     "Temp.," + serializeRecordingConfig({measurements: 10, period: 1000})
+            // ]
+
+            // this.ackReceived = true
+            // for (let i = 0; i < messages.length; i++) {
+            //     this.sendMessage(messages[i])
+            //     basic.pause(MESSAGE_LATENCY_MS)
+            // }
         }
     }
 }
