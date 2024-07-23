@@ -55,18 +55,25 @@ namespace microcode {
      * Each message (see NETWORK_COMMAND and NETWORK_COMMAND_STRING) has these components.
      */
     const enum MESSAGE_COMPONENT {
-        SENDER_ID,
         NETWORK_COMMAND,
         /** A CSV stream of data. */
         DATA_START
     }
 
     /** How long to wait between messages before timeout. */
-    const MESSAGE_LATENCY_MS = 100;
+    const MESSAGE_LATENCY_MS = 200;
 
     const UNINITIALISED_MICROBIT_ID: number = -1
+
+
+    const DATA_STREAM_BUFFER_SIZE: number = 50
+
+
+    export interface ITargetHasLoggedDataCallback {
+        callback(rowTheTargetLogged: string): void;
+    }
     
-    export class RadioLoggingProtocol {
+    export class RadioLoggingProtocol implements ITargetHasLoggedDataCallback {
         private app: App;
 
         //------------------------------------------------------
@@ -84,17 +91,18 @@ namespace microcode {
         private ackReceived: boolean
         private numberOfMessagesExpected: number
         private numberOfMessagesReceived: number
-        private sensors: Sensor[]
 
         //--------------------------
         // Commander only Variables:
         //--------------------------
         
         public numberOfTargetsConnected: number;
-        private nextMicrobitIDToIssue: number;
         public logMessageSent: boolean;
 
-        constructor(app: App, arcadeShieldIsConnected: boolean) {
+        private nextMicrobitIDToIssue: number;
+        private callbackObj: ITargetHasLoggedDataCallback
+
+        constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetHasLoggedDataCallback) {
             this.app = app
 
             //------------------------------------------------------
@@ -112,15 +120,15 @@ namespace microcode {
             this.ackReceived = false
             this.numberOfMessagesExpected = 0
             this.numberOfMessagesReceived = 0
-            this.sensors = []
 
             //--------------------------
             // Commander only Variables:
             //--------------------------
 
             this.numberOfTargetsConnected = 0
-            this.nextMicrobitIDToIssue = 0
             this.logMessageSent = false
+            this.nextMicrobitIDToIssue = 0
+            this.callbackObj = callbackObj
 
 
             // Default Microbit display when unconnected (not a target):
@@ -135,7 +143,17 @@ namespace microcode {
             }
             this.initialiseCommunication()
         }
+        
 
+        //--------------------
+        // Interface Function:
+        //--------------------
+
+        callback(newRowAsCSV: string): void {
+            this.sendMessage(
+                NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM] + "," + newRowAsCSV
+            )
+        }
 
         //---------------------------------------------
         // Message Creation and Transmission Utilities:
@@ -148,7 +166,7 @@ namespace microcode {
          * @returns A formatted string that will be sent over radio via DistributedLogging.sendMessage()
          */
         private createMessage(cmdEnum: NETWORK_COMMAND, data?: string[]): string {
-            let message: string = this.id + "," + NETWORK_COMMAND_STRING[cmdEnum] + ((data != null) ? "," : "")
+            let message: string = NETWORK_COMMAND_STRING[cmdEnum] + ((data != null) ? "," : "")
             if (data != null)
                 for (let i = 0; i < data.length; i++) {
                     message += data[i] + ((i + 1 != data.length) ? "," : "")
@@ -161,8 +179,7 @@ namespace microcode {
             radio.sendString(message)
         }
 
-        private sendAck(): void {radio.sendString(this.id + "," + NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK])}
-
+        // private sendAck(): void {radio.sendString(NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK])}
 
         //------------------------------
         // Communication Initialisation:
@@ -184,7 +201,7 @@ namespace microcode {
 
             // Listen from a response from a Commander:
             radio.onReceivedString(function(receivedString) {
-                const message = receivedString.split(",", 3)
+                const message = receivedString.split(",", 2)
 
                 // Command to become a target has been received:
                 if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
@@ -194,7 +211,6 @@ namespace microcode {
                 }
             })
 
-            
             // The join request message, will be sent out and waited on 5 times:
             const message: string = this.createMessage(NETWORK_COMMAND.JOIN_REQUEST)
 
@@ -286,7 +302,6 @@ namespace microcode {
                          * 
                          * The (measurements + period) or (measurements + inequality + comparator) is used to build a RecordingConfig.
                          * 
-                         * this.sensors is mutated
                          * @param receivedString a single message after a NETWORK_COMMAND.START_LOGGING command.
                          */
                         function handleStartLoggingRequest(receivedString: string) {
@@ -295,6 +310,8 @@ namespace microcode {
 
                                 const dataStream = receivedString.split(",")
                                 const sensorName = dataStream[0]
+
+                                // let sensor = SensorFactory.getFromRadioName("L")
                                 let sensor = SensorFactory.getFromSensorName(sensorName)
 
                                 const configType = dataStream[1]
@@ -327,17 +344,13 @@ namespace microcode {
                                     }
                                     else {
                                         const scheduler = new SensorScheduler(configuredSensors, true)
-                                        scheduler.start()
+                                        scheduler.start(this)
                                     }
                                 }
                             }
                         } // end of handleStartLoggingRequest
                     )
-                }
-
-                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
-
-                }
+                } 
             } // end of targetControlFlowFn
         }
 
@@ -349,7 +362,7 @@ namespace microcode {
             this.numberOfTargetsConnected = 0
 
             function commanderControlFlowFn(receivedString: string): void {
-                const message = receivedString.split(",", 2)
+                const message = receivedString.split(",")
                 
                 /**
                  * INCOMING JOIN REQUEST
@@ -357,18 +370,20 @@ namespace microcode {
                 if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.JOIN_REQUEST]) {
                     this.ackReceived = false
 
-                    radio.onReceivedString(
-                        function handleJoinRequest(receivedString: string) {
-                            const ackMessage = receivedString.split(",", 2)
+                    // radio.onReceivedString(
+                    //     function handleJoinRequest(receivedString: string) {
+                    //         // basic.showString("1")
+                    //         const ackMessage = receivedString.split(",", 2)
                             
-                            if (ackMessage[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK]) {
-                                this.ackReceived = true
-                                this.nextMicrobitIDToIssue += 1
-                                this.numberOfTargetsConnected += 1
-                                radio.onReceivedString(commanderControlFlowFn) //  Return to default
-                            }
-                        } // end of handleJoinRequest
-                    )
+                    //         if (ackMessage[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK]) {
+                    //             this.ackReceived = true
+                    //             this.nextMicrobitIDToIssue += 1
+                    //             this.numberOfTargetsConnected += 1
+                    //             radio.onReceivedString(commanderControlFlowFn) //  Return to default
+                    //         }
+                    //         // basic.showString("2")
+                    //     } // end of handleJoinRequest
+                    // )
 
                     //----------------------------
                     // SEND BECOME TARGET MESSAGE:
@@ -387,10 +402,11 @@ namespace microcode {
                             // break
                         }
                     // }
+                    // radio.onReceivedString(commanderControlFlowFn) //  Return to default
                 }
 
                 /**
-                 * INCOMING DATA STREAM REQUEST
+                 * INCOMING ACK
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.ACK]) {
                     this.ackReceived = true
@@ -400,7 +416,14 @@ namespace microcode {
                  * INCOMING DATA STREAM REQUEST
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
+                    const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
 
+                    datalogger.log(
+                        datalogger.createCV("Sensor", cols[0]),
+                        datalogger.createCV("Time (ms)", cols[1]),
+                        datalogger.createCV("Reading", cols[2]),
+                        datalogger.createCV("Event", cols[3])
+                    )
                 }
             }
 
@@ -415,23 +438,21 @@ namespace microcode {
 
                     const messages: string[] = [
                         this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors]),
-                        "T," + serializeRecordingConfig({measurements: 12, period: 1000}),
-                        "L," + serializeRecordingConfig({measurements: 10, period: SENSOR_EVENT_POLLING_PERIOD_MS, inequality: ">", comparator: 30})
+                        "Light," + serializeRecordingConfig({measurements: 12, period: 1000}),
+                        "Temp.," + serializeRecordingConfig({measurements: 10, period: 1000})
                     ]
 
-                    this.ackReceived = false
+                    this.ackReceived = true
                     for (let i = 0; i < messages.length; i++) {
                         // for (let _ = 0; _ < 3; _++) {
                             // while (!this.ackReceived) {
-                                // basic.showNumber(i)
                                 this.sendMessage(messages[i])
                                 basic.pause(MESSAGE_LATENCY_MS)
                             // }
+                            // basic.showNumber(i)
                             // this.ackReceived = false
-                        // } 
+                        // }
                     }
-
-                    radio.onReceivedString(commanderControlFlowFn) //  Return to default
                 }
             )
         }

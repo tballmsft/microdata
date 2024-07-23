@@ -6,7 +6,7 @@ namespace microcode {
      * 
      * The Commander and the Targets both have a GUI for management/information. Information for a Target without an Arcade Shield is displayed in on the 5x5 LED matrix.
      */
-    export class RadioLoggingScreen extends Scene {
+    export class RadioLoggingScreen extends Scene implements ITargetHasLoggedDataCallback{
         private radioLogger: RadioLoggingProtocol;
         private logMessageSent: boolean;
 
@@ -18,6 +18,11 @@ namespace microcode {
         }
 
         /* override */ startup() { super.startup() }
+
+
+        callback(rowTheTargetLogged: string): void {
+            
+        }
 
         draw() {
             Screen.fillRect(
