@@ -1,0 +1,349 @@
+namespace microcode {
+    //** See .initialiseCommunication() */
+    const RADIO_GROUP: number = 1;
+    //** See .initialiseCommunication() */
+    const TRANSMIT_POWER: number = 5;
+    //** See .initialiseCommunication() */
+    const FREQUENCY_BAND: number = 0;
+
+    /**
+     * Is this Microbit sending commands to others or is it being instructed by a Commander? 
+     */
+    export const enum RADIO_LOGGING_MODE {
+        /**
+         * Status when just starting prior to .initialiseCommunication() invocation.
+         */
+        UNCONFIGURED,
+        /**
+         * Must have an Arcade Shield connected and be first uBit.
+         * Only 1 commander at a time.
+         * User can command other uBit's to log data according to some config.
+         */
+        COMMANDER,
+        /**
+         * Default state if no Arcade Shield is connected.
+         * Takes radio requests from the commander.
+         */
+        TARGET
+    }
+
+    /**
+     * The types of requests that a uBit will send over radio.
+     * See NETWORK_COMMAND_STRING for the string that is sent tot convey each Enum.
+     */
+    const enum NETWORK_COMMAND {
+        JOIN_REQUEST,
+        START_LOGGING,
+        BECOME_TARGET,
+        DATA_STREAM
+    }
+
+    /**
+     * The exact string send over radio to convey a NETWORK_COMMAND
+     */
+    const NETWORK_COMMAND_STRING = [
+        "J", // "JOIN_REQUEST",
+        "S", // "START_LOGGING",
+        "T", // "BECOME_TARGET",
+        "D", // "DATA_STREAM"
+    ]
+
+    /**
+     * Each message (see NETWORK_COMMAND and NETWORK_COMMAND_STRING) has these components.
+     */
+    const enum MESSAGE_COMPONENT {
+        NETWORK_COMMAND,
+        /** A CSV stream of data. */
+        DATA_START
+    }
+
+    /** How long to wait between messages before timeout. */
+    const MESSAGE_LATENCY_MS: number = 100;
+
+    const UNINITIALISED_MICROBIT_ID: number = -1
+
+
+    export interface ITargetDataLoggedCallback {
+        callback(rowTheTargetLogged: string): void;
+    }
+
+    export class DistributedLoggingProtocol implements ITargetDataLoggedCallback {
+        private app: App;
+
+        //------------------------------------------------------
+        // Variables used by both the Commander and the Targets:
+        //------------------------------------------------------
+
+        public id: number;
+        public radioMode: RADIO_LOGGING_MODE;
+        private arcadeShieldIsConnected: boolean;
+
+        //-----------------------------------
+        // NETWORK_COMMAND MESSSAGE HANDLING:
+        //-----------------------------------
+
+        private numberOfMessagesExpected: number;
+        private numberOfMessagesReceived: number;
+
+
+
+        private sensors: Sensor[]
+
+        //--------------------------
+        // Commander only Variables:
+        //--------------------------
+        
+        public numberOfTargetsConnected: number;
+        private nextMicrobitIDToIssue: number;
+        private callbackObj: ITargetDataLoggedCallback;
+        private streamDataBack: boolean;
+
+        constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetDataLoggedCallback) {
+            this.app = app;
+
+            //------------------------------------------------------
+            // Variables used by both the Commander and the Targets:
+            //------------------------------------------------------
+
+            this.id = UNINITIALISED_MICROBIT_ID;
+            this.radioMode = RADIO_LOGGING_MODE.UNCONFIGURED;
+            this.arcadeShieldIsConnected = arcadeShieldIsConnected;
+
+            //-----------------------------------
+            // NETWORK_COMMAND MESSSAGE HANDLING:
+            //-----------------------------------
+
+            this.numberOfMessagesExpected = 0;
+            this.numberOfMessagesReceived = 0;
+
+
+            this.sensors = []
+
+            //--------------------------
+            // Commander only Variables:
+            //--------------------------
+            
+            this.numberOfTargetsConnected = 0;
+            this.nextMicrobitIDToIssue = 0;
+            this.callbackObj = callbackObj;
+            this.streamDataBack = false
+
+            // Default Microbit display when unconnected (not a target):
+            if (!arcadeShieldIsConnected) {
+                basic.showLeds(`
+                    . . . . .
+                    . . . . .
+                    . . . . .
+                    . . . . .
+                    . # # # .
+                `)
+            }
+            this.initialiseCommunication()
+        }
+
+        callback(newRowAsCSV: string): void {
+            this.sendMessage(
+                NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM] + "," + this.id + "," + newRowAsCSV
+            )
+        }
+
+        //---------------------------------------------
+        // Message Creation and Transmission Utilities:
+        //---------------------------------------------
+
+        /**
+         * Standardised Message used to communicate with the other Microbits.
+         * @param cmdEnum NETWORK_COMMAND that will become a NETWORK_COMMAND_STRING in the message
+         * @param data Optional list of data.
+         * @returns A formatted string that will be sent over radio via DistributedLogging.sendMessage()
+         */
+        private createMessage(cmdEnum: NETWORK_COMMAND, data?: string[]): string {
+            let message: string = NETWORK_COMMAND_STRING[cmdEnum] + ((data != null) ? "," : "")
+            if (data != null)
+                for (let i = 0; i < data.length; i++) {
+                    message += data[i] + ((i + 1 != data.length) ? "," : "")
+                }
+            return message
+        }
+
+        private sendMessage(message: string): void {radio.sendString(message)}
+
+
+        private initialiseCommunication() {
+            radio.setGroup(RADIO_GROUP)
+            radio.setTransmitPower(TRANSMIT_POWER)
+            radio.setFrequencyBand(FREQUENCY_BAND)
+
+            let responseReceived = false
+
+            // Listen from a response from a Commander:
+            radio.onReceivedString(function(receivedString) {
+                const message = receivedString.split(",")
+
+                // Command to become a target has been received:
+                if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
+                    responseReceived = true
+                    this.id = message[MESSAGE_COMPONENT.DATA_START]
+                }
+            })
+
+            // The join request message, will be sent out and waited on 5 times:
+            const message: string = this.createMessage(NETWORK_COMMAND.JOIN_REQUEST)
+
+            // Timeout:
+            for (let _ = 0; _ < 5; _++) {
+                // Account for onReceivedString processing:
+                this.sendMessage(message)
+                basic.pause(MESSAGE_LATENCY_MS)
+
+                // Means a Commander has replied:
+                if (responseReceived)
+                    break
+                basic.pause(MESSAGE_LATENCY_MS)
+            }
+
+            // ----------------------------------
+            // Become the Commander or a Target:
+            // ----------------------------------
+
+            if (responseReceived)
+                this.becomeTarget()
+            else
+                this.becomeCommander()
+        }
+
+        public addSensor(sensor: Sensor) {
+            this.sensors.push(sensor)
+        }
+
+        private becomeTarget() {
+            /**
+             * Internal function responsible for choosing the correct response to the incoming message.
+             * Default state of radio.onReceivedString()
+             * Message with 'NETWORK_COMMAND.START_LOGGING' -> 'radio.onReceivedString(getSensorConfigData)'
+             * @param receivedString The first message in a command; SENDER_ID + NETWORK_COMMAND + ?ADDITIONAL_INFO (number of future messages for START_LOGGING as an example)
+             */
+            radio.onReceivedString(function (receivedString: string): void {
+                const message = receivedString.split(",")
+
+                if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.START_LOGGING]) {
+                    this.numberOfMessagesExpected = message[MESSAGE_COMPONENT.DATA_START]
+                    this.streamDataBack = message[MESSAGE_COMPONENT.DATA_START + 1] == "1"
+                    this.numberOfMessagesReceived = 0
+                    // this.sensors = []
+                }
+
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
+                    if (this.numberOfMessagesReceived < this.numberOfMessagesExpected) {
+                        this.numberOfMessagesReceived += 1
+
+                        const dataStream = message.slice(MESSAGE_COMPONENT.DATA_START)
+                        const sensorName = dataStream[0]
+
+                        let sensor = SensorFactory.getFromRadioName(sensorName)
+
+                        const configType = dataStream[1]
+                        if (configType == "P") {
+                            const measurements: number = +dataStream[2]
+                            const period:       number = +dataStream[3]
+                            sensor.setConfig({measurements, period})
+                        }
+
+                        else if (configType == "E") {
+                            const measurements: number = +dataStream[2]
+                            const inequality:   string =  dataStream[3]
+                            const comparator:   number = +dataStream[4]
+                            sensor.setConfig({measurements, period: SENSOR_EVENT_POLLING_PERIOD_MS, inequality, comparator})
+                        }
+
+                        this.addSensor(sensor)
+
+                        // Reset state after all messages for this request are handled:
+                        if (this.numberOfMessagesReceived >= this.numberOfMessagesExpected) {
+                            this.numberOfMessagesReceived = 0
+                            this.numberOfMessagesExpected = 0
+
+                            if (this.arcadeShieldIsConnected) {
+                                this.app.popScene()
+                                this.app.pushScene(new DataRecorder(this.app, this.sensors))
+                            }
+                            else {
+                                const scheduler = new SensorScheduler(this.sensors, true)
+
+                                scheduler.start(((this.streamDataBack) ? this : null)) // Is it getting true? 
+                            }
+                        }
+                    }
+                }
+            })
+
+            this.radioMode = RADIO_LOGGING_MODE.TARGET
+
+            // Indicate the uBit is now a Target:
+            if (!this.arcadeShieldIsConnected) {
+                basic.showLeds(`
+                    . # . # .
+                    . # . # .
+                    . . . . .
+                    # . . . #
+                    . # # # .
+                `)
+            }
+        }
+
+        private becomeCommander() {
+            this.radioMode = RADIO_LOGGING_MODE.COMMANDER
+            this.id = 0
+            this.nextMicrobitIDToIssue = 1
+            this.numberOfTargetsConnected = 0
+
+            radio.onReceivedString(function commanderControlFlowFn(receivedString: string): void {
+                const message = receivedString.split(",")
+                
+                /**
+                 * INCOMING JOIN REQUEST
+                 */
+                if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.JOIN_REQUEST]) {
+                    const becomeTargetMessage = this.createMessage(NETWORK_COMMAND.BECOME_TARGET, [this.nextMicrobitIDToIssue])
+                    this.sendMessage(becomeTargetMessage)
+
+                    this.nextMicrobitIDToIssue += 1
+                    this.numberOfTargetsConnected += 1
+                }
+
+                /**
+                 * INCOMING DATA STREAM
+                 */
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
+                    const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
+
+                    datalogger.log(
+                        datalogger.createCV("Microbit", cols[0]),
+                        datalogger.createCV("Sensor", cols[1]), // SensorFactory.radioToSensorName(
+                        datalogger.createCV("Time (ms)", cols[2]),
+                        datalogger.createCV("Reading", cols[3]),
+                        datalogger.createCV("Event", cols[4])
+                    )
+                }
+            })
+        }
+
+
+        public log(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+            const numberOfSensors = sensors.length
+
+            let messages: string[] = [
+                this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors, ((streamItBack) ? "1" : "0")]) // START_LOGGING + number of messages + should the data be streamed back?
+            ]
+
+            for (let i = 0; i < numberOfSensors; i++) {
+                messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [sensors[i].getRadioName(), serializeRecordingConfig(configs[i])]))
+            }
+
+            for (let i = 0; i < messages.length; i++) {
+                this.sendMessage(messages[i])
+                basic.pause(MESSAGE_LATENCY_MS)
+            }
+        }
+    }
+}
