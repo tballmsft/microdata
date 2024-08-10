@@ -40,16 +40,16 @@ namespace microcode {
          * Runs within a separate fiber.
          * Mutates this.schedule
         */
-        start(callbackObj?: ITargetHasLoggedDataCallback) {
+        start(callbackObj?: ITargetDataLoggedCallback) {
             const callbackAfterLog: boolean = (callbackObj == null) ? false : true
-
+            
             control.inBackground(() => {
-                let currentTime = 0;                
+                let currentTime = 0;
 
                 // Log all sensors once:
                 for (let i = 0; i < this.schedule.length; i++) {
                     if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
-                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements(), 200)
+                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
 
                     // Make the datalogger log the data:
                     const logAsCSV = this.schedule[i].sensor.log(0)
@@ -61,11 +61,14 @@ namespace microcode {
                         this.schedule.splice(i, 1);
                 }
 
+                let lastLogTime = input.runningTime()
+
                 while (this.schedule.length > 0) {
                     const nextLogTime = this.schedule[0].waitTime;
                     const sleepTime = nextLogTime - currentTime;
 
-                    basic.pause(sleepTime)
+                    basic.pause(sleepTime + lastLogTime - input.runningTime()) // Discount for operation time
+                    lastLogTime = input.runningTime()
                     currentTime += sleepTime
 
                     for (let i = 0; i < this.schedule.length; i++) {
@@ -77,7 +80,7 @@ namespace microcode {
                         // Log sensors:
                         else if (currentTime % this.schedule[i].waitTime == 0) {
                             if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
-                                basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements(), 200)
+                                basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
 
                             // Make the datalogger log the data:
                             const logAsCSV = this.schedule[i].sensor.log(currentTime)
