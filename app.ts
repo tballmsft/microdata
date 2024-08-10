@@ -23,7 +23,7 @@ namespace microcode {
             if (arcadeShieldConnected)
                 this.pushScene(new Home(this))
             else
-                new RadioLoggingProtocol(this, false);
+                new DistributedLoggingProtocol(this, false);
         }
 
         public saveBuffer(slot: string, buf: Buffer) {

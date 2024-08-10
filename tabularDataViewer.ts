@@ -7,11 +7,6 @@ namespace microcode {
     const TABULAR_MAX_ROWS = 8
 
     /**
-     * Used to determine limits when pressing RIGHT & in .draw()
-     */
-    const NUMBER_OF_COLS = 4
-
-    /**
      * Locally used to control flow upon button presses: A, B, UP, DOWN
      */
     const enum DATA_VIEW_DISPLAY_MODE {
@@ -53,7 +48,6 @@ namespace microcode {
          * Pressing B sets to Unfiltered
          */
         private guiState: DATA_VIEW_DISPLAY_MODE;
-
 
         //---------
         // FOR GUI:
@@ -125,6 +119,7 @@ namespace microcode {
             super.startup()
 
             this.nextDataChunk();
+
             this.headerStringLengths = this.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
 
             //----------
@@ -237,7 +232,7 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.currentCol + 1 < NUMBER_OF_COLS - 1)
+                    if (this.currentCol + 1 < this.dataRows[0].length - 1)
                         this.currentCol += 1
                 }
             )
@@ -383,7 +378,7 @@ namespace microcode {
                 let cumulativeColOffset = 0;
 
                 // Skip the first column: Time (Seconds)
-                for (let col = 0; col < NUMBER_OF_COLS - this.currentCol; col++) {
+                for (let col = 0; col < this.dataRows[0].length - this.currentCol; col++) { // datalogger.getRows(1).split(",").length
                     const colID: number = col + this.currentCol;
                     let value: string = this.dataRows[row][colID];
 
@@ -397,7 +392,7 @@ namespace microcode {
 
                     // In this.drawGridOfVariableSize: If the column after this one would not fit grant this one the remanining space
                     // This will align the text to the center of this column space
-                    if (colID == NUMBER_OF_COLS - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
+                    if (colID == this.dataRows[0].length - 1 || cumulativeColOffset + this.headerStringLengths[colID] + this.headerStringLengths[colID + 1] > Screen.WIDTH) {
                         cumulativeColOffset += ((Screen.WIDTH - cumulativeColOffset) / 2) - (this.headerStringLengths[colID] / 2);
                     }
 

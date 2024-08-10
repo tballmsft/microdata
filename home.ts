@@ -65,7 +65,7 @@ namespace microcode {
                 onClick: () => {
                     this.app.popScene()
                     // if (datalogger.getNumberOfRows() <= 1)
-                        this.app.pushScene(new RadioLoggingScreen(this.app))
+                        this.app.pushScene(new DistributedLoggingScreen(this.app))
                     // else
                         // this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
