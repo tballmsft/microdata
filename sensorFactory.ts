@@ -56,8 +56,8 @@ namespace microcode {
             }
         }
 
-        public static getFromRadioName(sensorShorthandName: string): Sensor {
-            switch (sensorShorthandName) {
+        public static getFromRadioName(radioName: string): Sensor {
+            switch (radioName) {
                 case("AX")  : return new AccelerometerXSensor();
                 case("AY")  : return new AccelerometerYSensor();
                 case("AZ")  : return new AccelerometerZSensor();
@@ -83,5 +83,33 @@ namespace microcode {
                 default     : return new AccelerometerXSensor()
             }
         }
+
+        // public static radioToSensorName(radioName: string): string {
+        //     switch (radioName) {
+        //         case("AX")  : return "Accel. X"
+        //         case("AY")  : return "Accel. Y"
+        //         case("AZ")  : return "Accel. Z"
+        //         case("P")   : return "Pitch"
+        //         case("R")   : return "Roll"
+        //         case("TP0") : return "T. Pin 0"
+        //         case("TP1") : return "T. Pin 1"
+        //         case("TP2") : return "T. Pin 2"
+        //         case("AP0") : return "A. Pin 0"
+        //         case("AP1") : return "A. Pin 1"
+        //         case("AP2") : return "A. Pin 2"
+        //         case("L")   : return "Light"
+        //         case("T")   : return "Temp."
+        //         case("M")   : return "Magnet"
+        //         case("LP")  : return "Logo Pressed"
+        //         case("V")   : return "Volume"
+        //         case("C")   : return "Compass"
+        //         case("JL")  : return "Jac Light"
+        //         case("JM")  : return "Jac Moist"
+        //         case("JD")  : return "Jac Dist"
+        //         case("JF")  : return "Jac Flex"
+        //         case("JT")  : return "Jac Temp"
+        //         default     : return "Accel. X"
+        //     }
+        // }
     }
 }
