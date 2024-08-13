@@ -7,14 +7,14 @@
         "radio": "*",
         "microphone": "*",
         "datalogger": "*",
-        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.6",
-        "jacdac": "github:tballmsft/pxt-jacdac",
-        "jacdac-light-level": "github:tballmsft/pxt-jacdac/tree/master/light-level",
-        "jacdac-soil-moisture": "github:tballmsft/pxt-jacdac/tree/master/soil-moisture",
-        "jacdac-distance": "github:tballmsft/pxt-jacdac/tree/master/distance",
-        "jacdac-temperature": "github:tballmsft/pxt-jacdac/tree/master/temperature",
-        "jacdac-humidity": "github:tballmsft/pxt-jacdac/tree/master/humidity",
-        "jacdac-flex": "github:tballmsft/pxt-jacdac/tree/master/flex"
+        "arcadeshield": "github:microsoft/pxt-arcadeshield#v0.0.7",
+        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
+        "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28",
+        "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
+        "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
+        "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
+        "jacdac-humidity": "github:microsoft/pxt-jacdac/tree/master/humidity#v1.9.28",
+        "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
     },
     "files": [
         "keymap.ts",
@@ -59,6 +59,10 @@
         "radioLoggingScreen.ts"
     ],
     "testFiles": [],
+    "targetVersions": {
+        "target": "7.0.18",
+        "targetId": "microbit"
+    },
     "supportedTargets": [
         "microbit"
     ]
