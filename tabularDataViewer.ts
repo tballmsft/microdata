@@ -109,7 +109,7 @@ namespace microcode {
             super(app, "recordedDataViewer")
 
             this.guiState = DATA_VIEW_DISPLAY_MODE.UNFILTERED_DATA_VIEW
-            this.needToScroll = datalogger.getNumberOfRows() > TABULAR_MAX_ROWS
+            this.needToScroll = datalogger.getNumberOfRows(0) > TABULAR_MAX_ROWS
 
             this.currentRow = 1
             this.currentCol = 0
@@ -196,10 +196,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.down.id,
                 () => {
-                    let rowQty = (this.dataRows.length < TABULAR_MAX_ROWS) ? this.dataRows.length - 1 : datalogger.getNumberOfRows();
+                    let rowQty = (this.dataRows.length < TABULAR_MAX_ROWS) ? this.dataRows.length - 1 : datalogger.getNumberOfRows(0);
 
                     // Boundary where there are TABULAR_MAX_ROWS - 1 number of rows:
-                    if (datalogger.getNumberOfRows() == TABULAR_MAX_ROWS)
+                    if (datalogger.getNumberOfRows(0) == TABULAR_MAX_ROWS)
                         rowQty = TABULAR_MAX_ROWS - 1
 
                     if (this.guiState == DATA_VIEW_DISPLAY_MODE.FILTERED_DATA_VIEW)
@@ -250,7 +250,7 @@ namespace microcode {
          */
         private nextDataChunk() {
             const rows = datalogger.getRows(TABULAR_MAX_ROWS, this.currentRowOffset).split("\n");
-            this.needToScroll = datalogger.getNumberOfRows() > TABULAR_MAX_ROWS
+            this.needToScroll = datalogger.getNumberOfRows(0) > TABULAR_MAX_ROWS
             
             this.dataRows = []
             for (let i = 0; i < rows.length; i++) {
@@ -274,7 +274,7 @@ namespace microcode {
             if (this.currentRowOffset == 0)
                 this.dataRows.push(datalogger.getRows(1, 0).split("\n")[0].split(","))
             
-            while (start < datalogger.getNumberOfRows() && this.dataRows.length < TABULAR_MAX_ROWS) {
+            while (start < datalogger.getNumberOfRows(0) && this.dataRows.length < TABULAR_MAX_ROWS) {
                 const rows = datalogger.getRows(TABULAR_MAX_ROWS, start).split("\n");
                 for (let i = 0; i < rows.length; i++) {
                     const data = rows[i].split(",")
@@ -298,8 +298,8 @@ namespace microcode {
         private getNumberOfFilteredRows() {
             this.numberOfFilteredRows = 0
 
-            const chunkSize = Math.min(20, datalogger.getNumberOfRows())
-            for (let chunk = 0; chunk < datalogger.getNumberOfRows(); chunk+=chunkSize) {
+            const chunkSize = Math.min(20, datalogger.getNumberOfRows(0))
+            for (let chunk = 0; chunk < datalogger.getNumberOfRows(0); chunk+=chunkSize) {
                 const rows = datalogger.getRows(chunkSize, chunk).split("\n");
                 for (let i = 0; i < rows.length; i++) {
                     // Name:

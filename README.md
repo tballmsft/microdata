@@ -16,7 +16,7 @@ With the objective of allowing people to:
 
 
 # Branches
-* codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows() for a CODAL & pxt-microbit PR.
+* codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows(0) for a CODAL & pxt-microbit PR.
 
 
 ## Local setup

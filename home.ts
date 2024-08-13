@@ -47,7 +47,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // if (datalogger.getNumberOfRows() <= 1)
+                    // if (datalogger.getNumberOfRows(0) <= 1)
                         // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.SensorSelect)))
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                     // else
@@ -64,7 +64,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // if (datalogger.getNumberOfRows() <= 1)
+                    // if (datalogger.getNumberOfRows(0) <= 1)
                         this.app.pushScene(new RadioLoggingScreen(this.app))
                     // else
                         // this.app.pushScene(new ClearDataLoggerScreen(this.app))
