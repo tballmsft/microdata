@@ -175,6 +175,7 @@ namespace microcode {
         else if (id == "Jacdac Temperature") res = "Jacdac Temperature"
         else if (id == "Jacdac Humidity") res = "Jacdac Humidity"
 
+        else if (id === "linear_graph") res = "Real-time Data"
         else if (id == "Record") res = "Log Data"
         else if (id == "Command Mode") res = "Command Mode"
         else if (id == "View") res = "View Data"
@@ -188,7 +189,6 @@ namespace microcode {
         else if (id == "Oscilloscope") res = "Oscilloscope"
 
         else if (id == "Command Mode") res = "Command Mode"
-
         else if (id == "Meta Data") res = "Meta Data"
         else if (id == "View Data") res = "View Data"
         else if (id == "View Graph") res = "View Graph"
@@ -197,8 +197,9 @@ namespace microcode {
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
-        else if (id == "Command logging") res = "Command logging"
-        else if (id == "Command logging and streaming") res = "Command logging and streaming"
+        else if (id == "Start logging") res = "Start logging"
+        else if (id == "Start streaming") res = "Start streaming"
+        else if (id == "See connected Microbits") res = "See connected Microbits"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
         
