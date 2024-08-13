@@ -12,10 +12,18 @@ namespace microcode {
 
         constructor() {
             // One interval delay to ensure all static constructors have executed.
-            basic.pause(30)
+            basic.pause(10)
             reportEvent("app.start")
+
             this.sceneManager = new SceneManager()
-            this.pushScene(new Home(this))
+
+            datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
+            
+            const arcadeShieldConnected = _screen_internal.displayPresent();
+            if (arcadeShieldConnected)
+                this.pushScene(new Home(this))
+            else
+                new RadioLoggingProtocol(this, false);
         }
 
         public saveBuffer(slot: string, buf: Buffer) {

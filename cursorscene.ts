@@ -2,8 +2,9 @@ namespace microcode {
     export enum CursorSceneEnum {
         LiveDataViewer,
         SensorSelect,
-        MeasurementConfigSelect,
+        RecordingConfigSelect,
         RecordData,
+        CommandTargetLogging
     }
     
     export class CursorScene extends Scene {
@@ -145,15 +146,56 @@ namespace microcode {
     export class CursorSceneWithPriorPage extends CursorScene {
         private goBack1PageFn: () => void;
 
-        constructor(app: App, goBack1PageFn: () => void) {
+        constructor(app: App, goBack1PageFn: () => void, navigator?: INavigator) {
             super(app)
             this.backgroundColor = 11
-
+            
+            if (navigator)
+                this.navigator = navigator
+            else
+                this.navigator = null
             this.goBack1PageFn = goBack1PageFn
         }
 
         /* override */ startup() {
-            super.startup()
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.right.id,
+                () => this.moveCursor(CursorDir.Right)
+            )
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.up.id,
+                () => this.moveCursor(CursorDir.Up)
+            )
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.down.id,
+                () => this.moveCursor(CursorDir.Down)
+            )
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.left.id,
+                () => this.moveCursor(CursorDir.Left)
+            )
+
+            // click
+            const click = () => this.cursor.click()
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id,
+                click
+            )
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.A.id + keymap.PLAYER_OFFSET,
+                click
+            )
+            control.onEvent(
+                ControllerButtonEvent.Pressed,
+                controller.B.id,
+                () => this.back()
+            )
         
             control.onEvent(
                 ControllerButtonEvent.Pressed,
@@ -163,7 +205,9 @@ namespace microcode {
 
             this.cursor = new Cursor()
             this.picker = new Picker(this.cursor)
-            this.navigator = new RowNavigator()
+
+            if (this.navigator == null)
+                this.navigator = new RowNavigator()
             this.cursor.navigator = this.navigator
         }
     }

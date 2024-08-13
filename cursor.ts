@@ -1,4 +1,6 @@
 namespace microcode {
+    const DEFAULT_CURSOR_OUTLINE_COLOUR = 9
+
     export type CursorCancelHandler = () => void
 
     export enum CursorDir {
@@ -27,6 +29,7 @@ namespace microcode {
         size: Bounds
         visible = true
 
+        resetOutlineColourOnMove = false
         private cursorOutlineColour: number
 
         constructor() {
@@ -34,10 +37,14 @@ namespace microcode {
             this.cancelHandlerStack = []
             this.moveDest = new Vec2()
             this.setSize()
-            this.cursorOutlineColour = 9
+            
+            this.cursorOutlineColour = DEFAULT_CURSOR_OUTLINE_COLOUR
         }
 
         public moveTo(pos: Vec2, ariaId: string, sizeHint: Bounds) {
+            if (this.resetOutlineColourOnMove)
+                this.setOutlineColour(DEFAULT_CURSOR_OUTLINE_COLOUR)
+
             this.setSize(sizeHint)
             this.moveDest.copyFrom(pos)
             this.moveStartMs = control.millis()

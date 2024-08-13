@@ -151,7 +151,6 @@ namespace microcode {
         else if (id === "F23NL") res = "lost left";
         else if (id === "F23NR") res = "lost right";   
 
-        else if (id === "linear_graph") res = "Live"
         else if (id == "led_light_sensor") res = "Light Sensor"
         else if (id == "thermometer") res = "Thermometer" 
         else if (id == "accelerometer") res = "Accelerometer"
@@ -176,9 +175,10 @@ namespace microcode {
         else if (id == "Jacdac Temperature") res = "Jacdac Temperature"
         else if (id == "Jacdac Humidity") res = "Jacdac Humidity"
 
-        // icons do not yet exist:
-        else if (id == "Record") res = "Record"
-        else if (id == "View") res = "View"
+        else if (id === "linear_graph") res = "Real-time Data"
+        else if (id == "Record") res = "Log Data"
+        else if (id == "Command Mode") res = "Command Mode"
+        else if (id == "View") res = "View Data"
         else if (id == "Done") res = "Done"
         else if (id == "Pins") res = "Pins"
         else if (id == "Pin 0") res = "Pin 0"
@@ -196,7 +196,7 @@ namespace microcode {
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
-        else if (id == "Reset Datalogger") res = "Reset Datalogger"
+        else if (id == "Start target logging") res = "Start target logging"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
         

@@ -81,6 +81,11 @@ namespace microcode {
          * Not overriden by any concrete sensor implmentation.
          */
         getPeriod(): number;
+
+        /**
+         * Not overriden by any concrete sensor implmentation.
+         */
+        getMeasurements(): number;
         
         /**
          * Not overriden by any concrete sensor implmentation.
@@ -134,7 +139,7 @@ namespace microcode {
          * @param config see recordingConfigSelection
          * @param isInEventMode will this sensor be used to track events?
          */
-        setConfig(config: RecordingConfig, isInEventMode: boolean): void;
+        setConfig(config: RecordingConfig): void;
 
         /**
          * Records a sensor's reading to the datalogger.
@@ -151,7 +156,7 @@ namespace microcode {
      * These are implmented by the 
      */
     export abstract class Sensor implements ISensorable {
-        /** Set upon the first reading */
+        /** Set inside .setConfig() */
         public totalMeasurements: number
 
         /** Increased on the event of the graph zooming in for example. */
@@ -184,6 +189,8 @@ namespace microcode {
          */
         private dataBuffer: number[]
 
+        private lastLoggedReading: number;
+
         /**
          * Holds what the Y axis position should be for the corresponding read value, relative to a granted fromY value.
          * Filled alongside dataBuffer alongside .readIntoBufferOnce()
@@ -200,6 +207,7 @@ namespace microcode {
 
             this.lastLoggedEventDescription = ""
             this.dataBuffer = []
+            this.lastLoggedReading = 0
             this.normalisedDataBuffer = []
         }
 
@@ -219,13 +227,15 @@ namespace microcode {
         getBufferLength(): number {return this.dataBuffer.length}
         getNormalisedBufferLength(): number {return this.normalisedDataBuffer.length}
         getPeriod(): number {return this.config.period;}
+        getMeasurements(): number {return this.config.measurements}
         hasMeasurements(): boolean {return this.config.measurements > 0;}
 
         getRecordingInformation(): string[] {
             return [
                 this.getPeriod() / 1000 + " second period", 
                 this.config.measurements.toString() + " measurements left",
-                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left"
+                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
+                "Last log was " + this.lastLoggedReading,
             ]
         }
 
@@ -233,10 +243,10 @@ namespace microcode {
             return [
                 this.config.measurements.toString() + " events left",
                 "Logging " + this.config.inequality + " " + this.config.comparator + " events",
+                "Last log was " + this.lastLoggedReading,
                 this.lastLoggedEventDescription
             ]
         }
-
 
         /**
          * Change the size of the buffer used for this.dataBuffer & this.normalisedBuffer
@@ -298,7 +308,8 @@ namespace microcode {
          * @param config see recordingConfigSelection.
          * @param isInEventMode will this sensor be used to track events?
          */
-        setConfig(config: RecordingConfig, isInEventMode: boolean) {
+        setConfig(config: RecordingConfig) {
+            const isInEventMode = config.comparator != null && config.inequality != null
             this.config = config
             this.totalMeasurements = this.config.measurements
             this.isInEventMode = isInEventMode
@@ -310,16 +321,16 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number) {
-            const reading = this.getReading()
+        log(time: number): void {
+            this.lastLoggedReading = this.getReading()
             
             if (this.isInEventMode) {
-                if (sensorEventFunctionLookup[this.config.inequality](reading, this.config.comparator)) {
+                if (sensorEventFunctionLookup[this.config.inequality](this.lastLoggedReading, this.config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.getName()),
                         datalogger.createCV("Time (ms)", time),
-                        datalogger.createCV("Reading", reading.toString()),
-                        datalogger.createCV("Event", reading + " " + this.config.inequality + " " + this.config.comparator)
+                        datalogger.createCV("Reading", this.lastLoggedReading.toString()),
+                        datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
                 }
@@ -329,7 +340,7 @@ namespace microcode {
                 datalogger.log(
                     datalogger.createCV("Sensor", this.getName()),
                     datalogger.createCV("Time (ms)", time.toString()),
-                    datalogger.createCV("Reading", reading.toString()),
+                    datalogger.createCV("Reading", this.lastLoggedReading.toString()),
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1
@@ -431,31 +442,22 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP0Sensor extends Sensor {
+    export class TouchPinP0Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
 
-            PinP0Sensor.pinStatus = 0;
-            PinP0Sensor.isActive = !(PinP1Sensor.isActive && PinP2Sensor.isActive);
-
-            if (PinP0Sensor.isActive) {
-                input.onPinPressed(TouchPin.P0, function () {
-                    PinP0Sensor.pinStatus = (PinP0Sensor.pinStatus == 0) ? 1 : 0
-                })
-
-                input.onPinReleased(TouchPin.P0, function () {
-                    
-                })
-            }
+            TouchPinP0Sensor.pinStatus = 0;
+            input.onPinPressed(TouchPin.P0, function () {
+                TouchPinP0Sensor.pinStatus = (TouchPinP0Sensor.pinStatus == 1) ? 0 : 1
+            })
         }
 
-        public static getName(): string {return "Pin 0"}
-        public static getReading(): number {return PinP0Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 0"}
+        public static getReading(): number {return TouchPinP0Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }
@@ -463,27 +465,22 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP1Sensor extends Sensor {
+    export class TouchPinP1Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
 
-            PinP1Sensor.pinStatus = 0;
-            PinP1Sensor.isActive = !(PinP0Sensor.isActive && PinP2Sensor.isActive);
-
-            if (PinP1Sensor.isActive) {
-                input.onPinReleased(TouchPin.P1, () => {
-                    PinP1Sensor.pinStatus = (PinP1Sensor.pinStatus == 0) ? 1 : 0
-                })
-            }
+            TouchPinP1Sensor.pinStatus = 0;
+            input.onPinReleased(TouchPin.P1, () => {
+                TouchPinP1Sensor.pinStatus = (TouchPinP1Sensor.pinStatus == 0) ? 1 : 0
+            })
         }
 
-        public static getName(): string {return "Pin 1"}
-        public static getReading(): number {return PinP1Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 1"}
+        public static getReading(): number {return TouchPinP1Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }
@@ -491,27 +488,58 @@ namespace microcode {
     /**
      * Touchpin sensor.
      * Need to hold both Ground and this Pin for an effect.
-     * Not ideal implementation: Currently cycles between On & Off when pressed - ideally would automatically go Off without touch.
      */
-    export class PinP2Sensor extends Sensor {
+    export class TouchPinP2Sensor extends Sensor {
         private static pinStatus: number
         public static isActive: boolean = false
 
         constructor() {
             super()
             
-            PinP2Sensor.pinStatus = 0;
-            PinP2Sensor.isActive = !(PinP0Sensor.isActive && PinP1Sensor.isActive);
-
-            if (PinP2Sensor.isActive) {
-                input.onPinPressed(TouchPin.P2, function () {
-                    PinP2Sensor.pinStatus = (PinP2Sensor.pinStatus == 1) ? 0 : 1
-                })
-            }
+            TouchPinP2Sensor.pinStatus = 0;
+            input.onPinPressed(TouchPin.P2, function () {
+                TouchPinP2Sensor.pinStatus = (TouchPinP2Sensor.pinStatus == 1) ? 0 : 1
+            })
         }
 
-        public static getName(): string {return "Pin 2"}
-        public static getReading(): number {return PinP2Sensor.pinStatus}
+        public static getName(): string {return "T. Pin 2"}
+        public static getReading(): number {return TouchPinP2Sensor.pinStatus}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P0 pin
+     */
+    export class AnalogPinP0Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 0"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P0) / 1023}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P1 pin
+     */
+    export class AnalogPinP1Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 1"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P1) / 1023}
+        public static getMinimum(): number {return 0;}
+        public static getMaximum(): number {return 1;}
+    }
+
+
+    /**
+     * Sensing analog values on the P2 pin
+     */
+    export class AnalogPinP2Sensor extends Sensor {
+        constructor() {super()}
+        public static getName(): string {return "A. Pin 2"}
+        public static getReading(): number {return pins.analogReadPin(AnalogPin.P2) / 1023}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
     }

@@ -1,6 +1,6 @@
 namespace microcode {
     /**
-     * Generated at recordingConfigSelection
+     * Generated at recordingConfigSelection 
      * Passed to and owned by a sensor
      * The sensor uses this information to control how it logs readings
      */
@@ -10,4 +10,15 @@ namespace microcode {
         inequality?: string,
         comparator?: number
     };
+
+
+    export function serializeRecordingConfig(config: RecordingConfig): string {
+        if (config == null)
+            return ""
+
+        if (config.inequality == null || config.comparator == null)
+            return "PERIOD, " + config.measurements + ", " + config.period
+
+        return "EVENT, " + config.measurements + ", " + config.inequality + ", " + config.comparator
+    }
 }

@@ -23,16 +23,17 @@ namespace microcode {
         private jacdacSensorSelected: boolean
         
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
-            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}) 
-            this.btns = []
-            this.selectedSensorAriaIDs = []
-            this.nextSceneEnum = nextSceneEnum
-            this.jacdacSensorSelected = false
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5));
+            this.btns = [];
+            this.selectedSensorAriaIDs = [];
+            this.nextSceneEnum = nextSceneEnum;
+            this.jacdacSensorSelected = false;
         }
 
         /* override */ startup() {
             super.startup()
 
+            this.cursor.resetOutlineColourOnMove = true
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
                 "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
@@ -40,10 +41,14 @@ namespace microcode {
             ]
 
             const ariaIDs: string[] = [
-                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "Pin 0", "Pin 1", "Pin 2", "led_light_sensor",
+                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "led_light_sensor",
                 "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
                 "Jacdac Moisture", "Jacdac Distance"
             ]
+
+            //-----------------------------------------------------
+            // Organise buttons in 4x5 grid: same as GridNavigator:
+            //-----------------------------------------------------
 
             let x: number = -60;
             let y: number = -40;
@@ -74,6 +79,7 @@ namespace microcode {
 
                         // Addition:
                         else if (this.selectedSensorAriaIDs.length < MAX_NUMBER_OF_SENSORS) {
+                            this.cursor.setOutlineColour(7)
                             if (SensorFactory.getFromAriaID(button.ariaId).isJacdac()) {
                                 if (!this.jacdacSensorSelected) {
                                     this.selectedSensorAriaIDs.push(button.ariaId)
@@ -127,13 +133,31 @@ namespace microcode {
                         return
                     }
                     const sensors = this.selectedSensorAriaIDs.map((ariaID) => SensorFactory.getFromAriaID(ariaID))
+
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new LiveDataViewer(this.app, sensors))
+                        this.app.pushScene(new TutorialWindow(this.app, {
+                            tips: [
+                                {text: "The next screen\nshows live\nsensor readings."},
+                                {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
+                                {text: "Press A on the\ngraph zoom in.", keywords: [" A "], keywordColors: [6]},
+                                {text: "Press A when below\nthe graph to\ntoggle a\nsensor on/off.", keywords: [" A "], keywordColors: [6]},
+                                {text: "Press A to see\nsome data!", keywords: [" A "], keywordColors: [6]}, // Red
+                            ],
+                            backFn: () => {
+                                this.app.popScene()
+                                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
+                            }
+                        },
+                        new LiveDataViewer(this.app, sensors)))
+                    }
+                    
+                    else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect) {
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
                     }
 
-                    else {
-                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
+                    else if (this.nextSceneEnum === CursorSceneEnum.CommandTargetLogging) {
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors, this.nextSceneEnum))
                     }
                 }
             }))

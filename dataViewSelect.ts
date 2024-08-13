@@ -32,17 +32,43 @@ namespace microcode {
                     controller.A.id,
                     () => {
                         this.app.popScene()
-                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                        this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                     }
                 )
             }
+
+            this.dataViewBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "largeDisk",
+                ariaId: "View Data",
+                x: -50,
+                y: 30,
+                onClick: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new TabularDataViewer(this.app))
+                },
+            })
+
+            this.graphViewBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "linear_graph_2",
+                ariaId: "View Graph",
+                x: 0,
+                y: 30,
+                onClick: () => {
+                    this.app.popScene()
+                    this.app.pushScene(new GraphGenerator(this.app))
+                },
+            })
 
             this.resetDataLoggerBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "largeSettingsGear",
                 ariaId: "Reset Datalogger",
-                x: -50,
+                x: 50,
                 y: 30,
                 onClick: () => {
                     datalogger.deleteLog()
@@ -53,42 +79,13 @@ namespace microcode {
                         controller.A.id,
                         () => {
                             this.app.popScene()
-                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.MeasurementConfigSelect))
+                            this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
                         }
                     )
                 },
-                boundaryColor: 7,
             })
 
-            this.dataViewBtn = new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "largeDisk",
-                ariaId: "View Data",
-                x: 0,
-                y: 30,
-                onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new TabularDataViewer(this.app))
-                },
-                boundaryColor: 7,
-            })
-
-            this.graphViewBtn = new Button({
-                parent: null,
-                style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
-                ariaId: "View Graph",
-                x: 50,
-                y: 30,
-                onClick: () => {
-                    this.app.popScene()
-                    this.app.pushScene(new GraphGenerator(this.app))
-                },
-                boundaryColor: 7,
-            })
-
-            this.navigator.addButtons([this.resetDataLoggerBtn, this.dataViewBtn, this.graphViewBtn])
+            this.navigator.addButtons([this.dataViewBtn, this.graphViewBtn, this.resetDataLoggerBtn])
         }
 
         draw() {

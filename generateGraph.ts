@@ -57,7 +57,7 @@ namespace microcode {
         private windowWidth: number;
         private windowHeight: number;
 
-        private windowLeftBuffer: number;
+        private windowLeftBuffer: number; 
         private windowRightBuffer: number;
         private windowTopBuffer: number;
         private windowBotBuffer: number;

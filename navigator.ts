@@ -144,6 +144,63 @@ namespace microcode {
         }
     }
 
+
+    export class GridNavigator extends RowNavigator {
+        private height: number;
+        private width: number;
+        
+        constructor(height: number, width: number) {
+            super()
+            this.height = height
+            this.width = width
+        }
+
+        public move(dir: CursorDir) {
+            switch (dir) {
+                case CursorDir.Up: {
+                    this.row = (((this.row - 1) % this.height) + this.height) % this.height; // Non-negative modulo
+                    break
+                }
+
+                case CursorDir.Down: {
+                    this.row = (this.row + 1) % this.height;
+                    break
+                }
+
+                case CursorDir.Left: {
+                    if (this.col == 0)
+                        this.col = this.width - 1
+                    else
+                        this.col -= 1
+                    break
+                }
+
+                case CursorDir.Right: {
+                    if (this.col == this.width)
+                        this.col = 0
+                    else 
+                        this.col = (this.col + 1) % this.width
+                    break
+                }
+
+                case CursorDir.Back: {
+                    if (this.col > 0) this.col = 0
+                    else if (this.row > 0) this.row--
+                    else return undefined
+                    break
+                }
+            }
+
+            const btn = this.buttonGroups[0][(this.row * this.width) + this.col]
+            this.reportAria(btn)
+            return btn
+        }
+
+        public getCurrent(): Button {
+            return this.buttonGroups[0][(this.row * this.width) + this.col]
+        }
+    }
+
     // mostly a matrix, except for last row, which may be ragged
     // also supports delete button
     // add support for aria

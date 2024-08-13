@@ -16,8 +16,6 @@ With the objective of allowing people to:
 
 
 # Branches
-* The most up-to-date branch is codal_rework_fork_merge
-* Currently main is behind codal_rework, which is behind codal_rework_fork_merge.
 * codal_testing is separate to MicroData, its purpose is to validate the functionality of getRows() and getNumberOfRows() for a CODAL & pxt-microbit PR.
 
 
@@ -61,9 +59,8 @@ pxt clean
 ```
 pxt buildtarget --local
 ```
-8. Installing MicroData. Make a projects directory if absent.
+8. Installing MicroData.
 ```
-cd projects
 git clone https://github.com/KierPalin/MicroData
 cd Microdata
 ```
@@ -72,7 +69,11 @@ cd Microdata
 npm install --ignore-scripts
 pxt install
 ```
-10. Local build.
+10. Build and copy to microbit via build.sh script.
+```
+./build.sh
+```
+11. Local build without copy:
 ```
 pxt build --local
 ```
