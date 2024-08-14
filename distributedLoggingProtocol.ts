@@ -35,7 +35,8 @@ namespace microcode {
         JOIN_REQUEST,
         START_LOGGING,
         BECOME_TARGET,
-        DATA_STREAM
+        DATA_STREAM,
+        GET_ID,
     }
 
     /**
@@ -46,6 +47,7 @@ namespace microcode {
         "S", // "START_LOGGING",
         "T", // "BECOME_TARGET",
         "D", // "DATA_STREAM"
+        "G"
     ]
 
     /**
@@ -60,12 +62,26 @@ namespace microcode {
     /** How long to wait between messages before timeout. */
     const MESSAGE_LATENCY_MS: number = 100;
 
+    /** Default ID that all Microbits start with, 
+     *  If a Microbit becomes a Commander it will give itself the ID 0. 
+     *  If the Microbit finds an existing Commander it will be told to become a Target, and be given an ID
+     */
     const UNINITIALISED_MICROBIT_ID: number = -1
-
 
     export interface ITargetDataLoggedCallback {
         callback(rowTheTargetLogged: string): void;
     }
+
+
+    // KNOWN ISSUES:
+    // If a Microbit without an Arcade Shield joins it will always become a Target, even if it is the first to join (so there is not yet a Commander)
+    // The next Microbit with an Arcade Shield that joins will successfully become a Commander,
+    //      The interaction with controlling these Targets works well. 
+    //      The issue is that the Target in this case will not yet have a unique ID - it will still have the UNINITIALISED_MICROBIT_ID
+    // To solve: Targets should respond to JOIN_REQUESTS and send their current ID, the Commander should send them back a new one (send them a BECOME_TARGET)
+    //      Issue: this requires discrimination between Targets - since their could be multiple Targets with UNINITIALISED_MICROBIT_ID
+    //          How to individually send them a unique ID?
+    //      To solve: All Microbits send their ids and the Target generates a unique one.
 
     export class DistributedLoggingProtocol implements ITargetDataLoggedCallback {
         private app: App;
@@ -85,17 +101,18 @@ namespace microcode {
         private numberOfMessagesExpected: number;
         private numberOfMessagesReceived: number;
 
-
-
         private sensors: Sensor[]
-
+        
         //--------------------------
         // Commander only Variables:
         //--------------------------
         
         public numberOfTargetsConnected: number;
+        
         private nextMicrobitIDToIssue: number;
         private callbackObj: ITargetDataLoggedCallback;
+        
+        /** Should the target send each row of data it logs back to the Commander? See DistributedLoggingProtocol.log() */
         private streamDataBack: boolean;
 
         constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetDataLoggedCallback) {
@@ -116,9 +133,8 @@ namespace microcode {
             this.numberOfMessagesExpected = 0;
             this.numberOfMessagesReceived = 0;
 
-
             this.sensors = []
-
+            
             //--------------------------
             // Commander only Variables:
             //--------------------------
@@ -174,45 +190,52 @@ namespace microcode {
             radio.setTransmitPower(TRANSMIT_POWER)
             radio.setFrequencyBand(FREQUENCY_BAND)
 
-            let responseReceived = false
-
-            // Listen from a response from a Commander:
-            radio.onReceivedString(function(receivedString) {
-                const message = receivedString.split(",")
-
-                // Command to become a target has been received:
-                if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
-                    responseReceived = true
-                    this.id = message[MESSAGE_COMPONENT.DATA_START]
-                }
-            })
-
-            // The join request message, will be sent out and waited on 5 times:
-            const message: string = this.createMessage(NETWORK_COMMAND.JOIN_REQUEST)
-
-            // Timeout:
-            for (let _ = 0; _ < 5; _++) {
-                // Account for onReceivedString processing:
-                this.sendMessage(message)
-                basic.pause(MESSAGE_LATENCY_MS)
-
-                // Means a Commander has replied:
-                if (responseReceived)
-                    break
-                basic.pause(MESSAGE_LATENCY_MS)
+            // A Microbit without an Arcade Shield cannot become a Commander; so force this Microbit to become a Target:
+            if (!this.arcadeShieldIsConnected) {
+                this.becomeTarget()
             }
 
-            // ----------------------------------
-            // Become the Commander or a Target:
-            // ----------------------------------
+            else {
+                let responseReceived = false
 
-            if (responseReceived)
-                this.becomeTarget()
-            else
-                this.becomeCommander()
+                // Listen from a response from a Commander:
+                radio.onReceivedString(function(receivedString) {
+                    const message = receivedString.split(",")
+
+                    // Command to become a target has been received:
+                    if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
+                        responseReceived = true
+                        this.id = message[MESSAGE_COMPONENT.DATA_START]
+                    }
+                })
+
+                // The join request message, will be sent out and waited on 5 times:
+                const message: string = this.createMessage(NETWORK_COMMAND.JOIN_REQUEST)
+
+                // Timeout:
+                for (let _ = 0; _ < 5; _++) {
+                    // Account for onReceivedString processing:
+                    this.sendMessage(message)
+                    basic.pause(MESSAGE_LATENCY_MS)
+
+                    // Means a Commander has replied:
+                    if (responseReceived)
+                        break
+                    basic.pause(MESSAGE_LATENCY_MS)
+                }
+
+                // ---------------------------------
+                // Become the Commander or a Target:
+                // ---------------------------------
+
+                if (responseReceived)
+                    this.becomeTarget()
+                else
+                    this.becomeCommander()
+                }
         }
 
-        public addSensor(sensor: Sensor) {
+        private addSensor(sensor: Sensor) {
             this.sensors.push(sensor)
         }
 
@@ -230,8 +253,15 @@ namespace microcode {
                     this.numberOfMessagesExpected = message[MESSAGE_COMPONENT.DATA_START]
                     this.streamDataBack = message[MESSAGE_COMPONENT.DATA_START + 1] == "1"
                     this.numberOfMessagesReceived = 0
-                    // this.sensors = []
+                    this.sensors = []
                 }
+
+                // /**
+                //  * COMMANDER REQUESTS ID
+                //  */
+                // else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
+                //     this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID, [this.id]))
+                // }
 
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
                     if (this.numberOfMessagesReceived < this.numberOfMessagesExpected) {
@@ -275,7 +305,7 @@ namespace microcode {
                         }
                     }
                 }
-            })
+            }) // end of radio.onReceivedString
 
             this.radioMode = RADIO_LOGGING_MODE.TARGET
 
@@ -290,6 +320,13 @@ namespace microcode {
                 `)
             }
         }
+
+        //------------------------
+        // Commander-only Methods:
+        //------------------------
+
+        public addTargetID(id: number) {}
+        public getTargetIDs(): number[] {return []}
 
         private becomeCommander() {
             this.radioMode = RADIO_LOGGING_MODE.COMMANDER
@@ -311,6 +348,13 @@ namespace microcode {
                     this.numberOfTargetsConnected += 1
                 }
 
+                // /**
+                //  * INCOMING GET ID RESPONSE
+                //  */
+                // else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.GET_ID]) {
+                //     this.addTargetID(+message[MESSAGE_COMPONENT.DATA_START])
+                // }
+
                 /**
                  * INCOMING DATA STREAM
                  */
@@ -329,15 +373,15 @@ namespace microcode {
         }
 
 
-        public log(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
-            const numberOfSensors = sensors.length
+        public log(x: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+            const numberOfSensors = x.length
 
             let messages: string[] = [
                 this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors, ((streamItBack) ? "1" : "0")]) // START_LOGGING + number of messages + should the data be streamed back?
             ]
 
             for (let i = 0; i < numberOfSensors; i++) {
-                messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [sensors[i].getRadioName(), serializeRecordingConfig(configs[i])]))
+                messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [x[i].getRadioName(), serializeRecordingConfig(configs[i])]))
             }
 
             for (let i = 0; i < messages.length; i++) {
@@ -345,5 +389,11 @@ namespace microcode {
                 basic.pause(MESSAGE_LATENCY_MS)
             }
         }
+
+        // public requestTargetIDs() {
+        //     // this.x = []
+        //     this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID))
+        //     // basic.pause(MESSAGE_LATENCY_MS)
+        // }
     }
 }
