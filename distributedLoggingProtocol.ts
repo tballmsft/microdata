@@ -98,7 +98,20 @@ namespace microcode {
         // NETWORK_COMMAND MESSSAGE HANDLING:
         //-----------------------------------
 
+        /** There is a limit on the length of radio messages, so longer messages - such as those required for:
+         *      sending logs between the Target and the Commander
+         *      sending the list of sensors and their configuration information from the Commander to the Target
+         *  need to be split up into multiple messages.
+         * 
+         * This variable is sent to and set from the content in a message starting with NETWORK_COMMAND.START_LOGGING
+         * Set alongside numberOfMessagesReceived
+         */
         private numberOfMessagesExpected: number;
+
+        /**
+         * This variable is sent to and set from the content in a message starting with NETWORK_COMMAND.START_LOGGING
+         * Set alongside numberOfMessagesExpected
+         */
         private numberOfMessagesReceived: number;
 
         private sensors: Sensor[]

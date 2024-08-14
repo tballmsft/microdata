@@ -1,9 +1,13 @@
 namespace microcode {
+
+    /**
+     * Local enum used in .draw() to control what information should be shown
+     */
     const enum UI_STATE {
         SHOWING_OPTIONS,
         SHOWING_CONNECTED_MICROBITS,
-        SHOWING_START_LOGGING,
-        SHOWING_START_STREAMING,
+        SHOWING_LOGGING,
+        SHOWING_STREAMING,
         SHOWING_DATA
     }
 
@@ -23,10 +27,18 @@ namespace microcode {
         private startStreamingBtn: Button
         private showDataBtn: Button
 
-        constructor(app: App) {
+        public static streamDataBack = true
+
+        constructor(app: App, sensors?: Sensor[], configs?: RecordingConfig[]) {
             super(app)
             this.uiState = UI_STATE.SHOWING_OPTIONS
             this.distributedLogger = new DistributedLoggingProtocol(app, true)
+
+            if (sensors != null && configs != null) {
+                this.uiState = (DistributedLoggingScreen.streamDataBack ? UI_STATE.SHOWING_STREAMING : UI_STATE.SHOWING_LOGGING)
+                
+                this.distributedLogger.log(sensors, configs, DistributedLoggingScreen.streamDataBack)
+            }
         }
 
         callback(newRowAsCSV: string): void {
@@ -53,7 +65,7 @@ namespace microcode {
             )
 
             this.cursor.visible = true
-            if (this.distributedLogger.radioMode != RADIO_LOGGING_MODE.COMMANDER)
+            if (this.uiState != UI_STATE.SHOWING_OPTIONS)
                 this.cursor.visible = false
 
             // this.targetMicrobitsBtn = new Button({
@@ -77,15 +89,17 @@ namespace microcode {
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    this.uiState = UI_STATE.SHOWING_START_LOGGING
-                    this.cursor.visible = false
+                    // this.uiState = UI_STATE.SHOWING_START_LOGGING
+                    // this.cursor.visible = false
 
-                    const sensors: Sensor[] = [new LightSensor(), new TemperatureSensor()]
-                    const configs: RecordingConfig[] = [{measurements: 6, period: 10}, {measurements: 6, period: 1000}]
+                    // const sensors: Sensor[] = [new LightSensor(), new TemperatureSensor()]
+                    // const configs: RecordingConfig[] = [{measurements: 6, period: 10}, {measurements: 6, period: 1000}]
 
+                    // this.distributedLogger.log(sensors, configs, false)
 
-
-                    this.distributedLogger.log(sensors, configs, false)
+                    DistributedLoggingScreen.streamDataBack = false
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
                 },
             })
 
@@ -97,15 +111,9 @@ namespace microcode {
                 x: 0,   
                 y: 30,
                 onClick: () => {
-                    this.uiState = UI_STATE.SHOWING_START_STREAMING
-                    this.cursor.visible = false
-
-                    const sensors: Sensor[] = [new LightSensor(), new TemperatureSensor()]
-                    const configs: RecordingConfig[] = [{measurements: 6, period: 1000}, {measurements: 6, period: 1000}]
-
-
-
-                    this.distributedLogger.log(sensors, configs, true)
+                    DistributedLoggingScreen.streamDataBack = true
+                    this.app.popScene()
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
                 },
             })
 
@@ -200,7 +208,7 @@ namespace microcode {
                     break;
                 } // end of UI_STATE.SHOWING_CONNECTED_MICROBITS case
 
-                case UI_STATE.SHOWING_START_LOGGING: {
+                case UI_STATE.SHOWING_LOGGING: {
                     screen.printCenter(
                         "Microbits are logging!",
                         Screen.HALF_HEIGHT
@@ -208,7 +216,7 @@ namespace microcode {
                     break
                 }
             
-                case UI_STATE.SHOWING_START_STREAMING: {
+                case UI_STATE.SHOWING_STREAMING: {
                     screen.printCenter(
                         "Receiving Microbit logs!",
                         Screen.HALF_HEIGHT
