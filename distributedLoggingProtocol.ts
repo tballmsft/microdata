@@ -375,7 +375,7 @@ namespace microcode {
                     TabularDataViewer.updateDataRowsOnNextFrame = true
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
-                        datalogger.createCV("Sensor", cols[1]), // SensorFactory.radioToSensorName(
+                        datalogger.createCV("Sensor", cols[1]),
                         datalogger.createCV("Time (ms)", cols[2]),
                         datalogger.createCV("Reading", cols[3]),
                         datalogger.createCV("Event", cols[4])
@@ -385,15 +385,15 @@ namespace microcode {
         }
 
 
-        public log(x: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
-            const numberOfSensors = x.length
+        public log(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+            const numberOfSensors = sensors.length
 
             let messages: string[] = [
                 this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors, ((streamItBack) ? "1" : "0")]) // START_LOGGING + number of messages + should the data be streamed back?
             ]
 
             for (let i = 0; i < numberOfSensors; i++) {
-                messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [x[i].getRadioName(), serializeRecordingConfig(configs[i])]))
+                messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [sensors[i].getName(), serializeRecordingConfig(configs[i])]))
             }
 
             for (let i = 0; i < messages.length; i++) {

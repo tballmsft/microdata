@@ -613,7 +613,7 @@ namespace microcode {
     export class LogoPressSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Logo Pressed"}
+        public static getName(): string {return "Logo Press"}
         public static getRadioName(): string {return "LP"}
         public static getReading(): number {return input.logoIsPressed() ? 1 : 0}
         public static getMinimum(): number {return 0;}
