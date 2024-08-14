@@ -16,7 +16,7 @@ namespace microcode {
             if (name == "MISSING") return icondb.MISSING
             if (name == "disk") return icondb.disk
             if (name == "disk1") return icondb.disk1
-            if (name == "largeDisk") return icondb.largeDiskIcon
+            if (name == "largeDisk") return icondb.largeDisk
 
             // basic colors led editor
             // if (name == "note_on") return icondb.note_on
@@ -50,7 +50,7 @@ namespace microcode {
             if (name == "tile_button_b") return icondb.tile_button_b
             if (name == "compass") return icondb.compass
 
-            if (name == "radio_set_group") return icondb.radioBroadcast
+            if (name == "radio_set_group") return icondb.radio_set_group
             if (name == "settingsGear") return icondb.settingsGear
             if (name == "largeSettingsGear") return icondb.largeSettingsGear
             if (name == "microbitLogoWhiteBackground") return icondb.microbitLogoWhiteBackground
@@ -1056,7 +1056,7 @@ namespace icondb {
         .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
     `
 
-    export const radioBroadcast = bmp`
+    export const radio_set_group = bmp`
         .666666666666666666666666666666.
         66666666666666666666666666666666
         66666666666666666666666666666666
@@ -1092,7 +1092,7 @@ namespace icondb {
         .666666666666666666666666666666.
     `
 
-    export const largeDiskIcon = bmp`
+    export const largeDisk = bmp`
         .666666666666666666666666666666.
         66666666666666666666666666666666
         66666666666666666666666666666666

@@ -40,7 +40,7 @@ namespace microcode {
             this.dataViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk",
+                icon: "linear_graph_2", // largeDisk
                 ariaId: "View Data",
                 x: -50,
                 y: 30,

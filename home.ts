@@ -29,7 +29,7 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
-                x: -60,
+                x: -58,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
@@ -58,25 +58,22 @@ namespace microcode {
             this.distributedLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "radio_set_group",
+                icon: "linear_graph_2", // radio_set_group
                 ariaId: "Command Mode",
                 x: 20,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // if (datalogger.getNumberOfRows() <= 1)
-                        this.app.pushScene(new DistributedLoggingScreen(this.app))
-                    // else
-                        // this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                    this.app.pushScene(new DistributedLoggingScreen(this.app))
                 },
             })
 
             this.viewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk",
+                icon: "linear_graph_2", // largeDisk
                 ariaId: "View",
-                x: 60,
+                x: 58,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
