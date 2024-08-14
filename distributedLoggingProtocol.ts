@@ -226,7 +226,7 @@ namespace microcode {
                 const message: string = this.createMessage(NETWORK_COMMAND.JOIN_REQUEST)
 
                 // Timeout:
-                for (let _ = 0; _ < 5; _++) {
+                for (let _ = 0; _ < 3; _++) {
                     // Account for onReceivedString processing:
                     this.sendMessage(message)
                     basic.pause(MESSAGE_LATENCY_MS)
@@ -248,9 +248,7 @@ namespace microcode {
                 }
         }
 
-        private addSensor(sensor: Sensor) {
-            this.sensors.push(sensor)
-        }
+        private addSensor(sensor: Sensor) {this.sensors.push(sensor)}
 
         private becomeTarget() {
             /**
@@ -374,6 +372,7 @@ namespace microcode {
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
                     const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
 
+                    TabularDataViewer.updateDataRowsOnNextFrame = true
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
                         datalogger.createCV("Sensor", cols[1]), // SensorFactory.radioToSensorName(

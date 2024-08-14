@@ -18,7 +18,7 @@ namespace microcode {
      * 
      * The Commander and the Targets both have a GUI for management/information. Information for a Target without an Arcade Shield is displayed in on the 5x5 LED matrix.
      */
-    export class DistributedLoggingScreen extends CursorScene implements ITargetDataLoggedCallback {
+    export class DistributedLoggingScreen extends CursorScene {
         private uiState: UI_STATE
         private distributedLogger: DistributedLoggingProtocol;
 
@@ -27,6 +27,11 @@ namespace microcode {
         private startStreamingBtn: Button
         private showDataBtn: Button
 
+        /** The user needs to set the sensors and config before sending the request to other Microbits to start logging htose sensors.
+         *  In order to do this the Scene needs to change to the SensorSelection and then the recordingConfigSelection.
+         *  At the end of the recordingConfigSelection the scene will change back to this DistributedLoggingScreen
+         *  This variable is set before swapping to that SensorSelection scene - so that the users initial choice (of streaming the data back or not) is preserved.
+         */
         public static streamDataBack = true
 
         constructor(app: App, sensors?: Sensor[], configs?: RecordingConfig[]) {
@@ -40,10 +45,6 @@ namespace microcode {
                 this.distributedLogger.log(sensors, configs, DistributedLoggingScreen.streamDataBack)
             }
         }
-
-        callback(newRowAsCSV: string): void {
-
-        }
         
         /* override */ startup() {
             super.startup()
@@ -52,7 +53,6 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.B.id,
                 () => {
-
                     if (this.uiState != UI_STATE.SHOWING_OPTIONS) {
                         this.uiState = UI_STATE.SHOWING_OPTIONS
                         this.cursor.visible = true
@@ -89,14 +89,6 @@ namespace microcode {
                 x: -50,
                 y: 30,
                 onClick: () => {
-                    // this.uiState = UI_STATE.SHOWING_START_LOGGING
-                    // this.cursor.visible = false
-
-                    // const sensors: Sensor[] = [new LightSensor(), new TemperatureSensor()]
-                    // const configs: RecordingConfig[] = [{measurements: 6, period: 10}, {measurements: 6, period: 1000}]
-
-                    // this.distributedLogger.log(sensors, configs, false)
-
                     DistributedLoggingScreen.streamDataBack = false
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
@@ -125,9 +117,8 @@ namespace microcode {
                 x: 50,
                 y: 30,
                 onClick: () => {
-                    this.uiState = UI_STATE.SHOWING_DATA
-                    this.cursor.visible = false
-
+                    this.app.popScene()
+                    this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DistributedLoggingScreen(this.app))}))
                 },
             })
 

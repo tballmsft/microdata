@@ -80,10 +80,8 @@ namespace microcode {
                 this.sensorConfigs.push({measurements: 10, period: 1000, inequality: null, comparator: null}) // Defaults per sensor
 
                 this.guiConfigValues[i] = GUI_PERIOD_DEFAULTS
-                // this.guiConfigValues[i] = [0, Math.abs(this.sensors[i].getMaximum()) - Math.abs(this.sensors[i].getMinimum())]
             }
         }
-
 
         /* override */ startup() {
             super.startup()

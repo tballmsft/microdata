@@ -46,7 +46,7 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new TabularDataViewer(this.app))
+                    this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DataViewSelect(this.app))}))
                 },
             })
 
