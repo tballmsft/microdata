@@ -204,9 +204,8 @@ namespace microcode {
             radio.setFrequencyBand(FREQUENCY_BAND)
 
             // A Microbit without an Arcade Shield cannot become a Commander; so force this Microbit to become a Target:
-            if (!this.arcadeShieldIsConnected) {
+            if (!this.arcadeShieldIsConnected)
                 this.becomeTarget()
-            }
 
             else {
                 let responseReceived = false
@@ -265,6 +264,13 @@ namespace microcode {
                     this.streamDataBack = message[MESSAGE_COMPONENT.DATA_START + 1] == "1"
                     this.numberOfMessagesReceived = 0
                     this.sensors = []
+
+                    if (this.id == UNINITIALISED_MICROBIT_ID)
+                        this.sendMessage(this.createMessage(NETWORK_COMMAND.JOIN_REQUEST))
+                }
+
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
+                    this.id = message[MESSAGE_COMPONENT.DATA_START]
                 }
 
                 // /**
