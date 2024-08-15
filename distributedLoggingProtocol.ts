@@ -293,6 +293,7 @@ namespace microcode {
                         const sensorName = dataStream[0]
 
                         let sensor = SensorFactory.getFromRadioName(sensorName)
+                        // let sensor = new AccelerometerXSensor()
 
                         const configType = dataStream[1]
                         if (configType == "P") {
