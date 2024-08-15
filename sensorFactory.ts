@@ -1,87 +1,29 @@
 namespace microcode {
     export class SensorFactory {
-        public static getFromSensorName(ariaID: string): Sensor {
-            switch (ariaID) {
-                case("Accel. X")     : return new AccelerometerXSensor();
-                case("Accel. Y")     : return new AccelerometerYSensor();
-                case("Accel. Z")     : return new AccelerometerZSensor();
-                case("Pitch")        : return new PitchSensor();
-                case("Roll")         : return new RollSensor();
-                case("T. Pin 0")     : return new TouchPinP0Sensor();
-                case("T. Pin 1")     : return new TouchPinP1Sensor();
-                case("T. Pin 2")     : return new TouchPinP2Sensor();
-                case("A. Pin 0")     : return new AnalogPinP0Sensor();
-                case("A. Pin 1")     : return new AnalogPinP1Sensor();
-                case("A. Pin 2")     : return new AnalogPinP2Sensor();
-                case("Light")        : return new LightSensor();
-                case("Temp.")        : return new TemperatureSensor();
-                case("Magnet")       : return new MagnetXSensor();
-                case("Logo Pressed") : return new LogoPressSensor();
-                case("Volume")       : return new VolumeSensor();
-                case("Compass")      : return new CompassHeadingSensor();
-                case("Jac Light")    : return new JacdacLightSensor();
-                case("Jac Moist")    : return new JacdacSoilMoistureSensor();
-                case("Jac Dist")     : return new JacdacDistanceSensor();
-                case("Jac Flex")     : return new JacdacFlexSensor();
-                case("Jac Temp")     : return new JacdacTemperatureSensor();
-                default              : return new AccelerometerXSensor()
-            }
-        }
-
-        public static getFromAriaID(ariaID: string): Sensor {
-            switch (ariaID) {
-                case("accelerometer X")     : return new AccelerometerXSensor();
-                case("accelerometer Y")     : return new AccelerometerYSensor();
-                case("accelerometer Z")     : return new AccelerometerZSensor();
-                case("Pitch")               : return new PitchSensor();
-                case("Roll")                : return new RollSensor();
-                case("T. Pin 0")            : return new TouchPinP0Sensor();
-                case("T. Pin 1")            : return new TouchPinP1Sensor();
-                case("T. Pin 2")            : return new TouchPinP2Sensor();
-                case("A. Pin 0")            : return new AnalogPinP0Sensor();
-                case("A. Pin 1")            : return new AnalogPinP1Sensor();
-                case("A. Pin 2")            : return new AnalogPinP2Sensor();
-                case("led_light_sensor")    : return new LightSensor();
-                case("thermometer")         : return new TemperatureSensor();
-                case("S10")                 : return new MagnetXSensor();
-                case("Logo Press")          : return new LogoPressSensor();
-                case("Volume")              : return new VolumeSensor();
-                case("Compass")             : return new CompassHeadingSensor();
-                case("Jacdac Light")        : return new JacdacLightSensor();
-                case("Jacdac Moisture")     : return new JacdacSoilMoistureSensor();
-                case("Jacdac Distance")     : return new JacdacDistanceSensor();
-                case("Jacdac Flex")         : return new JacdacFlexSensor();
-                case("Jacdac Temperature")  : return new JacdacTemperatureSensor();
-                default                     : return new AccelerometerXSensor()
-            }
-        }
-
-        public static getFromRadioName(radioName: string): Sensor {
-            switch (radioName) {
-                case("AX")  : return new AccelerometerXSensor();
-                case("AY")  : return new AccelerometerYSensor();
-                case("AZ")  : return new AccelerometerZSensor();
-                case("P")   : return new PitchSensor();
-                case("R")   : return new RollSensor();
-                case("TP0") : return new TouchPinP0Sensor();
-                case("TP1") : return new TouchPinP1Sensor();
-                case("TP2") : return new TouchPinP2Sensor();
-                case("AP0") : return new AnalogPinP0Sensor();
-                case("AP1") : return new AnalogPinP1Sensor();
-                case("AP2") : return new AnalogPinP2Sensor();
-                case("L")   : return new LightSensor();
-                case("T")   : return new TemperatureSensor();
-                case("M")   : return new MagnetXSensor();
-                case("LP")  : return new LogoPressSensor();
-                case("V")   : return new VolumeSensor();
-                case("C")   : return new CompassHeadingSensor();
-                case("JL")  : return new JacdacLightSensor();
-                case("JM")  : return new JacdacSoilMoistureSensor();
-                case("JD")  : return new JacdacDistanceSensor();
-                case("JF")  : return new JacdacFlexSensor();
-                case("JT")  : return new JacdacTemperatureSensor();
-                default     : return new AccelerometerXSensor()
-            }
+        public static getFromNameRadioOrID(ariaID: string): Sensor {
+            if ("Accel. X" || "accelerometer X" || "AX")          return new AccelerometerXSensor();
+            else if ("Accel. Y" || "accelerometer Y" || "AY")     return new AccelerometerYSensor();
+            else if ("Accel. Z" || "accelerometer Z" || "AZ")     return new AccelerometerZSensor();
+            else if ("Pitch" || "Pitch" || "P")                   return new PitchSensor();
+            else if ("Roll" || "Roll" || "R")                     return new RollSensor();
+            else if ("T. Pin 0" || "T. Pin 0" || "TP0")           return new TouchPinP0Sensor();
+            else if ("T. Pin 1" || "T. Pin 1" || "TP1")           return new TouchPinP1Sensor();
+            else if ("T. Pin 2" || "T. Pin 2" || "TP2")           return new TouchPinP2Sensor();
+            else if ("A. Pin 0" || "A. Pin 0" || "AP0")           return new AnalogPinP0Sensor();
+            else if ("A. Pin 1" || "A. Pin 1" || "AP1")           return new AnalogPinP1Sensor();
+            else if ("A. Pin 2" || "A. Pin 2" || "AP2")           return new AnalogPinP2Sensor();
+            else if ("Light" || "led_light_sensor" || "L")        return new LightSensor();
+            else if ("Temp." || "thermometer" || "T")             return new TemperatureSensor();
+            else if ("Magnet" || "S10" || "M")                    return new MagnetXSensor();
+            else if ("Logo Pressed" || "Logo Press" || "LP")      return new LogoPressSensor();
+            else if ("Volume" || "Volume" || "V")                 return new VolumeSensor();
+            else if ("Compass" || "Compass" || "C")               return new CompassHeadingSensor();
+            else if ("Jac Light" || "Jacdac Light" || "JL")       return new JacdacLightSensor();
+            else if ("Jac Moist" || "Jacdac Moisture" || "JM")    return new JacdacSoilMoistureSensor();
+            else if ("Jac Dist" || "Jacdac Distance" || "JD")     return new JacdacDistanceSensor();
+            else if ("Jac Flex" || "Jacdac Flex" || "JF")         return new JacdacFlexSensor();
+            else if ("Jac Temp" || "Jacdac Temperature" || "JT")  return new JacdacTemperatureSensor();
+            else return new AccelerometerXSensor()
         }
     }
 }

@@ -254,7 +254,7 @@ namespace microcode {
                 }
                 dataStart += rows.length
             }
-            this.sensors = sensorNames.map((name) => SensorFactory.getFromSensorName(name))
+            this.sensors = sensorNames.map((name) => SensorFactory.getFromNameRadioOrID(name))
         }
 
         /**
