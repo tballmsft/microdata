@@ -14,11 +14,22 @@ With the objective of allowing people to:
 * Perform Science experiments.
 * Explore the diverse features of the BBC Microbit V2.
 
+**You will need an Arcade Shield for the micro:bit V2 to make use of MicroData.**
+
 ### Building
 
-You need to use https://makecode.microbit.org/beta currently to build MicroData. You can load this repo into MakeCode using the Import button in the home page and selecting "Import URL".
+### Via MakeCode CLI (recommended)
 
-Please note that there is currently no simulator support for the arcade shield extension (https://github.com/microsoft/pxt-arcadeshield) that MicroData depends on. 
+1. Install the [MakeCode CLI](https://microsoft.github.io/pxt-mkc/).
+2. Attach a micro:bit to your computer using USB cable.
+3. Clone this repo and cd to it
+4. invoke `mkc -d`, which will produce the MicroData hex file (in built/mbcodal-binary.hex) and copy it to the micro:bit drive.
 
-You will need an Arcade Shield for the micro:bit V2 to make use of MicroData.
+#### Via Web App
+
+You need to use https://makecode.microbit.org/beta currently to build MicroData. You can load this repo into MakeCode using the Import button in the home page and selecting "Import URL". Please note that there is currently no simulator support for the arcade shield extension (https://github.com/microsoft/pxt-arcadeshield) that MicroData depends on. 
+```
+
+
+
 
