@@ -18,12 +18,12 @@ With the objective of allowing people to:
 
 ### Building
 
-### Via mkc CLI (recommended)
+### Via MakeCode CLI (recommended)
 
-```
-mkc init
-mkc -d
-```
+1. Install the [MakeCode CLI](https://microsoft.github.io/pxt-mkc/).
+2. Attach a micro:bit to your computer using USB cable.
+3. Clone this repo and cd to it
+4. invoke `mkc -d`, which will produce the MicroData hex file (in built/mbcodal-binary.hex) and copy it to the micro:bit drive.
 
 #### Via Web App
 
