@@ -2,6 +2,34 @@ namespace microcode {
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const SENSOR_EVENT_POLLING_PERIOD_MS: number = 100
 
+    /**
+     * Used to lookup the implemented events via sensorEventFunctionLookup[]
+     * 
+     * Currently only events that check for inequalities are implemented,
+     *      The only sensors that are incompatible with this are Buttons
+     * The following code may be generalised to support them though.
+     */
+    export const sensorEventSymbols = ["=", ">", "<", ">=", "<="]
+
+
+    /**
+     * Type for value bound to inequality key within sensorEventFunctionLookup
+     * 
+     * One of these is optionally held by a sensor - see by sensor.setRecordingConfig
+     */
+    export type SensorEventFunction = (reading: number, comparator: number) => boolean
+
+    /** 
+     * Get aa function that performs that inequality check & logs it with an event description if the event has triggered.
+     */
+    export const sensorEventFunctionLookup: {[inequality: string]: SensorEventFunction} = {
+        "=":  function(reading: number, comparator: number) {return reading == comparator},
+        ">":  function(reading: number, comparator: number) {return reading >  comparator},
+        "<":  function(reading: number, comparator: number) {return reading <  comparator},
+        ">=": function(reading: number, comparator: number) {return reading >= comparator},
+        "<=": function(reading: number, comparator: number) {return reading <= comparator}
+    }
+
     /** Value returned by default if the abstract getMinimum() is not overriddent */
     const DEFAULT_SENSOR_MINIMUM = 0
     /** Value returned by default if the abstract getMaximum() is not overriddent */
@@ -10,6 +38,7 @@ namespace microcode {
     /** How many times should a line be duplicated when drawn? */
     const PLOT_SMOOTHING_CONSTANT: number = 4
 
+    
     /**
      * Only used within this sensor file.
      * Unique attributes to each sensor.
@@ -156,6 +185,127 @@ namespace microcode {
     }
 
 
+    export class SensorScheduler {
+        /** Ordered sensor periods */
+        private schedule: {sensor: Sensor, waitTime: number}[];
+        private sensors: Sensor[];
+        private sensorWithMostTimeLeft: Sensor
+
+        /** Should the information from the sensorWithMostTimeLeft be shown on the basic's 5x5 LED matrix? */
+        private showOnBasicScreen: boolean = false;
+
+        constructor(sensors: Sensor[], showOnBasicScreen?: boolean) {
+            this.schedule = []
+            this.sensors = sensors
+
+            if (showOnBasicScreen != null)
+                this.showOnBasicScreen = showOnBasicScreen
+
+            // Get the sensor that will take the longest to complete:
+            // The number of measurements this sensor has left is displayed on the microbit 5x5 led grid; when the Arcade Shield is not connected.
+            this.sensorWithMostTimeLeft = sensors[0]
+            let mostTimeLeft = this.sensorWithMostTimeLeft.totalMeasurements * this.sensorWithMostTimeLeft.getPeriod()
+            this.sensors.forEach(sensor => {
+                if ((sensor.totalMeasurements * sensor.getPeriod()) > mostTimeLeft) {
+                    mostTimeLeft = sensor.totalMeasurements * sensor.getPeriod()
+                    this.sensorWithMostTimeLeft = sensor
+                }
+            })
+
+            // Setup schedule so that periods are in order ascending
+            sensors.sort((a, b) => a.getPeriod() - b.getPeriod())
+            this.schedule = sensors.map((sensor) => {return {sensor, waitTime: sensor.getPeriod()}})
+        }
+
+
+        loggingComplete(): boolean {return !(this.schedule.length > 0)}
+
+
+        /**
+         * Schedules the sensors and orders them to .log()
+         * Runs within a separate fiber.
+         * Mutates this.schedule
+        */
+        start(callbackObj?: ITargetDataLoggedCallback) {
+            const callbackAfterLog: boolean = (callbackObj == null) ? false : true
+            
+            control.inBackground(() => {
+                let currentTime = 0;
+
+                // Log all sensors once:
+                for (let i = 0; i < this.schedule.length; i++) {
+                    if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
+                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
+
+                    // Make the datalogger log the data:
+                    const logAsCSV = this.schedule[i].sensor.log(0)
+                    if (callbackAfterLog)
+                        callbackObj.callback(logAsCSV)
+
+                    // Clear from schedule (A sensor may only have 1 reading):
+                    if (!this.schedule[i].sensor.hasMeasurements())
+                        this.schedule.splice(i, 1);
+                }
+
+                let lastLogTime = input.runningTime()
+
+                while (this.schedule.length > 0) {
+                    const nextLogTime = this.schedule[0].waitTime;
+                    const sleepTime = nextLogTime - currentTime;
+
+                    basic.pause(sleepTime + lastLogTime - input.runningTime()) // Discount for operation time
+                    lastLogTime = input.runningTime()
+                    currentTime += sleepTime
+
+                    for (let i = 0; i < this.schedule.length; i++) {
+                        // Clear from schedule:
+                        if (!this.schedule[i].sensor.hasMeasurements()) {
+                            this.schedule.splice(i, 1);
+                        }
+
+                        // Log sensors:
+                        else if (currentTime % this.schedule[i].waitTime == 0) {
+                            if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
+                                basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
+
+                            // Make the datalogger log the data:
+                            const logAsCSV = this.schedule[i].sensor.log(currentTime)
+                            if (callbackAfterLog)
+                                callbackObj.callback(logAsCSV)
+
+                            // Update schedule with when they should next be logged:
+                            if (this.schedule[i].sensor.hasMeasurements()) {
+                                this.schedule[i].waitTime = nextLogTime + this.schedule[i].sensor.getPeriod()
+                            }
+                        }
+                    }
+
+                    // Ensure the schedule remains ordely after these potential deletions & recalculations:
+                    this.schedule.sort((
+                        a: {sensor: Sensor; waitTime: number;}, 
+                        b: {sensor: Sensor; waitTime: number;}) =>
+                        a.waitTime - b.waitTime
+                    )
+                }
+
+                // Done:
+                if (this.showOnBasicScreen) {
+                    basic.showLeds(`
+                        . # . # .
+                        . # . # .
+                        . . . . .
+                        # . . . #
+                        . # # # .
+                    `)
+                }
+                if (callbackAfterLog) {
+                    DistributedLoggingProtocol.finishedLogging = true
+                    callbackObj.callback("")
+                }
+            })
+        }
+    }
+
     /**
      * Abstraction for all available sensors.
      * These are implmented by the 
@@ -214,6 +364,43 @@ namespace microcode {
             this.dataBuffer = []
             this.lastLoggedReading = 0
             this.normalisedDataBuffer = []
+        }
+
+
+        //------------------
+        // Factory Function:
+        //------------------
+
+        /**
+         * Factory function used to generate a Sensor from that sensors: Name, ariaID or its radio name
+         * This is a single factory within this abstract class to reduce binary size
+         * @param name either sensor.getName(), sensor.getRadioName() or the ariaID the button that represents the sensor in SensorSelect uses.
+         * @returns concrete sensor that the input name corresponds to.
+         */
+        public static getFromNameRadioOrID(name: string): Sensor {
+            if      (name == "Accel. X" || name == "accelerometer X" || name == "AX")     return new AccelerometerXSensor();
+            // else if (name == "Accel. Y" || name == "accelerometer Y" || name == "AY")     return new AccelerometerYSensor();
+            // else if (name == "Accel. Z" || name == "accelerometer Z" || name == "AZ")     return new AccelerometerZSensor();
+            // else if (name == "Pitch" || name == "Pitch" || name == "P")                   return new PitchSensor();
+            // else if (name == "Roll" || name == "Roll" || name == "R")                     return new RollSensor();
+            // else if (name == "T. Pin 0" || name == "T. Pin 0" || name == "TP0")           return new TouchPinP0Sensor();
+            // else if (name == "T. Pin 1" || name == "T. Pin 1" || name == "TP1")           return new TouchPinP1Sensor();
+            // else if (name == "T. Pin 2" || name == "T. Pin 2" || name == "TP2")           return new TouchPinP2Sensor();
+            // else if (name == "A. Pin 0" || name == "A. Pin 0" || name == "AP0")           return new AnalogPinP0Sensor();
+            // else if (name == "A. Pin 1" || name == "A. Pin 1" || name == "AP1")           return new AnalogPinP1Sensor();
+            // else if (name == "A. Pin 2" || name == "A. Pin 2" || name == "AP2")           return new AnalogPinP2Sensor();
+            // else if (name == "Light" || name == "led_light_sensor" || name == "L")        return new LightSensor();
+            // else if (name == "Temp." || name == "thermometer" || name == "T")             return new TemperatureSensor();
+            // else if (name == "Magnet" || name == "S10" || name == "M")                    return new MagnetXSensor();
+            // else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")      return new LogoPressSensor();
+            // else if (name == "Volume" || name == "Volume" || name == "V")                 return new VolumeSensor();
+            // else if (name == "Compass" || name == "Compass" || name == "C")               return new CompassHeadingSensor();
+            // else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")       return new JacdacLightSensor();
+            // else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM")    return new JacdacSoilMoistureSensor();
+            // else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")     return new JacdacDistanceSensor();
+            // else if (name == "Jac Flex" || name == "Jacdac Flex" || name == "JF")         return new JacdacFlexSensor();
+            // else if (name == "Jac Temp" || name == "Jacdac Temperature" || name == "JT")  return new JacdacTemperatureSensor();
+            else                                                                          return new AccelerometerXSensor() // Default
         }
 
         //---------------------

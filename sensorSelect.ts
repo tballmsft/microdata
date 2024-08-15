@@ -66,7 +66,7 @@ namespace microcode {
                         if (index != -1) {
                             this.selectedSensorAriaIDs.splice(index, 1)
     
-                            if (SensorFactory.getFromNameRadioOrID(button.ariaId).isJacdac()) {
+                            if (Sensor.getFromNameRadioOrID(button.ariaId).isJacdac()) {
                                 this.jacdacSensorSelected = false
                                 this.setOtherJacdacButtonsTo(true)
                             }
@@ -80,7 +80,7 @@ namespace microcode {
                         // Addition:
                         else if (this.selectedSensorAriaIDs.length < MAX_NUMBER_OF_SENSORS) {
                             this.cursor.setOutlineColour(7)
-                            if (SensorFactory.getFromNameRadioOrID(button.ariaId).isJacdac()) {
+                            if (Sensor.getFromNameRadioOrID(button.ariaId).isJacdac()) {
                                 if (!this.jacdacSensorSelected) {
                                     this.selectedSensorAriaIDs.push(button.ariaId)
                                     this.jacdacSensorSelected = true
@@ -132,7 +132,7 @@ namespace microcode {
                     if (this.selectedSensorAriaIDs.length === 0) {
                         return
                     }
-                    const sensors = this.selectedSensorAriaIDs.map((ariaID) => SensorFactory.getFromNameRadioOrID(ariaID))
+                    const sensors = this.selectedSensorAriaIDs.map((ariaID) => Sensor.getFromNameRadioOrID(ariaID))
 
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {

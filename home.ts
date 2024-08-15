@@ -122,7 +122,7 @@ namespace microcode {
             )
 
             if (!this.yOffset) {
-                const tagline = resolveTooltip("tagline")
+                const tagline = resolveTooltip("Data Science!")
                 Screen.print(
                     tagline,
                     Screen.LEFT_EDGE +

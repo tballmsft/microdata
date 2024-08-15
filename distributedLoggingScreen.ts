@@ -128,8 +128,8 @@ namespace microcode {
             this.showDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "radio_set_group",
-                ariaId: "linear_graph",
+                icon: "largeDisk",
+                ariaId: "Real-time Data",
                 x: 50,
                 y: 30,
                 onClick: () => {

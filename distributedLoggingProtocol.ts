@@ -292,8 +292,7 @@ namespace microcode {
                         const dataStream = message.slice(MESSAGE_COMPONENT.DATA_START)
                         const sensorName = dataStream[0]
 
-                        let sensor = SensorFactory.getFromNameRadioOrID(sensorName)
-                        // let sensor = new AccelerometerXSensor()
+                        let sensor = Sensor.getFromNameRadioOrID(sensorName)
 
                         const configType = dataStream[1]
                         if (configType == "P") {
@@ -394,7 +393,7 @@ namespace microcode {
                     TabularDataViewer.updateDataRowsOnNextFrame = true
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
-                        datalogger.createCV("Sensor", cols[1]),
+                        datalogger.createCV("Sensor", cols[1]), //Sensor.getFromNameRadioOrID(cols[1]).getName()),
                         datalogger.createCV("Time (ms)", cols[2]),
                         datalogger.createCV("Reading", cols[3]),
                         datalogger.createCV("Event", cols[4])
