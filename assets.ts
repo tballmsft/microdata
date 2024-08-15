@@ -9,18 +9,10 @@ namespace microcode {
     export class icons {
         public static get(name: string, nullIfMissing = false): Bitmap {
             // editor icons
-            if (name == "rule_arrow") return icondb.rule_arrow
-            if (name == "rule_handle") return icondb.rule_handle
             if (name == "edit_program") return icondb.largeEditIcon
             if (name == "new_program") return icondb.largeNewProgramIcon
             if (name == "MISSING") return icondb.MISSING
-            if (name == "disk") return icondb.disk
-            if (name == "disk1") return icondb.disk1
             if (name == "largeDisk") return icondb.largeDisk
-
-            // basic colors led editor
-            // if (name == "note_on") return icondb.note_on
-            // if (name == "note_off") return icondb.note_off
 
             // Newly added icons for MicroData Home menu:
             if (name == "linear_graph_1") return icondb.linearGraph1
@@ -51,7 +43,6 @@ namespace microcode {
             if (name == "compass") return icondb.compass
 
             if (name == "radio_set_group") return icondb.radio_set_group
-            if (name == "settingsGear") return icondb.settingsGear
             if (name == "largeSettingsGear") return icondb.largeSettingsGear
             if (name == "microbitLogoWhiteBackground") return icondb.microbitLogoWhiteBackground
 
@@ -168,26 +159,6 @@ namespace icondb {
         return ret
     }
 
-
-    export const iconEditor = bmp`
-        f f f f f f f f f f f f f f f f 
-        f f f f f f f f f f f f f f f f 
-        f f f f f f f f f f f f f f f f 
-        f f f f e e f f f f e e f f f f 
-        f f f e 2 2 e f f e 2 2 e f f f 
-        f f f e 2 2 e f f e 2 2 e f f f 
-        f f f f e e f f f f e e f f f f 
-        f f f f f f f f f f f f f f f f 
-        f f f f f f f f f f f f f f f f 
-        f e e f f f f f f f f f f e e f 
-        e 2 2 e f f f f f f f f e 2 2 e 
-        e 2 2 e f f f f f f f f e 2 2 e 
-        f e e f e e f e e f e e f e e f 
-        f f f e 2 2 e 2 2 e 2 2 e f f f 
-        f f f e 2 2 e 2 2 e 2 2 e f f f 
-        f f f f e e f e e f e e f f f f 
-    `
-
     function renderImg(i: Bitmap) {
         let r = ""
         for (let y = 0; y < i.height; ++y) {
@@ -204,25 +175,6 @@ namespace icondb {
     // SMALL ICONS:
     //-------------
 
-
-    export const melodyEditor = bmp`
-        1111111111111111
-        111111111ff11111
-        11111111fcc11111
-        11111111fcc11111
-        1111111111111111
-        1111111111111111
-        1111111111111111
-        11111ff111111111
-        1111fcc111111111
-        1111fcc111111111
-        1111111111111111
-        1111111111111111
-        1111111111111111
-        1ff1111111111ff1
-        fcc111111111fcc1
-        fcc111111111fcc1    
-        `
 
     export const microbitLogoWhiteBackground = bmp`
         11111111111111111
@@ -241,44 +193,6 @@ namespace icondb {
         11155555555555411
         11155555555555111
         11111444444441111
-    `
-
-    export const disk = bmp`
-        . . . . . . . . . . . . . . . .
-        . . 8 d d d d 8 8 d d 8 . . . .
-        . . 8 d d d d 8 8 d d 8 8 . . .
-        . . 8 d d d d 8 8 d d 8 8 8 . .
-        . . 8 d d d d d d d d 8 8 8 . .
-        . . 8 8 8 8 8 8 8 8 8 8 8 8 . .
-        . . 8 8 3 3 3 3 3 3 3 3 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-    `
-
-    export const disk1 = bmp`
-        . . . . . . . . . . . . . . . .
-        . . 8 d d d d 8 8 d d 8 . . . .
-        . . 8 d d d d 8 8 d d 8 8 . . .
-        . . 8 d d d d 8 8 d d 8 8 8 . .
-        . . 8 d d d d d d d d 8 8 8 . .
-        . . 8 8 8 8 8 8 8 8 8 8 8 8 d .
-        . . 8 8 3 3 3 3 3 3 3 3 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 f 1 1 1 8 8 d .
-        . . 8 8 1 1 1 f f 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 f 1 1 1 8 8 d .
-        . . 8 8 1 1 1 1 f 1 1 1 8 8 d .
-        . . 8 8 1 1 1 f f f 1 1 8 8 d .
-        . . 8 8 1 1 1 1 1 1 1 1 8 8 . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
     `
 
     export const MISSING = bmp`
@@ -300,49 +214,6 @@ namespace icondb {
         . . . . . . . . . . . . . . . .
     `
 
-    export const rule_arrow = bmp`
-        d d d . . . . . . . . . . .
-        d d d d . . . . . . . . . .
-        d d d d d . . . . . . . . .
-        d d d d d d . . . . . . . .
-        d d d d d d d . . . . . . .
-        d d d d d d d d . . . . . .
-        d d d d d d d d d . . . . .
-        d d d d d d d d d d . . . .
-        d d d d d d d d d d d . . .
-        d d d d d d d d d d d d . .
-        d d d d d d d d d d d d . .
-        d d d d d d d d d d d . . .
-        d d d d d d d d d d . . . .
-        d d d d d d d d d . . . . .
-        d d d d d d d d . . . . . .
-        d d d d d d d . . . . . . .
-        d d d d d d . . . . . . . .
-        d d d d d . . . . . . . . .
-        d d d d . . . . . . . . . .
-        d d d . . . . . . . . . . .
-    `
-
-    export const showScreen = bmp`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . 2 4 . .
-        . . . . 2 . . . . . . 2 4 4 2 .
-        . . . . 2 . . . . . 2 4 4 2 e .
-        . 2 . . 2 . . . . 2 4 4 2 e b .
-        . . 2 . 2 . . . 2 4 4 2 e b . .
-        . . . . . . . d 4 4 2 e b . . .
-        . . f f f f f d d 2 e b . . . .
-        . . f f f f f 2 d d b . . . . .
-        . . f f 2 f 2 f f b . . . . . .
-        . . f f f f f f f b . 2 2 2 2 .
-        . . f 2 f f f 2 f b . . . . . .
-        . . f f 2 2 2 f f b . 2 . . . .
-        . . f f f f f f f b . . 2 . . .
-        . . . b b b b b b b . . . . . .
-        . . . . . . . . . . . . . . . .
-    `
-
-
     export const green_tick = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
@@ -360,64 +231,6 @@ namespace icondb {
         1 1 6 6 6 6 6 1 1 1 1 1 1 1 1 1
         1 1 1 6 6 6 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-    `
-
-
-    export const largeRadio = bmp`
-        . . . . . . . . . . . . . . . .
-        . . . . . 8 . . . 8 . . . . . .
-        . . . 8 . . 8 8 8 . . 8 . . . .
-        . 8 . . 8 . . . . . 8 . . 8 . .
-        . . 8 . . 8 8 8 8 8 . . 8 . . .
-        . . . 8 . . . . . . . 8 . . . .
-        . . . . 8 8 8 8 8 8 8 . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . 6 6 6 . . . . 6 6 6 . . .
-        . . 6 9 6 9 6 . . 6 9 6 9 6 . .
-        . . . 6 6 6 . . . . 6 6 6 . . .
-        . . . . . . . . . . . . . . . .
-        . . . 6 6 6 . . . . 6 6 6 . . .
-        . . 6 9 6 9 6 . . 6 9 6 9 6 . .
-        . . . 6 6 6 . . . . 6 6 6 . . .
-        . . . . . . . . . . . . . . . .
-    `
-
-    export const settingsGear = bmp`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . d d . . . . . . .
-        . . . d d . d b b c . d d . . .
-        . . d b b c d b b c d b b c . .
-        . . d b b b b b b b b b b c . .
-        . . . c b d b c c b d b c . . .
-        . . d d b b c . . c b b d d . .
-        . d b b b c . . . . c b b b c .
-        . d b b b c . . . . c b b b c .
-        . . c c b b c . . c b b c c . .
-        . . . d b d b c c b d b c . . .
-        . . d b b b b b b b b b b c . .
-        . . d b b c c b b c c b b c . .
-        . . . c c . c b b c . c c . . .
-        . . . . . . . c c . . . . . . .
-        . . . . . . . . . . . . . . . .
-    `
-
-    export const servo_set_angle = bmp`
-        . . . . . . . . . . . . . . . . 
-        . . . 8 8 8 . . . . 4 . . . . . 
-        . . 8 8 8 8 8 . . . 2 . . . . . 
-        . . 8 8 8 8 8 . . . 2 4 . . . . 
-        . . 8 8 8 8 8 . . . . 2 . . . . 
-        . . 8 8 8 8 8 . . . . 2 . . . . 
-        . . 8 8 8 8 8 . . . . 2 . . . . 
-        . . 8 b b b 8 . . 4 . 2 . 4 . . 
-        . . 8 b c b b . . 2 4 2 4 2 . . 
-        . . 8 b c c b . . . 2 2 2 . . . 
-        . . 8 8 b b c b . . . 2 . . . . 
-        . . 8 8 8 8 b c b . . . . . . . 
-        . . 8 8 8 8 8 b c b . . . 5 5 5 
-        . . 8 8 8 8 8 . b c b . . 5 5 5 
-        . . . 8 8 8 . . . b c . . 5 5 4 
-        . . . . . . . . . . . b . 4 4 . 
     `
 
     ///
@@ -595,18 +408,6 @@ namespace icondb {
         . . . . . . . . . . . . . . . .
     `
 
-    export const rule_handle = bmp`
-        . f f f f f f f .
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        f 1 1 1 1 1 1 1 f
-        . f f f f f f f .
-    `
-
     export const microbit_logo = bmp`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -626,26 +427,6 @@ namespace icondb {
         . . . . . . . . . . . . . . . . 
     `
 
-
-    export const microbit_logo_btn = bmp`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . f f f f f f f f . . . . 
-        . . . f 1 1 1 1 1 1 1 1 f . . . 
-        . . f 1 1 1 1 1 1 1 1 1 1 f . . 
-        . . f 1 f f 1 1 1 1 f f 1 f . . 
-        . . f 1 f f 1 1 1 1 f f 1 f . . 
-        . . f 1 1 1 1 1 1 1 1 1 1 f . . 
-        . . . f 1 1 1 1 1 1 1 1 f . . . 
-        . . . . f f f f f f f f . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . .
-    `
-
     export const finger_press = bmp`
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 f 1 1 1 1 1 1 1 1
@@ -663,25 +444,6 @@ namespace icondb {
         1 1 1 1 e e e e e e e d 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-    `
-
-    export const finger_release = bmp`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . f f f . . . . . . .
-        . . . . . f . f . f . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . 4 4 4 4 4 . . . . . .
-        . . . . 4 4 4 4 4 4 4 d . . . .
-        . . . e 4 4 4 4 4 4 4 e d . . .
-        . . . e 2 4 4 4 4 4 2 e d . . .
-        . . . e e 2 2 2 2 2 e e d . . .
-        . . . . e e e e e e e d . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
     `
 
     export const magnet = bmp`
@@ -739,25 +501,6 @@ namespace icondb {
         1 1 8 8 8 2 2 2 2 2 8 8 8 1 1 1
         1 1 8 f f f f f f f f f 8 1 1 1
         1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-    `
-
-    export const light_sensor = bmp`
-        . . . . . . . . . . . . . . . .
-        . . 8 8 8 8 5 5 5 8 8 8 8 . . .
-        . . 8 8 8 5 4 4 4 5 8 8 8 . . .
-        . . 8 8 8 5 4 4 4 5 8 8 8 . . .
-        . . 8 8 8 5 4 4 4 5 8 8 8 . . .
-        . . 8 8 8 8 5 5 5 8 8 8 8 . . .
-        . . 8 8 5 8 8 8 8 8 5 8 8 . . .
-        . . 8 5 8 8 8 5 8 8 8 5 8 . . .
-        . . 8 8 8 5 8 8 8 5 8 8 8 . . .
-        . . 8 8 5 8 8 5 8 8 5 8 8 . . .
-        . . 8 5 8 8 8 8 8 8 8 5 8 . . .
-        . . 8 8 8 8 8 5 8 8 8 8 8 . . .
-        . . 8 8 8 8 8 8 8 8 8 8 8 5 5 5
-        . . 8 8 8 2 2 2 2 2 8 8 8 5 5 5
-        . . 8 f f f f f f f f f 8 5 5 4
-        . . . . . . . . . . . . . 4 4 .
     `
 
     export const microphone = bmp`
@@ -1122,42 +865,6 @@ namespace icondb {
         6666b88111111111111111118f8b6666
         6666bb811111111111111111888b6666
         66666bbbbbbbbbbbbbbbbbbbbbbb6666
-        66666666666666666666666666666666
-        66666666666666666666666666666666
-        b666666666666666666666666666666b
-        .bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-    `
-
-    export const largeMetaDataIcon = bmp`
-        .666666666666666666666666666666.
-        66666666666666666666666666666666
-        66666666666666666666666666666666
-        6666bbbbbbbbbbbbbbbbbbbbbb666666
-        666bb811111111111111111118b66666
-        666b88111111111111111111188b6666
-        666b881111111111111111111888b666
-        666b881111111111111111111888b666
-        666b881111111111111111111888b666
-        666b881111111111111111111888b666
-        666b881111111111111111111888b666
-        666b881111111111111111111888b666
-        6666b88ccccc111111111cccccc88b66
-        6666bcccccddb111111cbbccccc88b66
-        6666bccccdbbbbbbbbbbcccc8888b666
-        6666b8cccccddbcccbdcccc88888b666
-        6666b888dbbcc11111cbddd88888b666
-        6666bddbbbcc111111cccbbb8888b666
-        66ddddbbb11111111111bbbcccc8b666
-        66ddddbbb11111111111bbbcccc8b666
-        6666bddbbbcc111111ccbbbc8888b666
-        6666b888cbbcc11111cbbcc88888b666
-        666b888ccccddbcccbdcccc88888b666
-        666b88cccdbbbbbbbbbbcccc8888b666
-        666bcccccddb1111111cbbccccc8b666
-        666b8ccccc1111111111ccccc888b666
-        666b8811111111111111111118f8b666
-        666bb81111111111111111111888b666
-        6666bbbbbbbbbbbbbbbbbbbbbbbbb666
         66666666666666666666666666666666
         66666666666666666666666666666666
         b666666666666666666666666666666b

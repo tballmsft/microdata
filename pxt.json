@@ -13,7 +13,6 @@
         "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
         "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
         "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
-        "jacdac-humidity": "github:microsoft/pxt-jacdac/tree/master/humidity#v1.9.28",
         "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
     },
     "files": [
