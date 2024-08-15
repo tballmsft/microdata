@@ -40,13 +40,13 @@ namespace microcode {
             this.dataViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk",
+                icon: "linear_graph_2", // largeDisk
                 ariaId: "View Data",
                 x: -50,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new TabularDataViewer(this.app))
+                    this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DataViewSelect(this.app))}))
                 },
             })
 

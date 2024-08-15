@@ -29,11 +29,10 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
                 ariaId: "linear_graph",
-                x: -60,
+                x: -58,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                     this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
                 },
             })
@@ -47,36 +46,29 @@ namespace microcode {
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // if (datalogger.getNumberOfRows(0) <= 1)
-                        // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.SensorSelect)))
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
-                    // else
-                        // this.app.pushScene(new ClearDataLoggerScreen(this.app))
                 },
             })
 
             this.distributedLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "radio_set_group",
+                icon: "linear_graph_2", // radio_set_group
                 ariaId: "Command Mode",
                 x: 20,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()
-                    // if (datalogger.getNumberOfRows(0) <= 1)
-                        this.app.pushScene(new RadioLoggingScreen(this.app))
-                    // else
-                        // this.app.pushScene(new ClearDataLoggerScreen(this.app))
+                    this.app.pushScene(new DistributedLoggingScreen(this.app))
                 },
             })
 
             this.viewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk",
+                icon: "linear_graph_2", // largeDisk
                 ariaId: "View",
-                x: 60,
+                x: 58,
                 y: 30,
                 onClick: () => {
                     this.app.popScene()

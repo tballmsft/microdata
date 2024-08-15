@@ -152,13 +152,11 @@ namespace microcode {
                         new LiveDataViewer(this.app, sensors)))
                     }
                     
-                    else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect) {
+                    else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect)
                         this.app.pushScene(new RecordingConfigSelection(this.app, sensors))
-                    }
 
-                    else if (this.nextSceneEnum === CursorSceneEnum.CommandTargetLogging) {
-                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors, this.nextSceneEnum))
-                    }
+                    else if (this.nextSceneEnum === CursorSceneEnum.DistributedLogging)
+                        this.app.pushScene(new RecordingConfigSelection(this.app, sensors, CursorSceneEnum.DistributedLogging))
                 }
             }))
             this.navigator.addButtons(this.btns)

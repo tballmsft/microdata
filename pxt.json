@@ -55,8 +55,8 @@
         "tabularDataViewer.ts",
         "generateGraph.ts",
         "tutorialWindow.ts",
-        "radioLoggingProtocol.ts",
-        "radioLoggingScreen.ts"
+        "distributedLoggingProtocol.ts",
+        "distributedLoggingScreen.ts"
     ],
     "testFiles": [],
     "targetVersions": {
