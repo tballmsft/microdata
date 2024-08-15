@@ -292,7 +292,7 @@ namespace microcode {
                         const dataStream = message.slice(MESSAGE_COMPONENT.DATA_START)
                         const sensorName = dataStream[0]
 
-                        let sensor = SensorFactory.getFromRadioName(sensorName)
+                        let sensor = SensorFactory.getFromNameRadioOrID(sensorName)
                         // let sensor = new AccelerometerXSensor()
 
                         const configType = dataStream[1]

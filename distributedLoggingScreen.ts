@@ -92,7 +92,7 @@ namespace microcode {
             this.startLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
+                icon: "radio_set_group",
                 ariaId: "Start logging",
                 x: -50,
                 y: 30,
@@ -110,7 +110,7 @@ namespace microcode {
             this.startStreamingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
+                icon: "radio_set_group",
                 ariaId: "Start streaming",
                 x: 0,   
                 y: 30,
@@ -128,7 +128,7 @@ namespace microcode {
             this.showDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
+                icon: "radio_set_group",
                 ariaId: "linear_graph",
                 x: 50,
                 y: 30,

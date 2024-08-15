@@ -679,7 +679,8 @@ namespace microcode {
      * Overrides .isJacdac()
      */
     export class JacdacSoilMoistureSensor extends Sensor {
-        constructor() {super(); modules.soilMoisture1.start()}
+        constructor() {super(); modules.soilMoisture1.start()
+        }
 
         public static getName(): string {return "Jac Moist"}
         public static getRadioName(): string {return "JM"}
@@ -710,19 +711,6 @@ namespace microcode {
         public static getName(): string {return "Jac Temp"}
         public static getRadioName(): string {return "JT"}
         public static getReading(): number {return modules.temperature1.isConnected() ? modules.temperature1.temperature() : undefined}
-        public static isJacdac(): boolean {return true;}
-    }
-
-    /**
-     * See modules.humidity1.humidity sensor from pxt-jacdac/humidity.
-     * Overrides .isJacdac()
-     */
-    export class JacdacHumiditySensor extends Sensor {
-        constructor() {super(); modules.humidity1.start()}
-
-        public static getName(): string {return "Jac Humid"}
-        public static getRadioName(): string {return "JH"}
-        public static getReading(): number {return modules.humidity1.isConnected() ? modules.humidity1.humidity() : undefined}
         public static isJacdac(): boolean {return true;}
     }
 }
