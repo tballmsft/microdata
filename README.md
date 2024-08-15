@@ -19,21 +19,15 @@ With the objective of allowing people to:
 ### Building
 
 ### Via mkc CLI (recommended)
+
 ```
 mkc init
 mkc -d
 ```
 
 #### Via Web App
-You need to use https://makecode.microbit.org/beta currently to build MicroData. You can load this repo into MakeCode using the Import button in the home page and selecting "Import URL".
 
-Please note that there is currently no simulator support for the arcade shield extension (https://github.com/microsoft/pxt-arcadeshield) that MicroData depends on. 
-
-#### Via pxt CLI
-```
-pxt target microbit
-pxt install
-pxt build
+You need to use https://makecode.microbit.org/beta currently to build MicroData. You can load this repo into MakeCode using the Import button in the home page and selecting "Import URL". Please note that there is currently no simulator support for the arcade shield extension (https://github.com/microsoft/pxt-arcadeshield) that MicroData depends on. 
 ```
 
 
