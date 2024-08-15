@@ -43,7 +43,6 @@
         "sensors.ts",
         "liveDataViewer.ts",
         "dataViewSelect.ts",
-        "recordingConfig.ts",
         "recordingConfigSelection.ts",
         "sensorSelect.ts",
         "dataRecorder.ts",
@@ -51,7 +50,6 @@
         "tabularDataViewer.ts",
         "generateGraph.ts",
         "tutorialWindow.ts",
-        "distributedLoggingProtocol.ts",
         "distributedLoggingScreen.ts"
     ],
     "testFiles": [],

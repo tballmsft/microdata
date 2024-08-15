@@ -379,28 +379,27 @@ namespace microcode {
          */
         public static getFromNameRadioOrID(name: string): Sensor {
             if      (name == "Accel. X" || name == "accelerometer X" || name == "AX")     return new AccelerometerXSensor();
-            // else if (name == "Accel. Y" || name == "accelerometer Y" || name == "AY")     return new AccelerometerYSensor();
-            // else if (name == "Accel. Z" || name == "accelerometer Z" || name == "AZ")     return new AccelerometerZSensor();
-            // else if (name == "Pitch" || name == "Pitch" || name == "P")                   return new PitchSensor();
-            // else if (name == "Roll" || name == "Roll" || name == "R")                     return new RollSensor();
-            // else if (name == "T. Pin 0" || name == "T. Pin 0" || name == "TP0")           return new TouchPinP0Sensor();
-            // else if (name == "T. Pin 1" || name == "T. Pin 1" || name == "TP1")           return new TouchPinP1Sensor();
-            // else if (name == "T. Pin 2" || name == "T. Pin 2" || name == "TP2")           return new TouchPinP2Sensor();
-            // else if (name == "A. Pin 0" || name == "A. Pin 0" || name == "AP0")           return new AnalogPinP0Sensor();
-            // else if (name == "A. Pin 1" || name == "A. Pin 1" || name == "AP1")           return new AnalogPinP1Sensor();
-            // else if (name == "A. Pin 2" || name == "A. Pin 2" || name == "AP2")           return new AnalogPinP2Sensor();
-            // else if (name == "Light" || name == "led_light_sensor" || name == "L")        return new LightSensor();
-            // else if (name == "Temp." || name == "thermometer" || name == "T")             return new TemperatureSensor();
-            // else if (name == "Magnet" || name == "S10" || name == "M")                    return new MagnetXSensor();
-            // else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")      return new LogoPressSensor();
-            // else if (name == "Volume" || name == "Volume" || name == "V")                 return new VolumeSensor();
-            // else if (name == "Compass" || name == "Compass" || name == "C")               return new CompassHeadingSensor();
-            // else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")       return new JacdacLightSensor();
-            // else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM")    return new JacdacSoilMoistureSensor();
-            // else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")     return new JacdacDistanceSensor();
+            else if (name == "Accel. Y" || name == "accelerometer Y" || name == "AY")     return new AccelerometerYSensor();
+            else if (name == "Accel. Z" || name == "accelerometer Z" || name == "AZ")     return new AccelerometerZSensor();
+            else if (name == "Pitch" || name == "Pitch" || name == "P")                   return new PitchSensor();
+            else if (name == "Roll" || name == "Roll" || name == "R")                     return new RollSensor();
+            else if (name == "T. Pin 0" || name == "T. Pin 0" || name == "TP0")           return new TouchPinP0Sensor();
+            else if (name == "T. Pin 1" || name == "T. Pin 1" || name == "TP1")           return new TouchPinP1Sensor();
+            else if (name == "T. Pin 2" || name == "T. Pin 2" || name == "TP2")           return new TouchPinP2Sensor();
+            else if (name == "A. Pin 0" || name == "A. Pin 0" || name == "AP0")           return new AnalogPinP0Sensor();
+            else if (name == "A. Pin 1" || name == "A. Pin 1" || name == "AP1")           return new AnalogPinP1Sensor();
+            else if (name == "A. Pin 2" || name == "A. Pin 2" || name == "AP2")           return new AnalogPinP2Sensor();
+            else if (name == "Light" || name == "led_light_sensor" || name == "L")        return new LightSensor();
+            else if (name == "Temp." || name == "thermometer" || name == "T")             return new TemperatureSensor();
+            else if (name == "Magnet" || name == "S10" || name == "M")                    return new MagnetXSensor();
+            else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")      return new LogoPressSensor();
+            else if (name == "Volume" || name == "Volume" || name == "V")                 return new VolumeSensor();
+            else if (name == "Compass" || name == "Compass" || name == "C")               return new CompassHeadingSensor();
+            else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")       return new JacdacLightSensor();
+            else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM")    return new JacdacSoilMoistureSensor();
+            else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")     return new JacdacDistanceSensor();
             // else if (name == "Jac Flex" || name == "Jacdac Flex" || name == "JF")         return new JacdacFlexSensor();
-            // else if (name == "Jac Temp" || name == "Jacdac Temperature" || name == "JT")  return new JacdacTemperatureSensor();
-            else                                                                          return new AccelerometerXSensor() // Default
+            else                                                                          return new JacdacTemperatureSensor()
         }
 
         //---------------------
