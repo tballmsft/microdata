@@ -14,11 +14,28 @@ With the objective of allowing people to:
 * Perform Science experiments.
 * Explore the diverse features of the BBC Microbit V2.
 
+**You will need an Arcade Shield for the micro:bit V2 to make use of MicroData.**
+
 ### Building
 
+### Via mkc CLI (recommended)
+```
+mkc init
+mkc -d
+```
+
+#### Via Web App
 You need to use https://makecode.microbit.org/beta currently to build MicroData. You can load this repo into MakeCode using the Import button in the home page and selecting "Import URL".
 
 Please note that there is currently no simulator support for the arcade shield extension (https://github.com/microsoft/pxt-arcadeshield) that MicroData depends on. 
 
-You will need an Arcade Shield for the micro:bit V2 to make use of MicroData.
+#### Via pxt CLI
+```
+pxt target microbit
+pxt install
+pxt build
+```
+
+
+
 
