@@ -13,7 +13,7 @@ namespace microcode {
             this.currentlyDeleting = false
 
             // Data logger already empty:
-            if (datalogger.getNumberOfRows() <= 1) {
+            if (datalogger.getNumberOfRows(0) <= 1) {
                 this.app.popScene()
                 this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
             }
