@@ -116,7 +116,6 @@ namespace microcode {
                     DistributedLoggingProtocol.finishedLogging = true
                     callbackObj.callback("")
                 }
-                
             })
         }
     }

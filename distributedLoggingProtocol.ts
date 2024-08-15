@@ -398,9 +398,6 @@ namespace microcode {
                         datalogger.createCV("Reading", cols[3]),
                         datalogger.createCV("Event", cols[4])
                     )
-
-                    if (this.callbackObj != null)
-                        this.callbackObj.callback("")
                 }
             })
         }
