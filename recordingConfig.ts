@@ -11,14 +11,19 @@ namespace microcode {
         comparator?: number
     };
 
-
+    /**
+     * Turn a RecordingConfig into a string that can be prepended with the shorthand for a sensor's name (see SensorFactory.getFromRadioName()),
+     * This string can then be sent over the radio (see radioLoggingProtocol) by a Commander, a Target can then turn this string back into a Sensor and configure it.
+     * @param config Either Period or Event measurement
+     * @returns A string that can be prepended with a sensor shorthand (e.g: L + "," + serializeRecordingConfig()): meaning a Light sensor should have this RecordingConfig
+     */
     export function serializeRecordingConfig(config: RecordingConfig): string {
         if (config == null)
             return ""
 
         if (config.inequality == null || config.comparator == null)
-            return "PERIOD, " + config.measurements + ", " + config.period
+            return "P," + config.measurements + "," + config.period
 
-        return "EVENT, " + config.measurements + ", " + config.inequality + ", " + config.comparator
+        return "E," + config.measurements + "," + config.inequality + "," + config.comparator
     }
 }

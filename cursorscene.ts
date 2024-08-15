@@ -1,10 +1,15 @@
 namespace microcode {
+    /**
+     * Used to control the flow between scenes,
+     * The SensorSelect scene is used to set the sensors before the RecordData, DistributedLogging and LiveDataViewer scenes
+     * This enum may be passed to the constructors of these scenes so that they can dynamically control this flow.
+     */
     export enum CursorSceneEnum {
         LiveDataViewer,
         SensorSelect,
         RecordingConfigSelect,
         RecordData,
-        CommandTargetLogging
+        DistributedLogging
     }
     
     export class CursorScene extends Scene {

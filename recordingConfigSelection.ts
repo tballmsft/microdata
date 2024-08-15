@@ -80,10 +80,8 @@ namespace microcode {
                 this.sensorConfigs.push({measurements: 10, period: 1000, inequality: null, comparator: null}) // Defaults per sensor
 
                 this.guiConfigValues[i] = GUI_PERIOD_DEFAULTS
-                // this.guiConfigValues[i] = [0, Math.abs(this.sensors[i].getMaximum()) - Math.abs(this.sensors[i].getMinimum())]
             }
         }
-
 
         /* override */ startup() {
             super.startup()
@@ -113,14 +111,20 @@ namespace microcode {
                                         return
                                     }
                                 }
-
-                                // All sensors are configured, pass them their config and move to the DataRecording screen:
-                                this.sensors.map((sensor, index) => {
-                                    sensor.setConfig(this.sensorConfigs[index])
-                                })
                                 
                                 this.app.popScene()
-                                this.app.pushScene(new DataRecorder(this.app, this.sensors))       
+
+                                if (this.nextSceneEnum == CursorSceneEnum.DistributedLogging) {
+                                    this.app.pushScene(new DistributedLoggingScreen(this.app, this.sensors, this.sensorConfigs));
+                                }
+                                else {
+                                    // All sensors are configured, pass them their config and move to the DataRecording screen:
+                                    this.sensors.map((sensor, index) => {
+                                        sensor.setConfig(this.sensorConfigs[index])
+                                    });
+
+                                    this.app.pushScene(new DataRecorder(this.app, this.sensors));
+                                }
                             }
 
                             else if (this.currentConfigMode == CONFIG_MODE.EVENT && this.sensorConfigs[this.sensorIndex].inequality == null) {

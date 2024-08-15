@@ -3,7 +3,7 @@ namespace microcode {
      * Grant the user the option to clear the contents stored on the data logger.
      * Inbetween Home and SensorSelect
      */
-    export class ClearDataLoggerScreen extends Scene { // CursorSceneWithPriorPage {
+    export class ClearDataLoggerScreen extends Scene {
         private yesBtn: Sprite // currentBtn = 0
         private noBtn: Sprite // currentBtn = 1
         private currentlyDeleting: boolean
@@ -124,11 +124,9 @@ namespace microcode {
                 15 // Black
             )
 
-            if (this.currentlyDeleting) {
+            if (this.currentlyDeleting)
                 screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 9, 15)
-            }
 
-            
             // Draw button prompts:
             screen.print(
                 "Yes",

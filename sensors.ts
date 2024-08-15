@@ -27,6 +27,11 @@ namespace microcode {
 
         /**
          * Overriden by ALL concrete sensor implementations.
+         */
+        getRadioName(): string;
+
+        /**
+         * Overriden by ALL concrete sensor implementations.
          * May be return undefined (unconnected Jacdac)
          * This is caught inside of .readIntoBufferOnce()
          */
@@ -147,7 +152,7 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number): void;
+        log(time: number): string;
     }
 
 
@@ -216,6 +221,7 @@ namespace microcode {
         //---------------------
 
         getName(): string {return "abstract"}
+        getRadioName(): string {return "abstract"}
         getReading(): number {return 0}
         getMinimum(): number {return DEFAULT_SENSOR_MINIMUM;}
         getMaximum(): number {return DEFAULT_SENSOR_MAXIMUM;}
@@ -306,7 +312,6 @@ namespace microcode {
         /**
          * Set inside of recordingConfigSelection.
          * @param config see recordingConfigSelection.
-         * @param isInEventMode will this sensor be used to track events?
          */
         setConfig(config: RecordingConfig) {
             const isInEventMode = config.comparator != null && config.inequality != null
@@ -321,7 +326,7 @@ namespace microcode {
          * Invoked by dataRecorder.log().
          * Writes the "Time (Ms)" column using a cumulative period.
          */
-        log(time: number): void {
+        log(time: number): string {
             this.lastLoggedReading = this.getReading()
             
             if (this.isInEventMode) {
@@ -333,6 +338,7 @@ namespace microcode {
                         datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
+                    return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator
                 }
             }
 
@@ -344,7 +350,9 @@ namespace microcode {
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1
+                return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + "N/A"
             }
+            return ""
         }
 
         /**
@@ -377,6 +385,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Light"}
+        public static getRadioName(): string {return "L"}
         public static getReading(): number {return input.lightLevel()}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 255;}
@@ -391,6 +400,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Temp."}
+        public static getRadioName(): string {return "T"}
         public static getReading(): number {return input.temperature()}
     }
 
@@ -403,6 +413,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Accel. X"}
+        public static getRadioName(): string {return "AX"}
         public static getReading(): number {return input.acceleration(Dimension.X)}
         public static getMinimum(): number {return -1023;}
         public static getMaximum(): number {return 1023;}
@@ -418,6 +429,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Accel. Y"}
+        public static getRadioName(): string {return "AY"}
         public static getReading(): number {return input.acceleration(Dimension.Y)}
         public static getMinimum(): number {return -1023;}
         public static getMaximum(): number {return 1023;}
@@ -433,6 +445,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Accel. Z"}
+        public static getRadioName(): string {return "AZ"}
         public static getReading(): number {return input.acceleration(Dimension.Z)}
         public static getMinimum(): number {return -1023;}
         public static getMaximum(): number {return 1023;}
@@ -457,6 +470,7 @@ namespace microcode {
         }
 
         public static getName(): string {return "T. Pin 0"}
+        public static getRadioName(): string {return "TP0"}
         public static getReading(): number {return TouchPinP0Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -480,6 +494,7 @@ namespace microcode {
         }
 
         public static getName(): string {return "T. Pin 1"}
+        public static getRadioName(): string {return "TP1"}
         public static getReading(): number {return TouchPinP1Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -503,6 +518,7 @@ namespace microcode {
         }
 
         public static getName(): string {return "T. Pin 2"}
+        public static getRadioName(): string {return "TP2"}
         public static getReading(): number {return TouchPinP2Sensor.pinStatus}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -515,6 +531,7 @@ namespace microcode {
     export class AnalogPinP0Sensor extends Sensor {
         constructor() {super()}
         public static getName(): string {return "A. Pin 0"}
+        public static getRadioName(): string {return "AP0"}
         public static getReading(): number {return pins.analogReadPin(AnalogPin.P0) / 1023}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -527,6 +544,7 @@ namespace microcode {
     export class AnalogPinP1Sensor extends Sensor {
         constructor() {super()}
         public static getName(): string {return "A. Pin 1"}
+        public static getRadioName(): string {return "AP1"}
         public static getReading(): number {return pins.analogReadPin(AnalogPin.P1) / 1023}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -539,6 +557,7 @@ namespace microcode {
     export class AnalogPinP2Sensor extends Sensor {
         constructor() {super()}
         public static getName(): string {return "A. Pin 2"}
+        public static getRadioName(): string {return "AP2"}
         public static getReading(): number {return pins.analogReadPin(AnalogPin.P2) / 1023}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -552,6 +571,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Magnet X"}
+        public static getRadioName(): string {return "M"}
         public static getReading(): number {return input.magneticForce(Dimension.X)}
     }
 
@@ -565,6 +585,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Pitch"}
+        public static getRadioName(): string {return "P"}
         public static getReading(): number {return input.rotation(Rotation.Pitch)}
         public static getMinimum(): number {return -180;}
         public static getMaximum(): number {return 180;}
@@ -577,6 +598,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Roll"}
+        public static getRadioName(): string {return "R"}
         public static getReading(): number {return input.rotation(Rotation.Roll)}
         public static getMinimum(): number {return -180;}
         public static getMaximum(): number {return 180;}
@@ -591,7 +613,8 @@ namespace microcode {
     export class LogoPressSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Logo Pressed"}
+        public static getName(): string {return "Logo Press"}
+        public static getRadioName(): string {return "LP"}
         public static getReading(): number {return input.logoIsPressed() ? 1 : 0}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 1;}
@@ -605,6 +628,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Compass"}
+        public static getRadioName(): string {return "C"}
         public static getReading(): number {return input.compassHeading()}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 360;}
@@ -618,6 +642,7 @@ namespace microcode {
         constructor() {super()}
 
         public static getName(): string {return "Volume"}
+        public static getRadioName(): string {return "V"}
         public static getReading(): number {return input.soundLevel()}
         public static getMinimum(): number {return 0;}
         public static getMaximum(): number {return 255;}
@@ -631,6 +656,7 @@ namespace microcode {
         constructor() {super(); modules.lightLevel1.start()}
 
         public static getName(): string {return "Jac Light"}
+        public static getRadioName(): string {return "JL"}
         public static getReading(): number {return modules.lightLevel1.isConnected() ? modules.lightLevel1.lightLevel() : undefined}
         public static isJacdac(): boolean {return true;}
     }
@@ -643,6 +669,7 @@ namespace microcode {
         constructor() {super(); modules.distance1.start()}
 
         public static getName(): string {return "Jac Dist"}
+        public static getRadioName(): string {return "JD"}
         public static getReading(): number {return modules.distance1.isConnected() ? modules.distance1.distance() : undefined}
         public static isJacdac(): boolean {return true;}
     }
@@ -655,6 +682,7 @@ namespace microcode {
         constructor() {super(); modules.soilMoisture1.start()}
 
         public static getName(): string {return "Jac Moist"}
+        public static getRadioName(): string {return "JM"}
         public static getReading(): number {return modules.soilMoisture1.isConnected() ? modules.soilMoisture1.moisture() : undefined}
         public static isJacdac(): boolean {return true;}
     }
@@ -667,6 +695,7 @@ namespace microcode {
         constructor() {super(); modules.flex1.start()}
 
         public static getName(): string {return "Jac Flex"}
+        public static getRadioName(): string {return "JF"}
         public static getReading(): number {return modules.flex1.isConnected() ? modules.flex1.bending() : undefined}
         public static isJacdac(): boolean {return true;}
     }
@@ -679,6 +708,7 @@ namespace microcode {
         constructor() {super(); modules.temperature1.start()}
 
         public static getName(): string {return "Jac Temp"}
+        public static getRadioName(): string {return "JT"}
         public static getReading(): number {return modules.temperature1.isConnected() ? modules.temperature1.temperature() : undefined}
         public static isJacdac(): boolean {return true;}
     }
@@ -691,6 +721,7 @@ namespace microcode {
         constructor() {super(); modules.humidity1.start()}
 
         public static getName(): string {return "Jac Humid"}
+        public static getRadioName(): string {return "JH"}
         public static getReading(): number {return modules.humidity1.isConnected() ? modules.humidity1.humidity() : undefined}
         public static isJacdac(): boolean {return true;}
     }

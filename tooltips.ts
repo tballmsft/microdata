@@ -188,6 +188,7 @@ namespace microcode {
         else if (id == "Compass") res = "Compass"
         else if (id == "Oscilloscope") res = "Oscilloscope"
 
+        else if (id == "Command Mode") res = "Command Mode"
         else if (id == "Meta Data") res = "Meta Data"
         else if (id == "View Data") res = "View Data"
         else if (id == "View Graph") res = "View Graph"
@@ -196,7 +197,9 @@ namespace microcode {
         else if (id == "Reset Datalogger") res = "Reset Datalogger"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
-        else if (id == "Start target logging") res = "Start target logging"
+        else if (id == "Start logging") res = "Start logging"
+        else if (id == "Start streaming") res = "Start streaming"
+        else if (id == "See connected Microbits") res = "See connected Microbits"
         else if (id == "Yes") res = "Yes"
         else if (id == "No") res = "No"
         
