@@ -53,7 +53,7 @@ namespace microcode {
             this.distributedLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2", // radio_set_group
+                icon: "radio_set_group", // radio_set_group
                 ariaId: "Command Mode",
                 x: 20,
                 y: 30,
@@ -66,7 +66,7 @@ namespace microcode {
             this.viewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2", // largeDisk
+                icon: "largeDisk", // largeDisk
                 ariaId: "View",
                 x: 58,
                 y: 30,
