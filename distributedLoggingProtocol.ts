@@ -31,23 +31,25 @@ namespace microcode {
      * The types of requests that a uBit will send over radio.
      * See NETWORK_COMMAND_STRING for the string that is sent tot convey each Enum.
      */
-    const enum NETWORK_COMMAND {
+    export const enum NETWORK_COMMAND {
         JOIN_REQUEST,
         START_LOGGING,
         BECOME_TARGET,
-        DATA_STREAM,
         GET_ID,
+        DATA_STREAM,
+        DATA_STREAM_FINISH
     }
 
     /**
      * The exact string send over radio to convey a NETWORK_COMMAND
      */
-    const NETWORK_COMMAND_STRING = [
+    export const NETWORK_COMMAND_STRING = [
         "J", // "JOIN_REQUEST",
         "S", // "START_LOGGING",
         "T", // "BECOME_TARGET",
-        "D", // "DATA_STREAM"
-        "G"
+        "G", // "GET_ID",
+        "D", // "DATA_STREAM",
+        "F"  // "DATA_STREAM_FINISH"
     ]
 
     /**
@@ -93,6 +95,8 @@ namespace microcode {
         public id: number;
         public radioMode: RADIO_LOGGING_MODE;
         private arcadeShieldIsConnected: boolean;
+
+        public static finishedLogging: boolean = false;
 
         //-----------------------------------
         // NETWORK_COMMAND MESSSAGE HANDLING:
@@ -171,9 +175,10 @@ namespace microcode {
         }
 
         callback(newRowAsCSV: string): void {
-            this.sendMessage(
-                NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM] + "," + this.id + "," + newRowAsCSV
-            )
+            if (DistributedLoggingProtocol.finishedLogging)
+                this.sendMessage(this.createMessage(NETWORK_COMMAND.DATA_STREAM_FINISH))
+            else
+                this.sendMessage(NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM] + "," + this.id + "," + newRowAsCSV)
         }
 
         //---------------------------------------------
@@ -244,7 +249,7 @@ namespace microcode {
                     this.becomeTarget()
                 else
                     this.becomeCommander()
-                }
+            }
         }
 
         private addSensor(sensor: Sensor) {this.sensors.push(sensor)}
@@ -316,8 +321,7 @@ namespace microcode {
                             }
                             else {
                                 const scheduler = new SensorScheduler(this.sensors, true)
-
-                                scheduler.start(((this.streamDataBack) ? this : null)) // Is it getting true? 
+                                scheduler.start(((this.streamDataBack) ? this : null))
                             }
                         }
                     }
@@ -373,11 +377,19 @@ namespace microcode {
                 // }
 
                 /**
+                 * INCOMING FINISHED RESPONSE
+                 */
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM_FINISH]) {
+                    this.callbackObj.callback(NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM_FINISH])
+                }
+
+                /**
                  * INCOMING DATA STREAM
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
                     const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
 
+                    DistributedLoggingScreen.showTabularData = true
                     TabularDataViewer.updateDataRowsOnNextFrame = true
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
@@ -386,6 +398,9 @@ namespace microcode {
                         datalogger.createCV("Reading", cols[3]),
                         datalogger.createCV("Event", cols[4])
                     )
+
+                    if (this.callbackObj != null)
+                        this.callbackObj.callback("")
                 }
             })
         }

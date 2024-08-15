@@ -112,6 +112,11 @@ namespace microcode {
                         . # # # .
                     `)
                 }
+                if (callbackAfterLog) {
+                    DistributedLoggingProtocol.finishedLogging = true
+                    callbackObj.callback("")
+                }
+                
             })
         }
     }
