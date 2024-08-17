@@ -2,6 +2,14 @@
 namespace microcode {
     export const lang = "en"
     export const font = bitmap.font8
+
+
+    /**
+     * id to tooltip translation has been cut in favour of just returning ID
+     * This is currently neccessary to save much needed flash space
+     * @param id 
+     * @returns 
+     */
     export function resolveTooltip(id: string) {
         // let res: string = ""
         // if (!id) return id

@@ -19,7 +19,7 @@ namespace microcode {
             super.startup()
 
             // Includes the header:
-            this.dataloggerEmpty = datalogger.getNumberOfRows(0) <= 1
+            this.dataloggerEmpty = datalogger.getNumberOfRows() <= 1
             
             //---------
             // Control:
@@ -40,7 +40,7 @@ namespace microcode {
             this.dataViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2", // largeDisk
+                icon: "largeDisk",
                 ariaId: "View Data",
                 x: -50,
                 y: 30,
@@ -53,7 +53,7 @@ namespace microcode {
             this.graphViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
+                icon: "linear_graph_1",
                 ariaId: "View Graph",
                 x: 0,
                 y: 30,

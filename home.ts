@@ -28,7 +28,7 @@ namespace microcode {
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "linear_graph_1",
-                ariaId: "linear_graph",
+                ariaId: "Real-time Data",
                 x: -58,
                 y: 30,
                 onClick: () => {
@@ -41,7 +41,7 @@ namespace microcode {
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "edit_program",
-                ariaId: "Record",
+                ariaId: "Log Data",
                 x: -20,
                 y: 30,
                 onClick: () => {
@@ -53,7 +53,7 @@ namespace microcode {
             this.distributedLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "radio_set_group", // radio_set_group
+                icon: "radio_set_group",
                 ariaId: "Command Mode",
                 x: 20,
                 y: 30,
@@ -66,8 +66,8 @@ namespace microcode {
             this.viewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "largeDisk", // largeDisk
-                ariaId: "View",
+                icon: "largeDisk",
+                ariaId: "View Data",
                 x: 58,
                 y: 30,
                 onClick: () => {

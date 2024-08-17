@@ -36,7 +36,7 @@ namespace microcode {
             this.cursor.resetOutlineColourOnMove = true
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
-                "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
+                "led_light_sensor", "thermometer", "magnet", "finger_press", "microphone", "compass", "microbitLogoWhiteBackground",
                 "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
             ]
 
