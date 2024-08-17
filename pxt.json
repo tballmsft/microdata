@@ -43,14 +43,14 @@
         "sensors.ts",
         "liveDataViewer.ts",
         "dataViewSelect.ts",
-        "recordingConfigSelection.ts",
+        "loggingConfig.ts",
         "sensorSelect.ts",
         "dataRecorder.ts",
         "clearDataloggerScreen.ts",
         "tabularDataViewer.ts",
         "generateGraph.ts",
         "tutorialWindow.ts",
-        "distributedLoggingScreen.ts"
+        "distributedLogging.ts"
     ],
     "testFiles": [],
     "targetVersions": {

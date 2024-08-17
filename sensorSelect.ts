@@ -23,7 +23,7 @@ namespace microcode {
         private jacdacSensorSelected: boolean
         
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
-            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5));
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5)); // 4x5 grid
             this.btns = [];
             this.selectedSensorAriaIDs = [];
             this.nextSceneEnum = nextSceneEnum;
@@ -41,8 +41,8 @@ namespace microcode {
             ]
 
             const ariaIDs: string[] = [
-                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "led_light_sensor",
-                "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
+                "Accelerometer X", "Accelerometer Y", "Accelerometer Z", "Pitch", "Roll", "Analog Pin 0", "Analog Pin 1", "Analog Pin 2", "Light",
+                "Temperature", "Magnet", "Logo Press", "Microphone", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
                 "Jacdac Moisture", "Jacdac Distance"
             ]
 
@@ -51,7 +51,7 @@ namespace microcode {
             //-----------------------------------------------------
 
             let x: number = -60;
-            let y: number = -40;
+            let y: number = Screen.HEIGHT * -0.3125 // y = -40 on an Arcade Shield of height 128 pixels
             for (let i = 0; i < icons.length; i++) {
                 this.btns.push(new Button({
                     parent: null,
@@ -64,6 +64,7 @@ namespace microcode {
                         // Deletion:
                         const index = this.selectedSensorAriaIDs.indexOf(button.ariaId)
                         if (index != -1) {
+                            this.cursor.setOutlineColour()
                             this.selectedSensorAriaIDs.splice(index, 1)
     
                             if (Sensor.getFromNameRadioOrID(button.ariaId).isJacdac()) {
@@ -117,7 +118,7 @@ namespace microcode {
                 x += 30
                 if (x > 60) {
                     x = -60
-                    y += 28
+                    y += Screen.HEIGHT * 0.21875 // 28 on 128 pixel high Arcade Shield
                 }
             }
 
@@ -185,7 +186,7 @@ namespace microcode {
                 0xc
             )
 
-            screen.printCenter("Sensor Selection", 2)
+            screen.printCenter("Sensor Selection", 1)
 
             for (let i = 0; i < this.btns.length; i++)
                 this.btns[i].draw()

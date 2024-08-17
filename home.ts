@@ -10,6 +10,8 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            const y = Screen.HEIGHT * 0.234 // y = 30 on an Arcade Shield of height 128 pixels
+
             const sensorSelectTutorialOpts = {
                 tips: [
                     {text: "Pick your sensors\non the next\nscreen."},
@@ -30,7 +32,7 @@ namespace microcode {
                 icon: "linear_graph_1",
                 ariaId: "Real-time Data",
                 x: -58,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
@@ -43,7 +45,7 @@ namespace microcode {
                 icon: "edit_program",
                 ariaId: "Log Data",
                 x: -20,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.RecordingConfigSelect))
@@ -56,7 +58,7 @@ namespace microcode {
                 icon: "radio_set_group",
                 ariaId: "Command Mode",
                 x: 20,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new DistributedLoggingScreen(this.app))
@@ -69,7 +71,7 @@ namespace microcode {
                 icon: "largeDisk",
                 ariaId: "View Data",
                 x: 58,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new DataViewSelect(this.app))

@@ -493,6 +493,8 @@ namespace microcode {
             if (this.uiState != UI_STATE.SHOWING_OPTIONS)
                 this.cursor.visible = false
 
+            const y = Screen.HEIGHT * 0.234 // y = 30 on an Arcade Shield of height 128 pixels
+
             // this.targetMicrobitsBtn = new Button({
             //     parent: null,
             //     style: ButtonStyles.Transparent,
@@ -512,7 +514,7 @@ namespace microcode {
                 icon: "radio_set_group",
                 ariaId: "Start logging",
                 x: -50,
-                y: 30,
+                y,
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
                         DistributedLoggingScreen.streamDataBack = false
@@ -530,7 +532,7 @@ namespace microcode {
                 icon: "radio_set_group",
                 ariaId: "Start streaming",
                 x: 0,   
-                y: 30,
+                y,
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
                         DistributedLoggingScreen.streamDataBack = true
@@ -548,7 +550,7 @@ namespace microcode {
                 icon: "largeDisk",
                 ariaId: "Real-time Data",
                 x: 50,
-                y: 30,
+                y,
                 onClick: () => {
                     if (DistributedLoggingScreen.showTabularData) {
                         this.app.popScene()
@@ -569,8 +571,6 @@ namespace microcode {
                 Screen.HEIGHT,
                 0xc
             )
-
-            const headerY = 2
 
             switch (this.uiState) {
                 case UI_STATE.SHOWING_OPTIONS: {
