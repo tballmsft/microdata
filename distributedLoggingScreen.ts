@@ -69,9 +69,6 @@ namespace microcode {
      *  If the Microbit finds an existing Commander it will be told to become a Target, and be given an ID
      */
     const UNINITIALISED_MICROBIT_ID: number = -1
-
-
-
     
     export interface ITargetDataLoggedCallback {
         callback(rowTheTargetLogged: string): void;
