@@ -769,7 +769,7 @@ namespace microcode {
                             6
                         ) // Highlight selected in blue
                     }
-                }
+                } 
 
                 screen.print(
                     this.sensors[row].getName(),

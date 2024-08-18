@@ -120,6 +120,7 @@ namespace microcode {
         
         /** Should the target send each row of data it logs back to the Commander? See DistributedLoggingProtocol.log() */
         private streamDataBack: boolean;
+        private targetIDs: number[]
 
         constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetDataLoggedCallback) {
             this.app = app;
@@ -149,6 +150,7 @@ namespace microcode {
             this.nextMicrobitIDToIssue = 0;
             this.callbackObj = callbackObj;
             this.streamDataBack = false
+            this.targetIDs = []
 
             // Default Microbit display when unconnected (not a target):
             if (!arcadeShieldIsConnected) {
@@ -263,16 +265,17 @@ namespace microcode {
                         this.sendMessage(this.createMessage(NETWORK_COMMAND.JOIN_REQUEST))
                 }
 
-                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET]) {
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET] && this.id == UNINITIALISED_MICROBIT_ID) {
                     this.id = message[MESSAGE_COMPONENT.DATA_START]
                 }
 
-                // /**
-                //  * COMMANDER REQUESTS ID
-                //  */
-                // else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
-                //     this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID, [this.id]))
-                // }
+                /**
+                 * COMMANDER REQUESTS ID
+                 */
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.GET_ID]) {
+                    this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID, [this.id]))
+                    // basic.showNumber(this.id)
+                }
 
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
                     if (this.numberOfMessagesReceived < this.numberOfMessagesExpected) {
@@ -335,8 +338,7 @@ namespace microcode {
         // Commander-only Methods:
         //------------------------
 
-        public addTargetID(id: number) {}
-        public getTargetIDs(): number[] {return []}
+        public addTargetID(id: number) {this.targetIDs.push(id)}
 
         private becomeCommander() {
             this.radioMode = RADIO_LOGGING_MODE.COMMANDER
@@ -358,12 +360,12 @@ namespace microcode {
                     this.numberOfTargetsConnected += 1
                 }
 
-                // /**
-                //  * INCOMING GET ID RESPONSE
-                //  */
-                // else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.GET_ID]) {
-                //     this.addTargetID(+message[MESSAGE_COMPONENT.DATA_START])
-                // }
+                /**
+                 * INCOMING GET ID RESPONSE
+                 */
+                else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.GET_ID]) {
+                    this.addTargetID(message[MESSAGE_COMPONENT.DATA_START])
+                }
 
                 /**
                  * INCOMING FINISHED RESPONSE
@@ -409,11 +411,11 @@ namespace microcode {
             }
         }
 
-        // public requestTargetIDs() {
-        //     // this.x = []
-        //     this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID))
-        //     // basic.pause(MESSAGE_LATENCY_MS)
-        // }
+        public requestTargetIDs(): number[] {
+            this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID))
+            basic.pause(MESSAGE_LATENCY_MS)
+            return this.targetIDs
+        }
     }
 
     /**
@@ -445,7 +447,7 @@ namespace microcode {
         public static showTabularData: boolean = false
         private static streamingDone: boolean = true
 
-        // private targetMicrobitsBtn: Button
+        private targetMicrobitsBtn: Button
         private startLoggingBtn: Button
         private startStreamingBtn: Button
         private showDataBtn: Button
@@ -495,25 +497,25 @@ namespace microcode {
 
             const y = Screen.HEIGHT * 0.234 // y = 30 on an Arcade Shield of height 128 pixels
 
-            // this.targetMicrobitsBtn = new Button({
-            //     parent: null,
-            //     style: ButtonStyles.Transparent,
-            //     icon: "linear_graph_2", // radio_set_group
-            //     ariaId: "See connected Microbits",
-            //     x: -60,
-            //     y: 30,
-            //     onClick: () => {
-            //         this.uiState = UI_STATE.SHOWING_CONNECTED_MICROBITS
-            //         // this.distributedLogger.requestTargetIDs()
-            //     },
-            // })
+            this.targetMicrobitsBtn = new Button({
+                parent: null,
+                style: ButtonStyles.Transparent,
+                icon: "largeSettingsGear",
+                ariaId: "See connected Microbits",
+                x: -60,
+                y,
+                onClick: () => {
+                    DistributedLoggingScreen.streamingDone = false
+                    basic.showNumber(this.distributedLogger.requestTargetIDs()[0])
+                },
+            })
 
             this.startLoggingBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "radio_set_group",
                 ariaId: "Start logging",
-                x: -50,
+                x: -20,
                 y,
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
@@ -523,7 +525,7 @@ namespace microcode {
                         this.app.popScene()
                         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
                     }
-                },
+                }
             })
 
             this.startStreamingBtn = new Button({
@@ -531,7 +533,7 @@ namespace microcode {
                 style: ButtonStyles.Transparent,
                 icon: "radio_set_group",
                 ariaId: "Start streaming",
-                x: 0,   
+                x: 20,   
                 y,
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
@@ -542,14 +544,15 @@ namespace microcode {
                         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
                     }
                 },
+                flipIcon: true
             })
 
             this.showDataBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
                 icon: "largeDisk",
-                ariaId: "Real-time Data",
-                x: 50,
+                ariaId: "View real-time data",
+                x: 60,
                 y,
                 onClick: () => {
                     if (DistributedLoggingScreen.showTabularData) {
@@ -559,7 +562,7 @@ namespace microcode {
                 },
             })
 
-            const btns: Button[] = [this.startLoggingBtn, this.startStreamingBtn, this.showDataBtn]
+            const btns: Button[] = [this.targetMicrobitsBtn, this.startLoggingBtn, this.startStreamingBtn, this.showDataBtn]
             this.navigator.addButtons(btns)
         }
 
@@ -589,7 +592,7 @@ namespace microcode {
                                 2
                             )
     
-                            // this.targetMicrobitsBtn.draw()
+                            this.targetMicrobitsBtn.draw()
                             this.startLoggingBtn.draw()
                             this.startStreamingBtn.draw()
                             this.showDataBtn.draw()
