@@ -281,7 +281,7 @@ namespace microcode {
                         const dataStream = message.slice(MESSAGE_COMPONENT.DATA_START)
                         const sensorName = dataStream[0]
 
-                        let sensor = Sensor.getFromNameRadioOrID(sensorName)
+                        let sensor = Sensor.getFromName(sensorName)
 
                         const configType = dataStream[1]
                         if (configType == "P") {

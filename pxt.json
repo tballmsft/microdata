@@ -49,7 +49,6 @@
         "clearDataloggerScreen.ts",
         "tabularDataViewer.ts",
         "generateGraph.ts",
-        "tutorialWindow.ts",
         "distributedLogging.ts"
     ],
     "testFiles": [],

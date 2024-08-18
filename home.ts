@@ -35,7 +35,8 @@ namespace microcode {
                 y,
                 onClick: () => {
                     this.app.popScene()
-                    this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
+                    // this.app.pushScene(new TutorialWindow(this.app, sensorSelectTutorialOpts, new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer)));
+                    this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
                 },
             })
 

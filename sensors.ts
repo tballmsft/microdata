@@ -372,34 +372,34 @@ namespace microcode {
         //------------------
 
         /**
-         * Factory function used to generate a Sensor from that sensors: Name, ariaID or its radio name
+         * Factory function used to generate a Sensor from that sensors: .getName(), sensorSelect name, or its radio name
          * This is a single factory within this abstract class to reduce binary size
          * @param name either sensor.getName(), sensor.getRadioName() or the ariaID the button that represents the sensor in SensorSelect uses.
          * @returns concrete sensor that the input name corresponds to.
          */
-        public static getFromNameRadioOrID(name: string): Sensor {
-            if      (name == "Accel. X" || name == "accelerometer X" || name == "AX")     return new AccelerometerXSensor();
-            else if (name == "Accel. Y" || name == "accelerometer Y" || name == "AY")     return new AccelerometerYSensor();
-            else if (name == "Accel. Z" || name == "accelerometer Z" || name == "AZ")     return new AccelerometerZSensor();
-            else if (name == "Pitch" || name == "Pitch" || name == "P")                   return new PitchSensor();
-            else if (name == "Roll" || name == "Roll" || name == "R")                     return new RollSensor();
-            else if (name == "T. Pin 0" || name == "T. Pin 0" || name == "TP0")           return new TouchPinP0Sensor();
-            else if (name == "T. Pin 1" || name == "T. Pin 1" || name == "TP1")           return new TouchPinP1Sensor();
-            else if (name == "T. Pin 2" || name == "T. Pin 2" || name == "TP2")           return new TouchPinP2Sensor();
-            else if (name == "A. Pin 0" || name == "A. Pin 0" || name == "AP0")           return new AnalogPinP0Sensor();
-            else if (name == "A. Pin 1" || name == "A. Pin 1" || name == "AP1")           return new AnalogPinP1Sensor();
-            else if (name == "A. Pin 2" || name == "A. Pin 2" || name == "AP2")           return new AnalogPinP2Sensor();
-            else if (name == "Light" || name == "led_light_sensor" || name == "L")        return new LightSensor();
-            else if (name == "Temp." || name == "thermometer" || name == "T")             return new TemperatureSensor();
-            else if (name == "Magnet" || name == "S10" || name == "M")                    return new MagnetXSensor();
-            else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")      return new LogoPressSensor();
-            else if (name == "Volume" || name == "Volume" || name == "V")                 return new VolumeSensor();
-            else if (name == "Compass" || name == "Compass" || name == "C")               return new CompassHeadingSensor();
-            else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")       return new JacdacLightSensor();
-            else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM")    return new JacdacSoilMoistureSensor();
-            else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")     return new JacdacDistanceSensor();
-            // else if (name == "Jac Flex" || name == "Jacdac Flex" || name == "JF")         return new JacdacFlexSensor();
-            else                                                                          return new JacdacTemperatureSensor()
+        public static getFromName(name: string): Sensor {
+            if      (name == "Accel. X" || name == "Accelerometer X" || name == "AX")  return new AccelerometerXSensor();
+            else if (name == "Accel. Y" || name == "Accelerometer Y" || name == "AY")  return new AccelerometerYSensor();
+            else if (name == "Accel. Z" || name == "Accelerometer Z" || name == "AZ")  return new AccelerometerZSensor();
+            else if (name == "Pitch" || name == "P")                                   return new PitchSensor();
+            else if (name == "Roll" || name == "R")                                    return new RollSensor();
+            else if (name == "T. Pin 0" || name == "Touch Pin 0" || name == "TP0")     return new TouchPinP0Sensor();
+            else if (name == "T. Pin 1" || name == "Touch Pin 1" || name == "TP1")     return new TouchPinP1Sensor();
+            else if (name == "T. Pin 2" || name == "Touch Pin 2" || name == "TP2")     return new TouchPinP2Sensor();
+            else if (name == "A. Pin 0" || name == "Analog Pin 0" || name == "AP0")    return new AnalogPinP0Sensor();
+            else if (name == "A. Pin 1" || name == "Analog Pin 1" || name == "AP1")    return new AnalogPinP1Sensor();
+            else if (name == "A. Pin 2" || name == "Analog Pin 2" || name == "AP2")    return new AnalogPinP2Sensor();
+            else if (name == "Light" || name == "L")                                   return new LightSensor();
+            else if (name == "Temp." || name == "Temperature" || name == "T")          return new TemperatureSensor();
+            else if (name == "Magnet" || name == "M")                                  return new MagnetXSensor();
+            else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")   return new LogoPressSensor();
+            else if (name == "Volume" || name == "Microphone" || name == "V")          return new VolumeSensor();
+            else if (name == "Compass" || name == "C")                                 return new CompassHeadingSensor();
+            else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")    return new JacdacLightSensor();
+            else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM") return new JacdacSoilMoistureSensor();
+            else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")  return new JacdacDistanceSensor();
+            // else if (name == "Jac Flex" || name == "Jacdac Flex" || name == "JF")      return new JacdacFlexSensor();
+            else                                                                       return new JacdacTemperatureSensor()
         }
 
         //---------------------
@@ -756,7 +756,7 @@ namespace microcode {
     export class MagnetXSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Magnet X"}
+        public static getName(): string {return "Magnet"}
         public static getRadioName(): string {return "M"}
         public static getReading(): number {return input.magneticForce(Dimension.X)}
     }
@@ -827,7 +827,7 @@ namespace microcode {
     export class VolumeSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Volume"}
+        public static getName(): string {return "Microphone"}
         public static getRadioName(): string {return "V"}
         public static getReading(): number {return input.soundLevel()}
         public static getMinimum(): number {return 0;}
