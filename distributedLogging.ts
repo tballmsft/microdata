@@ -200,9 +200,14 @@ namespace microcode {
             radio.setFrequencyBand(FREQUENCY_BAND)
 
             // A Microbit without an Arcade Shield cannot become a Commander; so force this Microbit to become a Target:
-            if (!this.arcadeShieldIsConnected)
+            if (!this.arcadeShieldIsConnected) {
                 this.becomeTarget()
 
+                while (this.id == UNINITIALISED_MICROBIT_ID) {
+                    this.sendMessage(this.createMessage(NETWORK_COMMAND.JOIN_REQUEST))
+                    basic.pause(MESSAGE_LATENCY_MS)
+                }
+            }
             else {
                 let responseReceived = false
 
@@ -371,20 +376,23 @@ namespace microcode {
                  * INCOMING FINISHED RESPONSE
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM_FINISH]) {
-                    this.callbackObj.callback(NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM_FINISH])
+                    DistributedLoggingScreen.streamingDone = true
                 }
 
                 /**
                  * INCOMING DATA STREAM
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
-                    const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
-
+                    DistributedLoggingScreen.streamingDone = false
                     DistributedLoggingScreen.showTabularData = true
                     TabularDataViewer.updateDataRowsOnNextFrame = true
+
+                    const cols = message.slice(MESSAGE_COMPONENT.DATA_START)
+
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
-                        datalogger.createCV("Sensor", cols[1]), //Sensor.getFromNameRadioOrID(cols[1]).getName()),
+                        // datalogger.createCV("Sensor", cols[1]), //Sensor.getFromName(cols[1]).getName()),
+                        datalogger.createCV("Sensor", Sensor.getFromName(cols[1]).getName()),
                         datalogger.createCV("Time (ms)", cols[2]),
                         datalogger.createCV("Reading", cols[3]),
                         datalogger.createCV("Event", cols[4])
@@ -395,6 +403,7 @@ namespace microcode {
 
 
         public log(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+            DistributedLoggingScreen.streamingDone = false
             const numberOfSensors = sensors.length
 
             let messages: string[] = [
@@ -412,6 +421,15 @@ namespace microcode {
         }
 
         public requestTargetIDs(): number[] {
+            DistributedLoggingScreen.streamingDone = false
+            this.targetIDs = []
+
+            // Start timeout:
+            control.inBackground(() => {
+                basic.pause(MESSAGE_LATENCY_MS * 2)
+                DistributedLoggingScreen.streamingDone = true
+            })
+
             this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID))
             basic.pause(MESSAGE_LATENCY_MS)
             return this.targetIDs
@@ -443,9 +461,9 @@ namespace microcode {
          *  At the end of the recordingConfigSelection the scene will change back to this DistributedLoggingScreen
          *  This variable is set before swapping to that SensorSelection scene - so that the users initial choice (of streaming the data back or not) is preserved.
          */
-        public static streamDataBack: boolean = true
         public static showTabularData: boolean = false
-        private static streamingDone: boolean = true
+        public static streamingDone: boolean = true
+        private static streamDataBack: boolean = true
 
         private targetMicrobitsBtn: Button
         private startLoggingBtn: Button
@@ -484,7 +502,7 @@ namespace microcode {
                         this.uiState = UI_STATE.SHOWING_OPTIONS
                         this.cursor.visible = true
                     }
-                    else {
+                    else if (DistributedLoggingScreen.streamingDone) {
                         this.app.popScene()
                         this.app.pushScene(new Home(this.app));
                     }
@@ -505,8 +523,10 @@ namespace microcode {
                 x: -60,
                 y,
                 onClick: () => {
-                    DistributedLoggingScreen.streamingDone = false
-                    basic.showNumber(this.distributedLogger.requestTargetIDs()[0])
+                    if (DistributedLoggingScreen.streamingDone) {
+                        this.uiState = UI_STATE.SHOWING_CONNECTED_MICROBITS
+                        this.cursor.visible = false
+                    }
                 },
             })
 
@@ -520,7 +540,6 @@ namespace microcode {
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
                         DistributedLoggingScreen.streamDataBack = false
-                        DistributedLoggingScreen.streamingDone = false
 
                         this.app.popScene()
                         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
@@ -538,7 +557,6 @@ namespace microcode {
                 onClick: () => {
                     if (DistributedLoggingScreen.streamingDone) {
                         DistributedLoggingScreen.streamDataBack = true
-                        DistributedLoggingScreen.streamingDone = false
 
                         this.app.popScene()
                         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.DistributedLogging))
@@ -556,8 +574,8 @@ namespace microcode {
                 y,
                 onClick: () => {
                     if (DistributedLoggingScreen.showTabularData) {
-                        this.app.popScene()
-                        this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DistributedLoggingScreen(this.app))}))
+                        this.app.popScene();
+                        this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DistributedLoggingScreen(this.app))}));
                     }
                 },
             })
@@ -624,6 +642,25 @@ namespace microcode {
                     }
                     break;
                 } // end of UI_STATE.SHOWING_OPTIONS case
+
+                case UI_STATE.SHOWING_CONNECTED_MICROBITS: {
+                    const targetIDs = this.distributedLogger.requestTargetIDs()
+
+                    screen.printCenter("Microbits connected", 2)
+
+                    let y = 15
+
+                    targetIDs.forEach((id) => {
+                        screen.print(
+                            "Microbit " + id,
+                            1,
+                            y
+                        )
+                        y += 5
+                    })
+
+                    break;
+                } // end of UI_STATE.SHOWING_CONNECTED_MICROBITS case
             }
             super.draw()
         }
