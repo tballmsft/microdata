@@ -37,7 +37,6 @@ namespace microcode {
                 )
             }
 
-
             const y = Screen.HEIGHT * 0.234 // y = 30 on an Arcade Shield of height 128 pixels
 
             this.dataViewBtn = new Button({

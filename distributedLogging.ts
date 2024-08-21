@@ -113,9 +113,8 @@ namespace microcode {
         // Commander only Variables:
         //--------------------------
         
+        private static nextMicrobitIDToIssue: number;
         public numberOfTargetsConnected: number;
-        
-        private nextMicrobitIDToIssue: number;
         private callbackObj: ITargetDataLoggedCallback;
         
         /** Should the target send each row of data it logs back to the Commander? See DistributedLoggingProtocol.log() */
@@ -146,8 +145,8 @@ namespace microcode {
             // Commander only Variables:
             //--------------------------
             
+            DistributedLoggingProtocol.nextMicrobitIDToIssue = 0;
             this.numberOfTargetsConnected = 0;
-            this.nextMicrobitIDToIssue = 0;
             this.callbackObj = callbackObj;
             this.streamDataBack = false
             this.targetIDs = []
@@ -348,7 +347,7 @@ namespace microcode {
         private becomeCommander() {
             this.radioMode = RADIO_LOGGING_MODE.COMMANDER
             this.id = 0
-            this.nextMicrobitIDToIssue = 1
+            DistributedLoggingProtocol.nextMicrobitIDToIssue = 1
             this.numberOfTargetsConnected = 0
 
             radio.onReceivedString(function commanderControlFlowFn(receivedString: string): void {
@@ -358,10 +357,10 @@ namespace microcode {
                  * INCOMING JOIN REQUEST
                  */
                 if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.JOIN_REQUEST]) {
-                    const becomeTargetMessage = this.createMessage(NETWORK_COMMAND.BECOME_TARGET, [this.nextMicrobitIDToIssue])
+                    const becomeTargetMessage = this.createMessage(NETWORK_COMMAND.BECOME_TARGET, [DistributedLoggingProtocol.nextMicrobitIDToIssue])
                     this.sendMessage(becomeTargetMessage)
 
-                    this.nextMicrobitIDToIssue += 1
+                    DistributedLoggingProtocol.nextMicrobitIDToIssue += 1
                     this.numberOfTargetsConnected += 1
                 }
 
@@ -391,7 +390,6 @@ namespace microcode {
 
                     datalogger.log(
                         datalogger.createCV("Microbit", cols[0]),
-                        // datalogger.createCV("Sensor", cols[1]), //Sensor.getFromName(cols[1]).getName()),
                         datalogger.createCV("Sensor", Sensor.getFromName(cols[1]).getName()),
                         datalogger.createCV("Time (ms)", cols[2]),
                         datalogger.createCV("Reading", cols[3]),
@@ -465,6 +463,8 @@ namespace microcode {
         public static streamingDone: boolean = true
         private static streamDataBack: boolean = true
 
+        private targetIDCache: number[]
+
         private targetMicrobitsBtn: Button
         private startLoggingBtn: Button
         private startStreamingBtn: Button
@@ -474,6 +474,8 @@ namespace microcode {
             super(app)
             this.uiState = UI_STATE.SHOWING_OPTIONS
             this.distributedLogger = new DistributedLoggingProtocol(app, true, this)
+
+            this.targetIDCache = []
 
             DistributedLoggingScreen.showTabularData = datalogger.getNumberOfRows() > 1
 
@@ -526,6 +528,16 @@ namespace microcode {
                     if (DistributedLoggingScreen.streamingDone) {
                         this.uiState = UI_STATE.SHOWING_CONNECTED_MICROBITS
                         this.cursor.visible = false
+                        this.targetIDCache = []
+
+                        // Start timeout:
+                        // Continually request the target ids; so that new incoming targets appear on the list as it is displayed, and outgoing targets leave it, in real-time:
+                        control.inBackground(() => {
+                            while (this.uiState == UI_STATE.SHOWING_CONNECTED_MICROBITS) {
+                                this.targetIDCache = this.distributedLogger.requestTargetIDs()
+                                basic.pause(50)
+                            }
+                        })
                     }
                 },
             })
@@ -644,19 +656,17 @@ namespace microcode {
                 } // end of UI_STATE.SHOWING_OPTIONS case
 
                 case UI_STATE.SHOWING_CONNECTED_MICROBITS: {
-                    const targetIDs = this.distributedLogger.requestTargetIDs()
-
                     screen.printCenter("Microbits connected", 2)
-
                     let y = 15
-
-                    targetIDs.forEach((id) => {
-                        screen.print(
-                            "Microbit " + id,
-                            1,
-                            y
-                        )
-                        y += 5
+                    this.targetIDCache.forEach((id) => {
+                        if (id != UNINITIALISED_MICROBIT_ID) {
+                            screen.print(
+                                "Microbit " + id,
+                                1,
+                                y
+                            )
+                            y += 5
+                        }
                     })
 
                     break;

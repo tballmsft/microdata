@@ -378,6 +378,7 @@ namespace microcode {
          * @returns concrete sensor that the input name corresponds to.
          */
         public static getFromName(name: string): Sensor {
+            // basic.showString(name)
             if      (name == "Accel. X" || name == "Accelerometer X" || name == "AX")  return new AccelerometerXSensor();
             else if (name == "Accel. Y" || name == "Accelerometer Y" || name == "AY")  return new AccelerometerYSensor();
             else if (name == "Accel. Z" || name == "Accelerometer Z" || name == "AZ")  return new AccelerometerZSensor();

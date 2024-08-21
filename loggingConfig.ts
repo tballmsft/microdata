@@ -281,7 +281,7 @@ namespace microcode {
                     else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                         switch (this.configurationIndex) {
                             case CONFIG_ROW.MEASUREMENT_QTY: {
-                                this.sensorConfigs[this.sensorIndex].measurements = Math.min(this.sensorConfigs[this.sensorIndex].measurements - 10, 0)
+                                this.sensorConfigs[this.sensorIndex].measurements = Math.max(this.sensorConfigs[this.sensorIndex].measurements - 10, 0)
                                 break;
                             }
                             case CONFIG_ROW.PERIOD_OR_EVENT: {
@@ -720,8 +720,8 @@ namespace microcode {
                                         Screen.HALF_WIDTH - ((periodConfigString.length * font.charWidth) / 2) + (distance * font.charWidth) - 4,
                                         Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.0625), // 8
                                         (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex].toString().length * font.charWidth) + 8,
-                                        (Screen.HEIGHT * 0.109), // 14
-                                        5
+                                        (Screen.HEIGHT * 0.1171), // 15
+                                        5 // yellow
                                     )
                                     break
                                 }
