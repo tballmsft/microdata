@@ -423,21 +423,34 @@ namespace microcode {
         hasMeasurements(): boolean {return this.config.measurements > 0;}
 
         getRecordingInformation(): string[] {
-            return [
-                this.getPeriod() / 1000 + " second period", 
-                this.config.measurements.toString() + " measurements left",
-                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
-                "Last log was " + this.lastLoggedReading,
-            ]
+            if (this.hasMeasurements())            
+                return [
+                    this.getPeriod() / 1000 + " second period", 
+                    this.config.measurements.toString() + " measurements left",
+                    ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
+                    "Last log was " + this.lastLoggedReading,
+                ]
+            else
+                return [
+                    "Logging complete.",
+                    "Last log was " + this.lastLoggedReading,
+                ]
         }
 
         getEventInformation(): string[] {
-            return [
-                this.config.measurements.toString() + " events left",
-                "Logging " + this.config.inequality + " " + this.config.comparator + " events",
-                "Last log was " + this.lastLoggedReading,
-                this.lastLoggedEventDescription
-            ]
+            if (this.hasMeasurements())
+                return [
+                    this.config.measurements.toString() + " events left",
+                    "Logging " + this.config.inequality + " " + this.config.comparator + " events",
+                    "Last log was " + this.lastLoggedReading,
+                    this.lastLoggedEventDescription
+                ]
+
+            else
+                return [
+                    "Logging complete.",
+                    "Last log was " + this.lastLoggedReading
+                ]
         }
 
         /**

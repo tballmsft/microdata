@@ -244,6 +244,10 @@ namespace microcode {
 
                     else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                         switch (this.configurationIndex) {
+                            case CONFIG_ROW.MEASUREMENT_QTY: {
+                                this.sensorConfigs[this.sensorIndex].measurements += 10
+                                break;
+                            }
                             case CONFIG_ROW.PERIOD_OR_EVENT: {
                                 if (this.currentConfigMode == CONFIG_MODE.EVENT) {
                                     const qty = (this.eventOrPeriodIndex == GUI_TEXT_EVENT_INDEX.INEQUALITY) ? sensorEventSymbols.length : this.sensors[this.sensorIndex].getMaximum()
@@ -276,6 +280,10 @@ namespace microcode {
 
                     else if (this.guiState == GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                         switch (this.configurationIndex) {
+                            case CONFIG_ROW.MEASUREMENT_QTY: {
+                                this.sensorConfigs[this.sensorIndex].measurements = Math.min(this.sensorConfigs[this.sensorIndex].measurements - 10, 0)
+                                break;
+                            }
                             case CONFIG_ROW.PERIOD_OR_EVENT: {
                                 if (this.currentConfigMode == CONFIG_MODE.EVENT) {
                                     if (this.eventOrPeriodIndex == GUI_TEXT_EVENT_INDEX.COMPARATOR ) {
@@ -583,7 +591,7 @@ namespace microcode {
                 switch (this.configurationIndex) {
                     case CONFIG_ROW.MEASUREMENT_QTY: {
                         const yWindowStart = yStart + font.charHeight + (Screen.HEIGHT * 0.0859) // 11
-                
+
                         screen.fillRect(
                             2,
                             yWindowStart,
@@ -661,7 +669,7 @@ namespace microcode {
                             // Write Event expression:
                             screen.printCenter(
                                 expression,
-                                Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.039), // 5
+                                Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.109375), // 14
                                 15 // black
                             )
 
@@ -712,7 +720,7 @@ namespace microcode {
                                         Screen.HALF_WIDTH - ((periodConfigString.length * font.charWidth) / 2) + (distance * font.charWidth) - 4,
                                         Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.0625), // 8
                                         (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex].toString().length * font.charWidth) + 8,
-                                        (Screen.HEIGHT * 0.09375), // 12
+                                        (Screen.HEIGHT * 0.109), // 14
                                         5
                                     )
                                     break
@@ -723,7 +731,7 @@ namespace microcode {
 
                             screen.printCenter(
                                 periodConfigString,
-                                Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.07812), // 10,
+                                Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.09375), // 12,
                                 15
                             )
                         }
