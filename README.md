@@ -1,14 +1,16 @@
 # MicroData
 ![home_screen](https://github.com/KierPalin/MicroData/assets/45743174/0dd0ed8c-f8ec-4260-bdae-1ed3413f2018)
 
-This is an application for the Microbit V2 and an Arcade shield that leverages onboard sensors for scientific experiments inside the classroom - without the need for an external computer. MicroData utilises the variety of sensors & buttons onboard the Microbit to allow you to:
-* Record data and events into flash storage
+An application for a Microbit V2 + Arcade shield that leverages onboard sensors to enable data collection for scientific experiments inside & outside the classroom - without the need for an external computer. MicroData allows you to:
+* Record data and events into flash storage.
 * View real-time graphs of sensor readings.
 * Create graphs from recorded data.
 * View data & events in a tabular format.
-* Supports Jacdac sensors for Light, Soil moisture, Distance, Flex, Temperature and Humidity.
+* Use Jacdac sensors for Light, Soil moisture, Distance, Flexibility, Temperature.
+* Command other Microbits (including those without Arcade Shields) to log data.
+* Collect data from sensors on other Microbits over the radio.
 
-With the objective of allowing people to:
+MicroData makes it easy to select and configure sensors. The data collected through it can be used to:
 * Teach and better understand Data Science.
 * Experiment with Physical Computing.
 * Perform Science experiments.
