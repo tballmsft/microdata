@@ -69,22 +69,43 @@ namespace microcode {
      *  If the Microbit finds an existing Commander it will be told to become a Target, and be given an ID
      */
     const UNINITIALISED_MICROBIT_ID: number = -1
-    
+
+    /**
+     * An object that implements this interface is passed to the SensorScheduler so that it when a log is made,
+     * The target can send a copy of that log message back to the Commander over radio.
+     * Additionally, the DistributedLoggingScreen implements this interface so that the screen can update only when needed.
+     */
     export interface ITargetDataLoggedCallback {
         callback(rowTheTargetLogged: string): void;
     }
 
+
+    /**
+     * This protocol is used by both the DistributedLoggingScreen AND by Microbits that do not have an Arcade Shield (see app.ts) 
+     * to manage how Microbits communicate
+     * There can only be 1 Commander - which must have an Arcade Shield, this Commander has options to control the Targets.
+     * Targets are Microbits that may (or may not) have an Arcade Shield connected to them. They have a unique ID and they passively respond to the Commanders requests
+     * 
+     * The user can select and configure sensors then tell Targets to log them, and optionally send that data back to the Commander.
+     * The Commander can get a list of the IDs of connected Targets and see the data from sensors being streamed back.
+     */
     export class DistributedLoggingProtocol implements ITargetDataLoggedCallback {
+        /** The DistributedLoggingScreen which uses this protocol needs to switch between scenes - so that the user can select sensors, etc, then come back to the screen. */
         private app: App;
 
         //------------------------------------------------------
         // Variables used by both the Commander and the Targets:
         //------------------------------------------------------
-
+        
         public id: number;
+
+        /** Target (many) or Commander (only can be 1)? This is set inside .initialiseCommunication() and does not change thereon. */
         public radioMode: RADIO_LOGGING_MODE;
+
+        /** A Microbit that does not have an Arcade Shield connected cannot become a Commander, and needs to display its logging information differently. */
         private arcadeShieldIsConnected: boolean;
 
+        /** The Target tells the Commander when it has finished. SensorScheduler.start() modifies this static*/
         public static finishedLogging: boolean = false;
 
         //-----------------------------------
@@ -107,6 +128,7 @@ namespace microcode {
          */
         private numberOfMessagesReceived: number;
 
+        /** The Target needs to build a list of sensors from sensor names, configure them according to the Commander's specification, then pass that to the recorder */
         private sensors: Sensor[]
         
         //--------------------------
@@ -247,7 +269,6 @@ namespace microcode {
             }
         }
 
-        private addSensor(sensor: Sensor) {this.sensors.push(sensor)}
 
         private becomeTarget() {
             /**
@@ -269,6 +290,10 @@ namespace microcode {
                         this.sendMessage(this.createMessage(NETWORK_COMMAND.JOIN_REQUEST))
                 }
 
+
+                /**
+                 * COMMANDER GIVES THIS TARGET A NEW ID
+                 */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.BECOME_TARGET] && this.id == UNINITIALISED_MICROBIT_ID) {
                     this.id = message[MESSAGE_COMPONENT.DATA_START]
                 }
@@ -278,9 +303,12 @@ namespace microcode {
                  */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.GET_ID]) {
                     this.sendMessage(this.createMessage(NETWORK_COMMAND.GET_ID, [this.id]))
-                    // basic.showNumber(this.id)
                 }
 
+
+                /**
+                 * COMMANDER SENDS DATA_STREAM
+                 */
                 else if (message[MESSAGE_COMPONENT.NETWORK_COMMAND] == NETWORK_COMMAND_STRING[NETWORK_COMMAND.DATA_STREAM]) {
                     if (this.numberOfMessagesReceived < this.numberOfMessagesExpected) {
                         this.numberOfMessagesReceived += 1
@@ -304,7 +332,7 @@ namespace microcode {
                             sensor.setConfig({measurements, period: SENSOR_EVENT_POLLING_PERIOD_MS, inequality, comparator})
                         }
 
-                        this.addSensor(sensor)
+                        this.sensors.push(sensor)
 
                         // Reset state after all messages for this request are handled:
                         if (this.numberOfMessagesReceived >= this.numberOfMessagesExpected) {

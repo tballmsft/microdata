@@ -19,7 +19,6 @@ namespace microcode {
         ZOOMED_IN
     }
 
-
     /**
      * Indice access alias into this.sensorMinsAndMaxs columns.
      */
