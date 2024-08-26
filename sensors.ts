@@ -38,7 +38,9 @@ namespace microcode {
     /** How many times should a line be duplicated when drawn? */
     const PLOT_SMOOTHING_CONSTANT: number = 4
 
-    
+    /** To what precision whould readings fromt he sensor be cut to when they're logged? */
+    const READING_PRECISION: number = 8
+
     /**
      * Only used within this sensor file.
      * Unique attributes to each sensor.
@@ -528,17 +530,19 @@ namespace microcode {
          */
         log(time: number): string {
             this.lastLoggedReading = this.getReading()
+
+            const reading = this.lastLoggedReading.toString().slice(0, READING_PRECISION)
             
             if (this.isInEventMode) {
                 if (sensorEventFunctionLookup[this.config.inequality](this.lastLoggedReading, this.config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.getName()),
                         datalogger.createCV("Time (ms)", time),
-                        datalogger.createCV("Reading", this.lastLoggedReading.toString()),
-                        datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
+                        datalogger.createCV("Reading", reading),
+                        datalogger.createCV("Event", this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
-                    return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator
+                    return this.getRadioName() + "," + time.toString() + "," + reading + "," + this.config.inequality + " " + this.config.comparator
                 }
             }
 
@@ -546,11 +550,11 @@ namespace microcode {
                 datalogger.log(
                     datalogger.createCV("Sensor", this.getName()),
                     datalogger.createCV("Time (ms)", time.toString()),
-                    datalogger.createCV("Reading", this.lastLoggedReading.toString()),
+                    datalogger.createCV("Reading", reading),
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1
-                return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + "N/A"
+                return this.getRadioName() + "," + time.toString() + "," + reading + "," + "N/A"
             }
             return ""
         }

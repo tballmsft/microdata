@@ -32,6 +32,8 @@ namespace microcode {
      * Allows for the live feed of a sensor to be plotted,
      *      Multiple sensors may be plotted at once
      *      Display modes may be toggled per sensor
+     * 
+     * UI elements have been scaled to allow for Arcade Shields of different dimensions.
      */
     export class LiveDataViewer extends Scene {
         /** Same as the Screen.HEIGHT. But reduced when entering GUI_STATE.ZOOMED_IN. */

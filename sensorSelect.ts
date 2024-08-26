@@ -46,12 +46,6 @@ namespace microcode {
                 "Jacdac Moisture", "Jacdac Distance"
             ]
 
-            // const ariaIDs: string[] = [
-            //     "Accel. X", "Accel. Y", "Accel. Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "Light",
-            //     "Temp.", "Magnet", "Logo Press", "Microphone", "Compass", "Jac Flex", "Jac Temp", "Jac Light",
-            //     "Jac Moisture", "Jac Distance"
-            // ]
-
             //-----------------------------------------------------
             // Organise buttons in 4x5 grid: same as GridNavigator:
             //-----------------------------------------------------
@@ -143,21 +137,7 @@ namespace microcode {
 
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(
-                        //     new TutorialWindow(this.app, {
-                        //     tips: [
-                        //         {text: "The next screen\nshows live\nsensor readings."},
-                        //         {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
-                        //         {text: "Press A on the\ngraph zoom in.", keywords: [" A "], keywordColors: [6]},
-                        //         {text: "Press A when below\nthe graph to\ntoggle a\nsensor on/off.", keywords: [" A "], keywordColors: [6]},
-                        //         {text: "Press A to see\nsome data!", keywords: [" A "], keywordColors: [6]}, // Red
-                        //     ],
-                        //     backFn: () => {
-                        //         this.app.popScene()
-                        //         this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-                        //     }
-                        // },
-                        new LiveDataViewer(this.app, sensors))
+                        this.app.pushScene(new LiveDataViewer(this.app, sensors))
                     }
                     
                     else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect)
