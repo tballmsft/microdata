@@ -33,7 +33,9 @@ namespace microcode {
      *      Multiple sensors may be plotted at once
      *      Display modes may be toggled per sensor
      * 
+     * 
      * UI elements have been scaled to allow for Arcade Shields of different dimensions.
+     * Where this is the case the raw value for an Arcade Shield of Height 128 is commented alongside it.
      */
     export class LiveDataViewer extends Scene {
         /** Same as the Screen.HEIGHT. But reduced when entering GUI_STATE.ZOOMED_IN. */
@@ -49,11 +51,13 @@ namespace microcode {
         private windowTopBuffer: number
         /** Reduced when entering GUI_STATE.ZOOMED_IN */
         private windowBotBuffer: number
-
+        /** How much all UI elements should be offset by, adjusted when pressing up or down. */
         private yScrollOffset: number
-        private yScrollRate: number
+        /** Maximum limit to how far yScrollOffset may travel, this is so the screen cannot go below the sensor information boxes */
         private maxYScrollOffset: number
-
+        /** By how much should this.yScrollRate be adjusted by?  */
+        private yScrollRate: number
+        
         /** Show the graph or show the sensor information below the graph? */
         private guiState: GUI_STATE;
 
@@ -92,7 +96,7 @@ namespace microcode {
             
             this.windowLeftBuffer = 38
             this.windowRightBuffer = 10
-            this.windowTopBuffer = (Screen.HEIGHT *  0.0390) // 5
+            this.windowTopBuffer = (Screen.HEIGHT *  0.0390) // At Screen.HEIGHT=128: 5
             this.windowBotBuffer = (Screen.HEIGHT * 0.15625) // 20
 
             this.guiState = GUI_STATE.GRAPH

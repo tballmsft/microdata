@@ -187,10 +187,19 @@ namespace microcode {
     }
 
 
+
+    /**
+     * Responsible for making an array of sensors with configurations read & log their data accurately.
+     * This class is used by both the DataRecorder (when an Arcade Shield is connected), and by a microbit without an Arcade Shield (see DistributedLoggingProtocol).
+     * The scheduler runs in a separate thread and accounts for sensors with different numbers of measurements, periods and events.
+     * see .start()
+     */
     export class SensorScheduler {
         /** Ordered sensor periods */
         private schedule: {sensor: Sensor, waitTime: number}[];
         private sensors: Sensor[];
+
+        /** This class can be used evven if an Arcade Shield is not connected; the 5x5 matrix will display the number of measurements for the sensor with the most time left if this is the case */
         private sensorWithMostTimeLeft: Sensor
 
         /** Should the information from the sensorWithMostTimeLeft be shown on the basic's 5x5 LED matrix? */
@@ -226,7 +235,11 @@ namespace microcode {
         /**
          * Schedules the sensors and orders them to .log()
          * Runs within a separate fiber.
+         * 
+         * Time it takes for this algorithm to run is accounted for when calculating how long to wait inbetween logs
          * Mutates this.schedule
+         * 
+         * @param callbackObj is used by the DistributedLoggingProtocol; after each log & after the algorithm finishes a callback will be made
         */
         start(callbackObj?: ITargetDataLoggedCallback) {
             const callbackAfterLog: boolean = (callbackObj == null) ? false : true
@@ -241,6 +254,8 @@ namespace microcode {
 
                     // Make the datalogger log the data:
                     const logAsCSV = this.schedule[i].sensor.log(0)
+
+                    // Optionally inform the caller of the log (In the case of the DistributedLoggingProtocol this information can be forwarded to the Commander over radio)
                     if (callbackAfterLog)
                         callbackObj.callback(logAsCSV)
 
@@ -248,6 +263,7 @@ namespace microcode {
                     if (!this.schedule[i].sensor.hasMeasurements())
                         this.schedule.splice(i, 1);
                 }
+
 
                 let lastLogTime = input.runningTime()
 
@@ -272,6 +288,8 @@ namespace microcode {
 
                             // Make the datalogger log the data:
                             const logAsCSV = this.schedule[i].sensor.log(currentTime)
+
+                            // Optionally inform the caller of the log (In the case of the DistributedLoggingProtocol this information can be forwarded to the Commander over radio)
                             if (callbackAfterLog)
                                 callbackObj.callback(logAsCSV)
 
@@ -310,7 +328,7 @@ namespace microcode {
 
     /**
      * Abstraction for all available sensors.
-     * These are implmented by the 
+     * This class is extended by each of the concrete sensors which add on static methods for their name, getting their readings & optionally min/max readings
      */
     export abstract class Sensor implements ISensorable {
         /** Set inside .setConfig() */
@@ -425,6 +443,11 @@ namespace microcode {
         getMeasurements(): number {return this.config.measurements}
         hasMeasurements(): boolean {return this.config.measurements > 0;}
 
+
+        /**
+         * Used by the DataRecorder to display information about the sensor as it is logging.
+         * @returns linles of information that can be printed out into a box for display.
+         */
         getRecordingInformation(): string[] {
             if (this.hasMeasurements())            
                 return [
@@ -439,7 +462,11 @@ namespace microcode {
                     "Last log was " + this.lastLoggedReading,
                 ]
         }
-
+        
+        /**
+         * Used by the DataRecorder to display information about the sensor as it is logging.
+         * @returns linles of information that can be printed out into a box for display.
+         */
         getEventInformation(): string[] {
             if (this.hasMeasurements())
                 return [
