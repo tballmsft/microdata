@@ -294,10 +294,10 @@ namespace microcode {
          * Then draw to screen
          */
         update() {
-            screen.fill(this.backgroundColor);
+            screen().fill(this.backgroundColor);
 
             // Make graph region black:
-            screen.fillRect(
+            screen().fillRect(
                 this.windowLeftBuffer,
                 this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
                 Screen.WIDTH - this.windowLeftBuffer - this.windowRightBuffer,
@@ -344,7 +344,7 @@ namespace microcode {
                             const y = Math.round(Screen.HEIGHT - ((((reading - sensor.getMinimum()) / range) * (BUFFERED_SCREEN_HEIGHT - fromY)))) - fromY
                             // Make sure the ticker won't be cut-off by other UI elements
                             if (y > sensor.getMinimum() + 5) {
-                                screen.print(
+                                screen().print(
                                     sensor.getNthReading(sensor.getBufferLength() - 1).toString().slice(0, 5),
                                     Screen.WIDTH - this.windowRightBuffer - (4 * font.charWidth),
                                     y,
@@ -361,7 +361,7 @@ namespace microcode {
             // Draw oscilloscope circle:
             //--------------------------
             if (this.guiState == GUI_STATE.ZOOMED_IN && this.oscReading != undefined) {
-                screen.drawCircle(
+                screen().drawCircle(
                     this.windowLeftBuffer + this.oscXCoordinate + 2,
                     this.oscReading,
                     5,
@@ -374,7 +374,7 @@ namespace microcode {
 
                 const xText = "x = " + this.oscXCoordinate
                 const yText = "y = " + this.oscReading
-                screen.print(
+                screen().print(
                     xText,
                     this.windowWidth - (1 + xText.length * font.charWidth),
                     this.windowTopBuffer + 5,
@@ -382,7 +382,7 @@ namespace microcode {
                     bitmap.font5,
                 );
 
-                screen.print(
+                screen().print(
                     yText,
                     this.windowWidth - (1 + yText.length * font.charWidth),
                     this.windowTopBuffer + 15,
@@ -403,7 +403,7 @@ namespace microcode {
                 let y = this.windowHeight - 2 + (2 * this.yScrollOffset)
                 for (let i = 0; i < this.sensors.length; i++) {
                     // Black edges:
-                    screen.fillRect(
+                    screen().fillRect(
                         5,
                         y,
                         142,
@@ -420,7 +420,7 @@ namespace microcode {
                     }
 
                     // Coloured block:
-                    screen.fillRect(
+                    screen().fillRect(
                         7,
                         y,
                         145,
@@ -432,7 +432,7 @@ namespace microcode {
                     if (this.guiState == GUI_STATE.SENSOR_SELECTION && i == this.informationSensorIndex) {
                         // Blue edges:
                         for (let thickness = 0; thickness < 3; thickness++) {
-                            screen.drawRect(
+                            screen().drawRect(
                                 7 - thickness,
                                 y - thickness,
                                 145 + thickness,
@@ -443,21 +443,21 @@ namespace microcode {
                     }
 
                     // Information:
-                    screen.print(
+                    screen().print(
                         this.sensors[i].getName(),
                         12,
                         y + 2,
                         textColor
                     )
 
-                    screen.print(
+                    screen().print(
                         "Sensor Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                         12,
                         y + 16,
                         textColor
                     )
 
-                    screen.print(
+                    screen().print(
                         "Sensor Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                         12,
                         y + 32,
@@ -482,7 +482,7 @@ namespace microcode {
             const yAxisOffset = ((this.guiState == GUI_STATE.ZOOMED_IN) ? 2 : 0)
             for (let i = 0; i < 2; i++) {
                 // X-Axis:
-                screen.drawLine(
+                screen().drawLine(
                     this.windowLeftBuffer,
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset - yAxisOffset, 
                     this.windowWidth - this.windowRightBuffer, 
@@ -490,7 +490,7 @@ namespace microcode {
                     5
                 );
                 // Y-Axis:
-                screen.drawLine(
+                screen().drawLine(
                     this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
                     this.windowLeftBuffer + i, 
@@ -506,7 +506,7 @@ namespace microcode {
                 if (this.yScrollOffset > -60) {
                     if (this.globalSensorMinimum != null && this.globalSensorMaximum != null) {
                         // Bot:
-                        screen.print(
+                        screen().print(
                             this.globalSensorMinimum.toString(),
                             (6 * font.charWidth) - (this.globalSensorMinimum.toString().length * font.charWidth),
                             this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
@@ -514,7 +514,7 @@ namespace microcode {
                         )
 
                         // Top:
-                        screen.print(
+                        screen().print(
                             this.globalSensorMaximum.toString(),
                             (6 * font.charWidth) - (this.globalSensorMaximum.toString().length * font.charWidth),
                             Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset),
@@ -528,7 +528,7 @@ namespace microcode {
                 //----------
 
                 // Start
-                screen.print(
+                screen().print(
                     this.sensors[0].numberOfReadings.toString(),
                     this.windowLeftBuffer - 2,
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
@@ -537,7 +537,7 @@ namespace microcode {
 
                 // End:
                 const end: string = (this.sensors[0].numberOfReadings + this.sensors[0].getNormalisedBufferLength()).toString() 
-                screen.print(
+                screen().print(
                     end,
                     Screen.WIDTH - this.windowRightBuffer - (end.length * font.charWidth) - 1,
                     this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,

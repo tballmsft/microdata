@@ -185,7 +185,7 @@ namespace microcode {
                 0xc
             )
 
-            screen.printCenter("Sensor Selection", 2)
+            screen().printCenter("Sensor Selection", 2)
 
             for (let i = 0; i < this.btns.length; i++)
                 this.btns[i].draw()

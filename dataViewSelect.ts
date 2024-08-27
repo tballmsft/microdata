@@ -98,13 +98,13 @@ namespace microcode {
             )
 
             if (this.dataloggerEmpty) {
-                screen.printCenter("No data has been recorded", 5)
-                screen.printCenter("Press A to Record some!", Screen.HALF_HEIGHT)
+                screen().printCenter("No data has been recorded", 5)
+                screen().printCenter("Press A to Record some!", Screen.HALF_HEIGHT)
                 return;
             }
 
             else {
-                screen.printCenter("Recorded Data Options", 5)
+                screen().printCenter("Recorded Data Options", 5)
                 this.resetDataLoggerBtn.draw()
                 this.dataViewBtn.draw()
                 this.graphViewBtn.draw()

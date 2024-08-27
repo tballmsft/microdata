@@ -365,7 +365,7 @@ namespace microcode {
         draw(fromX: number, color: number): void {
             for (let i = 0; i < this.normalisedDataBuffer.length - 1; i++) {
                 for (let j = -(PLOT_SMOOTHING_CONSTANT / 2); j < PLOT_SMOOTHING_CONSTANT / 2; j++) {
-                    screen.drawLine(
+                    screen().drawLine(
                         fromX + i,
                         this.normalisedDataBuffer[i] + j,
                         fromX + i + 1,

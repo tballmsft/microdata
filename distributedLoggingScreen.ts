@@ -159,7 +159,7 @@ namespace microcode {
                 case UI_STATE.SHOWING_OPTIONS: {
                     switch (this.distributedLogger.radioMode) {
                         case RADIO_LOGGING_MODE.UNCONFIGURED: {
-                            screen.printCenter(
+                            screen().printCenter(
                                 "Searching for Microbits...",
                                 2
                             )
@@ -167,7 +167,7 @@ namespace microcode {
                         }
     
                         case RADIO_LOGGING_MODE.COMMANDER: {
-                            screen.printCenter(
+                            screen().printCenter(
                                 "Commander Mode",
                                 2
                             )
@@ -184,14 +184,14 @@ namespace microcode {
                             const connectedText = "Connected to Commander,"
                             const asMicrobit    = "as Microbit " + this.distributedLogger.id + "."
                             
-                            screen.print(
+                            screen().print(
                                 connectedText,
                                 Screen.HALF_WIDTH - ((connectedText.length * font.charWidth) / 2),
                                 2
                             )
     
                             // Left-aligned with above text
-                            screen.print(
+                            screen().print(
                                 asMicrobit,
                                 Screen.HALF_WIDTH - ((connectedText.length * font.charWidth) / 2),
                                 12
