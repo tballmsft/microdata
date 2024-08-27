@@ -464,6 +464,7 @@ namespace microcode {
                 7 // green
             ) // Coloured border ontop
 
+            
             //-----------------------------------------------
             // Period text & block: Draw as an on/off switch:
             //-----------------------------------------------

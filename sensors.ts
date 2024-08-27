@@ -638,7 +638,8 @@ namespace microcode {
     /**
      * Concrete implementation of onboard Accelerometer with Dimension X
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerXSensor extends Sensor {
         constructor() {
@@ -657,7 +658,8 @@ namespace microcode {
     /**
      * Concrete implementation of onboard Accelerometer with Dimension Y
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerYSensor extends Sensor {
         constructor() {
@@ -676,7 +678,8 @@ namespace microcode {
     /**
      * Concrete implementation of onboard Accelerometer with Dimension Z
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerZSensor extends Sensor {
         constructor() {

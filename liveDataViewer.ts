@@ -2,6 +2,11 @@ namespace microcode {
     /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
 
+    /** Time to wait inbetween updating each frame of the graph - new sensor reading requests are made.
+     * The rest of the UI is still responsive though - since UP, DOWN, LEFT, RIGHT movements will invoke .update() immediately.
+     */
+    const GRAPH_FRAME_TIME_MS: number = 100
+
     /**
      * Used in sensors.draw()
      * Neccessary to prevent graph overflowing in the case of extreme readings
@@ -112,6 +117,7 @@ namespace microcode {
             this.sensors = sensors
             this.drawSensorStates = []
             this.sensorMinsAndMaxs = []
+
             sensors.forEach((sensor) => {
                 this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
                 this.drawSensorStates.push(true)
@@ -239,12 +245,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    if (this.guiState == GUI_STATE.ZOOMED_IN) {
-                        if (this.oscXCoordinate > 0) {
-                            this.oscXCoordinate -= 1
-                            this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
-                            this.update() // For fast response to the above change
-                        }
+                    if (this.guiState == GUI_STATE.ZOOMED_IN && this.oscXCoordinate > 0) {
+                        this.oscXCoordinate -= 1
+                        this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
+                        this.update() // For fast response to the above change
                     }
                 }
             )
@@ -253,13 +257,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.guiState == GUI_STATE.ZOOMED_IN) {
-                        if (this.oscXCoordinate < this.sensors[this.oscSensorIndex].getNormalisedBufferLength() - 1) {
-                            this.oscXCoordinate += 1
-                            this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
+                    if (this.guiState == GUI_STATE.ZOOMED_IN && this.oscXCoordinate < this.sensors[this.oscSensorIndex].getNormalisedBufferLength() - 1) {
+                        this.oscXCoordinate += 1
+                        this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
 
-                            this.update() // For fast response to the above change
-                        }
+                        this.update() // For fast response to the above change
                     }
                 }
             )
@@ -469,7 +471,7 @@ namespace microcode {
                     y += (Screen.HEIGHT * 0.4296) // 55
                 }
             }
-            basic.pause(100);
+            basic.pause(GRAPH_FRAME_TIME_MS);
         }
 
 

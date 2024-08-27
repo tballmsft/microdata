@@ -427,17 +427,31 @@ namespace microcode {
                     )
                 }
             })
-        }
+        }   
 
+        //--------------------------------------------------------------------------------
+        // Methods invoked on the Commander Screen that tell command the Target Microbits:
+        //--------------------------------------------------------------------------------
 
-        public log(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
+        /**
+         * DistributedLoggingScreen invokes this.
+         * Converts a list of sensors and recordingconfigs into a series of messages.
+         *      These messages are then transmitted to each Target microbit - which rebuilds a list of sensors and configures them according to that config
+         * Optional flag to tell these Targets Microbits to send a copy of each log back to this Commander. The Commander will then also log that data.
+         * @param sensors unconfigured sensors selected by the user.
+         * @param configs 1 config per sensor, selected by the user.
+         * @param streamItBack Should the targets send a copy of each log it makes back to the Commander? 
+         */
+        public commanderRequestLog(sensors: Sensor[], configs: RecordingConfig[], streamItBack: boolean) {
             DistributedLoggingScreen.streamingDone = false
             const numberOfSensors = sensors.length
 
+            // Let each Target know that there are going to be numberOfSensors messages after this one.
             let messages: string[] = [
                 this.createMessage(NETWORK_COMMAND.START_LOGGING, ["" + numberOfSensors, ((streamItBack) ? "1" : "0")]) // START_LOGGING + number of messages + should the data be streamed back?
             ]
 
+            // These NETWORK_COMMAND.DATA_STREAM messages will be handled with aide from the information in the above messages
             for (let i = 0; i < numberOfSensors; i++) {
                 messages.push(this.createMessage(NETWORK_COMMAND.DATA_STREAM, [sensors[i].getName(), serializeRecordingConfig(configs[i])]))
             }
@@ -448,7 +462,17 @@ namespace microcode {
             }
         }
 
-        public requestTargetIDs(): number[] {
+        /**
+         * Invoked by the targetMicrobitsBtn in DistributedLoggingScreen.
+         * Mutates the DistributedLoggingScreen.streamingDone flag to let the screen know when it has received all of the Target IDs.
+         * 
+         * Inside of DistributedLoggingScreen there is a fiber that polls this when DistributedLoggingScreen is in the UI_STATE.SHOWING_CONNECTED_MICROBITS state
+         *      This allows for the screen to update the list of connected Microbits in realtime - so that the user can see when Microbits join & leave instantly.
+         * 
+         * see .targetIDCache in DistributedLoggingScreen
+         * @returns a list of these ids
+         */
+        public commanderRequestTargetIDs(): number[] {
             DistributedLoggingScreen.streamingDone = false
             this.targetIDs = []
 
@@ -510,7 +534,7 @@ namespace microcode {
             DistributedLoggingScreen.showTabularData = datalogger.getNumberOfRows() > 1
 
             if (sensors != null && configs != null) {
-                this.distributedLogger.log(sensors, configs, DistributedLoggingScreen.streamDataBack)
+                this.distributedLogger.commanderRequestLog(sensors, configs, DistributedLoggingScreen.streamDataBack)
 
                 if (DistributedLoggingScreen.showTabularData) {
                     this.app.popScene()
@@ -564,7 +588,7 @@ namespace microcode {
                         // Continually request the target ids; so that new incoming targets appear on the list as it is displayed, and outgoing targets leave it, in real-time:
                         control.inBackground(() => {
                             while (this.uiState == UI_STATE.SHOWING_CONNECTED_MICROBITS) {
-                                this.targetIDCache = this.distributedLogger.requestTargetIDs()
+                                this.targetIDCache = this.distributedLogger.commanderRequestTargetIDs()
                                 basic.pause(50)
                             }
                         })

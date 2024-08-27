@@ -27,9 +27,8 @@ namespace microcode {
         /** Should the TabularDataViewer update dataRows on the next frame? Used by the DistributedLoggingProtocol to tell this screen to update dataRows when a new log is made in realtime */
         public static updateDataRowsOnNextFrame: boolean = false
 
-        /** The */
+        /** First row in the datalogger; always the first row in dataRows and thus always displayed at the top of the screen, even if scrolling past it. See .nextDataChunk() */
         public static dataLoggerHeader: string[];
-        // TabularDataViewer.dataLoggerHeader
 
         /**
          * Used to store a chunk of data <= TABULAR_MAX_ROWS in length.
