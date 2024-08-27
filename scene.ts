@@ -93,7 +93,7 @@ namespace microcode {
                 this.draw()
                 if (Options.fps)
                     Screen.image.print(context.EventContext.lastStats, 1, 1, 15)
-                if (screen !== Screen.image)
+                if (screen() !== Screen.image)
                     screen().drawBitmap(Screen.image, 0, 0)
             })
             context.eventContext().registerFrameHandler(SCREEN_PRIORITY, () => {

@@ -45,13 +45,13 @@
         }
         public static get image(): Bitmap {
             if (!Screen.image_) {
-                Screen.image_ = screen
+                Screen.image_ = screen()
                 Screen.updateBounds()
             }
             return Screen.image_
         }
         public static resetScreenImage() {
-            Screen.image_ = screen
+            Screen.image_ = screen()
             Screen.updateBounds()
         }
 
