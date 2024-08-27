@@ -24,7 +24,12 @@ namespace microcode {
      * Pressing shows all rows by the same sensor (filters the data)
      */
     export class TabularDataViewer extends Scene {
+        /** Should the TabularDataViewer update dataRows on the next frame? Used by the DistributedLoggingProtocol to tell this screen to update dataRows when a new log is made in realtime */
         public static updateDataRowsOnNextFrame: boolean = false
+
+        /** The */
+        public static dataLoggerHeader: string[];
+        // TabularDataViewer.dataLoggerHeader
 
         /**
          * Used to store a chunk of data <= TABULAR_MAX_ROWS in length.
@@ -111,7 +116,6 @@ namespace microcode {
 
             this.currentRow = 1
             this.currentCol = 0
-            TabularDataViewer.currentRowOffset = 0
             
             this.numberOfFilteredRows = 0
 
@@ -124,8 +128,12 @@ namespace microcode {
         /* override */ startup() {
             super.startup()
 
+            TabularDataViewer.currentRowOffset = 0
+            TabularDataViewer.dataLoggerHeader = datalogger.getRows(TabularDataViewer.currentRowOffset, 1).split("\n")[0].split(",");
+            TabularDataViewer.currentRowOffset = 1
             TabularDataViewer.nextDataChunk();
-            this.headerStringLengths = TabularDataViewer.dataRows[0].map((header) => (header.length + 3) * font.charWidth)
+
+            this.headerStringLengths = TabularDataViewer.dataLoggerHeader.map((header) => (header.length + 3) * font.charWidth)
 
             //----------
             // Controls:
@@ -168,13 +176,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.up.id,
                 () => {
-                    if (this.currentRow > 0) {
-                        const limit = TabularDataViewer.needToScroll? 0 : 1
-                        this.currentRow = Math.max(this.currentRow - 1, limit);
-                    }
+                    if (this.currentRow > 0)
+                        this.currentRow = Math.max(this.currentRow - 1, 1);
 
-                    if (TabularDataViewer.needToScroll && this.currentRow == 0) {
-                        TabularDataViewer.currentRowOffset = Math.max(TabularDataViewer.currentRowOffset - 1, 0);
+                    if (TabularDataViewer.needToScroll && this.currentRow == 1) {
+                        TabularDataViewer.currentRowOffset = Math.max(TabularDataViewer.currentRowOffset - 1, 1);
                         
                         if (this.guiState == DATA_VIEW_DISPLAY_MODE.UNFILTERED_DATA_VIEW) {       
                             TabularDataViewer.nextDataChunk();
@@ -184,7 +190,7 @@ namespace microcode {
                             this.nextFilteredDataChunk()
                         }
 
-                        if (TabularDataViewer.currentRowOffset == 0) {
+                        if (TabularDataViewer.currentRowOffset == 1) {
                             this.currentRow = 1
                         }
                     }
@@ -261,7 +267,7 @@ namespace microcode {
             const rows = datalogger.getRows(TabularDataViewer.currentRowOffset, TABULAR_MAX_ROWS).split("\n");
             TabularDataViewer.needToScroll = datalogger.getNumberOfRows() > TABULAR_MAX_ROWS
             
-            TabularDataViewer.dataRows = []
+            TabularDataViewer.dataRows = [TabularDataViewer.dataLoggerHeader]
             for (let i = 0; i < rows.length; i++) {
                 if (rows[i][0] != "")
                     TabularDataViewer.dataRows.push(rows[i].split(","));
@@ -390,6 +396,7 @@ namespace microcode {
             const tabularRowBufferSize = Screen.HEIGHT / Math.min(TabularDataViewer.dataRows.length, TABULAR_MAX_ROWS);
             this.drawGridOfVariableColSize(this.headerStringLengths.slice(this.currentCol), tabularRowBufferSize)
 
+            
             // Values:
             for (let row = 0; row < Math.min(TabularDataViewer.dataRows.length, TABULAR_MAX_ROWS); row++) {
                 let cumulativeColOffset = 0;

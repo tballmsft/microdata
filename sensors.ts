@@ -641,13 +641,16 @@ namespace microcode {
      * Ranged between -1023 to 1023
      */
     export class AccelerometerXSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. X"}
         public static getRadioName(): string {return "AX"}
         public static getReading(): number {return input.acceleration(Dimension.X)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 
@@ -657,13 +660,16 @@ namespace microcode {
      * Ranged between -1023 to 1023
      */
     export class AccelerometerYSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. Y"}
         public static getRadioName(): string {return "AY"}
         public static getReading(): number {return input.acceleration(Dimension.Y)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 
@@ -673,13 +679,16 @@ namespace microcode {
      * Ranged between -1023 to 1023
      */
     export class AccelerometerZSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. Z"}
         public static getRadioName(): string {return "AZ"}
         public static getReading(): number {return input.acceleration(Dimension.Z)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 

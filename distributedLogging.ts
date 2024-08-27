@@ -141,6 +141,8 @@ namespace microcode {
         
         /** Should the target send each row of data it logs back to the Commander? See DistributedLoggingProtocol.log() */
         private streamDataBack: boolean;
+
+        /** */
         private targetIDs: number[]
 
         constructor(app: App, arcadeShieldIsConnected: boolean, callbackObj?: ITargetDataLoggedCallback) {

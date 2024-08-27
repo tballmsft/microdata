@@ -469,8 +469,8 @@ namespace microcode {
             //-----------------------------------------------
 
             // Draw as an on-off switch:
-            const periodBlockColour = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? 7 : 2
-            const eventBlockColour  = (this.currentConfigMode == CONFIG_MODE.EVENT)  ? 7 : 2
+            const periodBlockColour = (this.currentConfigMode == CONFIG_MODE.PERIOD) ? 7 : 1 // Green vs White
+            const eventBlockColour  = (this.currentConfigMode == CONFIG_MODE.EVENT)  ? 7 : 1 // Green vs White
             const periodTextColour  = 15
             const eventTextColour   = 15
 
