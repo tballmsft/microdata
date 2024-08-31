@@ -36,14 +36,14 @@ namespace microcode {
             this.cursor.resetOutlineColourOnMove = true
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
-                "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", "microbitLogoWhiteBackground",
-                "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
+                "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", 
+                // "microbitLogoWhiteBackground","microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
             ]
 
             const ariaIDs: string[] = [
                 "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "led_light_sensor",
-                "thermometer", "S10", "Logo Press", "Volume", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
-                "Jacdac Moisture", "Jacdac Distance"
+                "thermometer", "S10", "Logo Press", "Volume", "Compass", 
+                // "Jacdac Flex", "Jacdac Temperature", "Jacdac Light", "Jacdac Moisture", "Jacdac Distance"
             ]
 
             //-----------------------------------------------------

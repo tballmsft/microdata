@@ -18,11 +18,19 @@ namespace microcode {
             else if ("Logo Pressed" || "Logo Press" || "LP")      return new LogoPressSensor();
             else if ("Volume" || "Volume" || "V")                 return new VolumeSensor();
             else if ("Compass" || "Compass" || "C")               return new CompassHeadingSensor();
+            /*
             else if ("Jac Light" || "Jacdac Light" || "JL")       return new JacdacLightSensor();
             else if ("Jac Moist" || "Jacdac Moisture" || "JM")    return new JacdacSoilMoistureSensor();
             else if ("Jac Dist" || "Jacdac Distance" || "JD")     return new JacdacDistanceSensor();
             else if ("Jac Flex" || "Jacdac Flex" || "JF")         return new JacdacFlexSensor();
             else if ("Jac Temp" || "Jacdac Temperature" || "JT")  return new JacdacTemperatureSensor();
+                    "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
+        "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28",
+        "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
+        "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
+        "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
+        "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
+            */
             else return new AccelerometerXSensor()
         }
     }

@@ -7,13 +7,7 @@
         "radio": "*",
         "microphone": "*",
         "datalogger": "*",
-        "pxt-arcadeshield": "github:microsoft/pxt-arcadeshield#v0.1.0",
-        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
-        "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28",
-        "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
-        "jacdac-distance": "github:microsoft/pxt-jacdac/tree/master/distance#v1.9.28",
-        "jacdac-temperature": "github:microsoft/pxt-jacdac/tree/master/temperature#v1.9.28",
-        "jacdac-flex": "github:microsoft/pxt-jacdac/tree/master/flex#v1.9.28"
+        "pxt-arcadeshield": "github:microsoft/pxt-arcadeshield#v0.1.0"
     },
     "files": [
         "keymap.ts",
