@@ -7,6 +7,7 @@
         "radio": "*",
         "microphone": "*",
         "datalogger": "*",
+        "settings": "*",
         "pxt-arcadeshield": "github:microsoft/pxt-arcadeshield#v0.1.0"
     },
     "files": [
