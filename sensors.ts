@@ -454,12 +454,12 @@ namespace microcode {
                     this.getPeriod() / 1000 + " second period", 
                     this.config.measurements.toString() + " measurements left",
                     ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
-                    "Last log was " + this.lastLoggedReading,
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
                 ]
             else
                 return [
                     "Logging complete.",
-                    "Last log was " + this.lastLoggedReading,
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
                 ]
         }
         
@@ -472,14 +472,14 @@ namespace microcode {
                 return [
                     this.config.measurements.toString() + " events left",
                     "Logging " + this.config.inequality + " " + this.config.comparator + " events",
-                    "Last log was " + this.lastLoggedReading,
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
                     this.lastLoggedEventDescription
                 ]
 
             else
                 return [
                     "Logging complete.",
-                    "Last log was " + this.lastLoggedReading
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4)
                 ]
         }
 
