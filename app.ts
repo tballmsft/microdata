@@ -31,13 +31,6 @@ namespace microcode {
                 new DistributedLoggingProtocol(this, false);
         }
 
-        public saveBuffer(slot: string, buf: Buffer) {
-            reportEvent("app.save", { slot: slot, size: buf.length })
-            console.log(`save to ${slot}: ${buf.length}b`)
-            profile()
-            settings.writeBuffer(slot, buf)
-        }
-        
         public pushScene(scene: Scene) {
             this.sceneManager.pushScene(scene)
         }
