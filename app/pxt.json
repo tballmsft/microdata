@@ -5,9 +5,7 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "microdata": "file:../",
-        "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
-        "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28"
+        "microdata": "file:../"
     },
     "files": [
         "main.ts"

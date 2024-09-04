@@ -373,7 +373,7 @@ namespace microcode {
             )
 
             if (this.guiState == GUI_STATE.SENSOR_SELECT) {
-                screen.printCenter("Logging Settings", 1)
+                screen().printCenter("Logging Settings", 1)
                 this.drawSensorSelection()
             }
             else
@@ -383,7 +383,7 @@ namespace microcode {
         private drawConfigurationWindow() {
             const sensorName = this.sensors[this.sensorIndex].getName()
 
-            screen.printCenter(sensorName, 1)
+            screen().printCenter(sensorName, 1)
 
             //---------------------------------
             // 3 boxes to configure the sensor:
@@ -397,7 +397,7 @@ namespace microcode {
             //---------------------
 
             // Measurements:
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 yStart,
                 (CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY].length * font.charWidth),
@@ -405,7 +405,7 @@ namespace microcode {
                 15
             ) // Black border
 
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 yStart,
                 ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY].length + 1) * font.charWidth),
@@ -413,7 +413,7 @@ namespace microcode {
                 7 // green
             ) // Coloured border ontop
 
-            screen.print(
+            screen().print(
                 CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY],
                 headerX - 2,
                 yStart + (Screen.HEIGHT * 0.023437), // + 3
@@ -424,7 +424,7 @@ namespace microcode {
             // Bounding box in blue:
             if (this.configurationIndex == CONFIG_ROW.MEASUREMENT_QTY && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 2; thickness++) {
-                    screen.drawRect(
+                    screen().drawRect(
                         0,
                         yStart + thickness - 1,
                         ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.MEASUREMENT_QTY].length + 1) * font.charWidth) - thickness,
@@ -448,7 +448,7 @@ namespace microcode {
                     periodEventStart = yStart + font.charHeight + (Screen.HEIGHT * 0.08593) // + 11 // yStart + font.charHeight + (Screen.HEIGHT * 0.08593)
             }
             
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 periodEventStart,
                 (CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.PERIOD_OR_EVENT].length * font.charWidth),
@@ -456,7 +456,7 @@ namespace microcode {
                 15 // black
             ) // Black border
 
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 periodEventStart,
                 ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.PERIOD_OR_EVENT].length + 1) * font.charWidth) + 2,
@@ -475,7 +475,7 @@ namespace microcode {
             const periodTextColour  = 15
             const eventTextColour   = 15
 
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 periodEventStart,
                 ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.PERIOD_OR_EVENT].length + 1) * font.charWidth) + 2,
@@ -483,7 +483,7 @@ namespace microcode {
                 periodBlockColour
             ) // Coloured border ontop
             
-            screen.print(
+            screen().print(
                 "Period",
                 headerX - 2,
                 periodEventStart + (Screen.HEIGHT * 0.023) + 1, // 3
@@ -495,7 +495,7 @@ namespace microcode {
             //--------------------
 
             // Draw coloured triangle to complete the switch:
-            screen.fillTriangle(
+            screen().fillTriangle(
                 ("Period".length + 1) * font.charWidth,
                 periodEventStart + font.charHeight + (Screen.HEIGHT * 0.063), // + 8
                 ("Period".length + 2) * font.charWidth,
@@ -505,7 +505,7 @@ namespace microcode {
                 eventBlockColour
             )
 
-            screen.fillRect(
+            screen().fillRect(
                 ("Period".length + 2) * font.charWidth,
                 periodEventStart,
                 ("  Event".length * font.charWidth) + 2,
@@ -513,7 +513,7 @@ namespace microcode {
                 eventBlockColour
             ) // Coloured border ontop
             
-            screen.print(
+            screen().print(
                 "         Event", // Space for "Period" + "   " (3 spaces)
                 headerX - 2,
                 periodEventStart + (Screen.HEIGHT * 0.0234) + 1, // + 3
@@ -523,7 +523,7 @@ namespace microcode {
 
             // Diagonal line that sepratates Period and Event text
             for (let thickness = 0; thickness < 3; thickness++)
-                screen.drawLine(
+                screen().drawLine(
                     ("Period".length + 1) * font.charWidth - 1 + thickness,
                     periodEventStart + font.charHeight + (Screen.HEIGHT * 0.07), // 9
                     ("Period".length + 2) * font.charWidth - 1 + thickness,
@@ -534,7 +534,7 @@ namespace microcode {
             // Bounding box in blue if selected:
             if (this.configurationIndex == CONFIG_ROW.PERIOD_OR_EVENT && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 2; thickness++) {
-                    screen.drawRect(
+                    screen().drawRect(
                         0,
                         periodEventStart + thickness,
                         ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.PERIOD_OR_EVENT].length + 1) * font.charWidth) + 4 - thickness,
@@ -548,7 +548,7 @@ namespace microcode {
             // Done button:
             //-------------
 
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 Screen.HEIGHT - (Screen.HEIGHT * 0.1406), // -18
                 CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.DONE].length * font.charWidth,
@@ -556,7 +556,7 @@ namespace microcode {
                 15
             ) // Black border
 
-            screen.fillRect(
+            screen().fillRect(
                 0,
                 Screen.HEIGHT - (Screen.HEIGHT * 0.1406), // 18
                 ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.DONE].length + 1) * font.charWidth) + 3,
@@ -564,7 +564,7 @@ namespace microcode {
                 7 // green
             ) // Coloured border ontop
 
-            screen.print(
+            screen().print(
                 CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.DONE],
                 headerX - 2,
                 Screen.HEIGHT - (Screen.HEIGHT * 0.11718) + 2, // -15,
@@ -574,7 +574,7 @@ namespace microcode {
             // Bounding box in blue if selected:
             if (this.configurationIndex == CONFIG_ROW.DONE && this.guiState != GUI_STATE.SENSOR_MODIFY_CONFIG_ROW) {
                 for (let thickness = 0; thickness < 2; thickness++) {
-                    screen.drawRect(
+                    screen().drawRect(
                         0,
                         Screen.HEIGHT - (Screen.HEIGHT * 0.1406) + thickness, // 18
                         ((CONFIG_ROW_DISPLAY_NAME_LOOKUP[CONFIG_ROW.DONE].length + 1) * font.charWidth) + 5 - thickness,
@@ -593,7 +593,7 @@ namespace microcode {
                     case CONFIG_ROW.MEASUREMENT_QTY: {
                         const yWindowStart = yStart + font.charHeight + (Screen.HEIGHT * 0.0859) // 11
 
-                        screen.fillRect(
+                        screen().fillRect(
                             2,
                             yWindowStart,
                             Screen.WIDTH - 4,
@@ -601,7 +601,7 @@ namespace microcode {
                             15
                         ) // Black border
 
-                        screen.fillRect(
+                        screen().fillRect(
                             3,
                             yWindowStart + (Screen.HEIGHT * 0.01562), // 2
                             Screen.WIDTH - 6,
@@ -610,20 +610,20 @@ namespace microcode {
                         ) // Blue menu
 
                         // Prompt text:
-                        screen.printCenter(
+                        screen().printCenter(
                             "How many measurements?",
                             yWindowStart + (Screen.HEIGHT * 0.0468), // 6
                             15 // black
                         )
                         
                         const measurementsText = this.sensorConfigs[this.sensorIndex].measurements.toString()
-                        screen.printCenter(
+                        screen().printCenter(
                             measurementsText,
                             yWindowStart + (Screen.HEIGHT * 0.1875), // 24
                             15 // black
                         )
 
-                        screen.drawRect(
+                        screen().drawRect(
                             Screen.HALF_WIDTH - ((measurementsText.length * font.charWidth) / 2) - 4,
                             yWindowStart + (Screen.HEIGHT * 0.1640), // 21
                             (measurementsText.length * font.charWidth) + 8,
@@ -637,7 +637,7 @@ namespace microcode {
                     case CONFIG_ROW.PERIOD_OR_EVENT: {
                         const yPeriodOrEventWindowStart = periodEventStart + font.charHeight 
                         
-                        screen.fillRect(
+                        screen().fillRect(
                             2,
                             yPeriodOrEventWindowStart + (Screen.HEIGHT * 0.0859), // 11
                             Screen.WIDTH - 4,
@@ -645,7 +645,7 @@ namespace microcode {
                             15
                         ) // Black border
 
-                        screen.fillRect(
+                        screen().fillRect(
                             3,
                             yPeriodOrEventWindowStart + (Screen.HEIGHT * 0.10156), // 13
                             Screen.WIDTH - 6,
@@ -655,7 +655,7 @@ namespace microcode {
 
                         if (this.currentConfigMode == CONFIG_MODE.EVENT) {
                             // Prompt text:
-                            screen.printCenter(
+                            screen().printCenter(
                                 GUI_TEXT_EVENT_CONFIG[this.eventOrPeriodIndex],
                                 Screen.HALF_HEIGHT - (Screen.HEIGHT * 0.039), // 3
                                 15 // black
@@ -668,7 +668,7 @@ namespace microcode {
                             const expression = sensor.getName() + " " + inequalitySymbol + " " + inequalityOperand
 
                             // Write Event expression:
-                            screen.printCenter(
+                            screen().printCenter(
                                 expression,
                                 Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.109375), // 14
                                 15 // black
@@ -677,7 +677,7 @@ namespace microcode {
                             // Box around selected element:
                             switch (this.eventOrPeriodIndex) {
                                 case 0:
-                                    screen.drawRect(
+                                    screen().drawRect(
                                         Screen.HALF_WIDTH - ((expression.length * font.charWidth) / 2) + ((sensor.getName().length + 1) * font.charWidth) - 4,
                                         Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.09375), // 12
                                         (inequalitySymbol.length * font.charWidth) + 8,
@@ -687,7 +687,7 @@ namespace microcode {
                                     break;
 
                                 case 1:
-                                    screen.drawRect(
+                                    screen().drawRect(
                                         Screen.HALF_WIDTH - ((expression.length * font.charWidth) / 2) + ((sensor.getName() + " " + inequalitySymbol + " ").length * font.charWidth) - 4,
                                         Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.09375), // 12
                                         (inequalityOperand.length * font.charWidth) + 8,
@@ -703,7 +703,7 @@ namespace microcode {
 
                         else if (this.currentConfigMode == CONFIG_MODE.PERIOD) {
                             // Prompt text:
-                            screen.printCenter(
+                            screen().printCenter(
                                 GUI_TEXT_PERIOD_CONFIG[this.eventOrPeriodIndex],
                                 Screen.HALF_HEIGHT - (Screen.HEIGHT * 0.023437), // 3
                                 15 // black
@@ -717,7 +717,7 @@ namespace microcode {
                             let distance = 0
                             for (let col = 0; col < this.guiConfigValues[this.sensorIndex].length; col++) {
                                 if (col == this.eventOrPeriodIndex) {
-                                    screen.drawRect(
+                                    screen().drawRect(
                                         Screen.HALF_WIDTH - ((periodConfigString.length * font.charWidth) / 2) + (distance * font.charWidth) - 4,
                                         Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.0625), // 8
                                         (this.guiConfigValues[this.sensorIndex][this.eventOrPeriodIndex].toString().length * font.charWidth) + 8,
@@ -730,7 +730,7 @@ namespace microcode {
                                 distance += (this.guiConfigValues[this.sensorIndex][col].toString() + " + ").length
                             }
 
-                            screen.printCenter(
+                            screen().printCenter(
                                 periodConfigString,
                                 Screen.HALF_HEIGHT + (Screen.HEIGHT * 0.09375), // 12,
                                 15
@@ -751,7 +751,7 @@ namespace microcode {
                 // Colour for the box:
                 const boxColor = (this.sensorConfigIsSet[row]) ? 7 : 2 // green: set, red: unset
 
-                screen.fillRect(
+                screen().fillRect(
                     0,
                     headerY + (row * rowSize) - (Screen.HEIGHT * 0.023437), // 3
                     (this.sensors[row].getName().length * font.charWidth) + 4,
@@ -759,7 +759,7 @@ namespace microcode {
                     15 // black
                 )
     
-                screen.fillRect(
+                screen().fillRect(
                     1,
                     headerY + (row * rowSize) - (Screen.HEIGHT * 0.023437), // 3
                     (this.sensors[row].getName().length * font.charWidth) + 5,
@@ -770,7 +770,7 @@ namespace microcode {
                 // Bounding box in blue if selected:
                 if (row == this.sensorIndex) {
                     for (let thickness = 0; thickness < 2; thickness++) {
-                        screen.drawRect(
+                        screen().drawRect(
                             0,
                             headerY + (row * rowSize) - (Screen.HEIGHT * 0.03125) + thickness, // 4
                             (this.sensors[row].getName().length * font.charWidth) + 7 - thickness,
@@ -780,7 +780,7 @@ namespace microcode {
                     }
                 } 
 
-                screen.print(
+                screen().print(
                     this.sensors[row].getName(),
                     headerX - 2,
                     (Screen.HEIGHT * 0.1875) + (row * rowSize) - 1, // 24
