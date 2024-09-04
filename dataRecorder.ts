@@ -63,9 +63,8 @@ namespace microcode {
                 () => {
                     this.currentSensorIndex = Math.max(0, this.currentSensorIndex - 1)
 
-                    if (this.sensorIndexOffset > 0) {
+                    if (this.sensorIndexOffset > 0)
                         this.sensorIndexOffset = Math.max(0, this.sensorIndexOffset - 1)
-                    }
                     
                     this.update()
                 }
@@ -78,9 +77,8 @@ namespace microcode {
                 () => {
                     this.currentSensorIndex = Math.min(this.currentSensorIndex + 1, this.numberOfSensors - 1)
 
-                    if (this.currentSensorIndex > 4) {
+                    if (this.currentSensorIndex > 4)
                         this.sensorIndexOffset = Math.min(this.sensorIndexOffset + 1, this.numberOfSensors - 5)
-                    }
 
                     this.update()
                 }

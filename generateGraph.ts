@@ -235,7 +235,7 @@ namespace microcode {
 
             let dataStart = 1
             while (datalogger.getNumberOfRows(dataStart) > 0) {
-                const rows = datalogger.getRows(Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
+                const rows = datalogger.getRows(dataStart, Math.min(stdChunkSize, datalogger.getNumberOfRows(dataStart))).split("\n")
 
                 for (let i = 0; i < rows.length - 1; i++) {
                     const sensorName = rows[i].split(",", 1)[SENSOR_COLUMNS.NAME]
@@ -254,7 +254,7 @@ namespace microcode {
                 }
                 dataStart += rows.length
             }
-            this.sensors = sensorNames.map((name) => SensorFactory.getFromNameRadioOrID(name))
+            this.sensors = sensorNames.map((name) => Sensor.getFromName(name))
         }
 
         /**
@@ -311,7 +311,7 @@ namespace microcode {
 
             let foundAllReadings = false
             while (!foundAllReadings && datalogger.getNumberOfRows(dataStart) > 0) {
-                const rows = datalogger.getRows(Math.min(targetNumberOfReadings, datalogger.getNumberOfRows(dataStart)), dataStart).split("\n")
+                const rows = datalogger.getRows(dataStart, Math.min(targetNumberOfReadings, datalogger.getNumberOfRows(dataStart))).split("\n")
 
                 for (let i = 0; i < rows.length; i++) {
                     const cols = rows[i].split(",") // [name, time, reading, event]

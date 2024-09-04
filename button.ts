@@ -232,7 +232,8 @@ namespace microcode {
             y: number
             onClick?: (button: Button) => void,
             dynamicBoundaryColorsOn?: boolean
-            boundaryColor?: number
+            boundaryColor?: number,
+            flipIcon?: boolean
         }) {
             super(
                 opts.x,
@@ -244,6 +245,11 @@ namespace microcode {
             this._ariaId = opts.ariaId
             this.onClick = opts.onClick
             this.buildSprite(this.image_())
+
+            if (opts.flipIcon) {
+                this.icon.image = this.icon.image.clone()
+                this.icon.image.flipY()
+            }
 
             this.selected = false
             this.pressable = true

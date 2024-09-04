@@ -19,7 +19,7 @@ namespace microcode {
             super.startup()
 
             // Includes the header:
-            this.dataloggerEmpty = datalogger.getNumberOfRows(0) <= 1
+            this.dataloggerEmpty = datalogger.getNumberOfRows() <= 1
             
             //---------
             // Control:
@@ -37,13 +37,15 @@ namespace microcode {
                 )
             }
 
+            const y = Screen.HEIGHT * 0.234 // y = 30 on an Arcade Shield of height 128 pixels
+
             this.dataViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2", // largeDisk
+                icon: "largeDisk",
                 ariaId: "View Data",
                 x: -50,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new TabularDataViewer(this.app, function () {this.app.popScene(); this.app.pushScene(new DataViewSelect(this.app))}))
@@ -53,10 +55,10 @@ namespace microcode {
             this.graphViewBtn = new Button({
                 parent: null,
                 style: ButtonStyles.Transparent,
-                icon: "linear_graph_2",
+                icon: "linear_graph_1",
                 ariaId: "View Graph",
                 x: 0,
-                y: 30,
+                y,
                 onClick: () => {
                     this.app.popScene()
                     this.app.pushScene(new GraphGenerator(this.app))
@@ -69,7 +71,7 @@ namespace microcode {
                 icon: "largeSettingsGear",
                 ariaId: "Reset Datalogger",
                 x: 50,
-                y: 30,
+                y,
                 onClick: () => {
                     datalogger.deleteLog()
                     this.dataloggerEmpty = true

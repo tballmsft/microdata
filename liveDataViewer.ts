@@ -2,11 +2,16 @@ namespace microcode {
     /** The colours that will be used for the lines & sensor information boxes */
     const SENSOR_COLORS: number[] = [2,3,4,6,7,9]
 
+    /** Time to wait inbetween updating each frame of the graph - new sensor reading requests are made.
+     * The rest of the UI is still responsive though - since UP, DOWN, LEFT, RIGHT movements will invoke .update() immediately.
+     */
+    const GRAPH_FRAME_TIME_MS: number = 100
+
     /**
      * Used in sensors.draw()
      * Neccessary to prevent graph overflowing in the case of extreme readings
      */
-    export const BUFFERED_SCREEN_HEIGHT = Screen.HEIGHT - 10
+    export const BUFFERED_SCREEN_HEIGHT = Screen.HEIGHT - (Screen.HEIGHT * 0.078125) // 10
 
     /**
      * Is the graph or the sensors being shown? Is the graph zoomed in on?
@@ -18,7 +23,6 @@ namespace microcode {
         /** GUI Buffers are removed, sensor read buffer is increased */
         ZOOMED_IN
     }
-
 
     /**
      * Indice access alias into this.sensorMinsAndMaxs columns.
@@ -33,6 +37,10 @@ namespace microcode {
      * Allows for the live feed of a sensor to be plotted,
      *      Multiple sensors may be plotted at once
      *      Display modes may be toggled per sensor
+     * 
+     * 
+     * UI elements have been scaled to allow for Arcade Shields of different dimensions.
+     * Where this is the case the raw value for an Arcade Shield of Height 128 is commented alongside it.
      */
     export class LiveDataViewer extends Scene {
         /** Same as the Screen.HEIGHT. But reduced when entering GUI_STATE.ZOOMED_IN. */
@@ -48,11 +56,13 @@ namespace microcode {
         private windowTopBuffer: number
         /** Reduced when entering GUI_STATE.ZOOMED_IN */
         private windowBotBuffer: number
-
+        /** How much all UI elements should be offset by, adjusted when pressing up or down. */
         private yScrollOffset: number
-        private yScrollRate: number
+        /** Maximum limit to how far yScrollOffset may travel, this is so the screen cannot go below the sensor information boxes */
         private maxYScrollOffset: number
-
+        /** By how much should this.yScrollRate be adjusted by?  */
+        private yScrollRate: number
+        
         /** Show the graph or show the sensor information below the graph? */
         private guiState: GUI_STATE;
 
@@ -91,17 +101,14 @@ namespace microcode {
             
             this.windowLeftBuffer = 38
             this.windowRightBuffer = 10
-            
-            this.windowLeftBuffer = 38
-            this.windowRightBuffer = 10
-            this.windowTopBuffer = 5
-            this.windowBotBuffer = 20
+            this.windowTopBuffer = (Screen.HEIGHT *  0.0390) // At Screen.HEIGHT=128: 5
+            this.windowBotBuffer = (Screen.HEIGHT * 0.15625) // 20
 
             this.guiState = GUI_STATE.GRAPH
             
             this.yScrollOffset = 0
-            this.yScrollRate = 20
-            this.maxYScrollOffset = -60 - ((sensors.length - 1) * 28)
+            this.yScrollRate = (Screen.HEIGHT * 0.15625) // 20
+            this.maxYScrollOffset = (Screen.HEIGHT * -0.46875) - ((sensors.length - 1) * (Screen.HEIGHT * 0.21875)) // 60, 28
 
             this.oscXCoordinate = 0
             this.oscReading = 0
@@ -110,6 +117,7 @@ namespace microcode {
             this.sensors = sensors
             this.drawSensorStates = []
             this.sensorMinsAndMaxs = []
+
             sensors.forEach((sensor) => {
                 this.sensorMinsAndMaxs.push([sensor.getMinimum(), sensor.getMaximum()])
                 this.drawSensorStates.push(true)
@@ -171,8 +179,8 @@ namespace microcode {
 
                         this.windowLeftBuffer = 38
                         this.windowRightBuffer = 10
-                        this.windowTopBuffer = 5
-                        this.windowBotBuffer = 20
+                        this.windowTopBuffer = (Screen.HEIGHT *  0.0390) // 5
+                        this.windowBotBuffer = (Screen.HEIGHT * 0.15625) // 20
 
                         this.update()
                     }
@@ -185,14 +193,14 @@ namespace microcode {
                 () => {
                     if (this.guiState != GUI_STATE.ZOOMED_IN) {
                         this.yScrollOffset = Math.min(this.yScrollOffset + this.yScrollRate, 0)
-                        if (this.yScrollOffset <= -60) {
+                        if (this.yScrollOffset <= (Screen.HEIGHT * -0.46875)) { //-60
                             this.guiState = GUI_STATE.SENSOR_SELECTION
-                            this.informationSensorIndex = Math.abs(this.yScrollOffset + 60) / this.yScrollRate
-                            this.yScrollRate = 28
+                            this.informationSensorIndex = Math.abs(this.yScrollOffset + (Screen.HEIGHT * 0.46875)) / this.yScrollRate // 60
+                            this.yScrollRate = (Screen.HEIGHT * 0.21875)
                         }
                         else {
                             this.guiState = GUI_STATE.GRAPH
-                            this.yScrollRate = 20
+                            this.yScrollRate = (Screen.HEIGHT * 0.15625) // 20
                         }
                     }
 
@@ -201,7 +209,7 @@ namespace microcode {
                         this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
                     }
 
-                    this.sensors.forEach((sensor) => sensor.normaliseDataBuffer(this.windowBotBuffer - (2 * this.yScrollOffset) + 8))
+                    this.sensors.forEach((sensor) => sensor.normaliseDataBuffer(this.windowBotBuffer - (2 * this.yScrollOffset) + (Screen.HEIGHT * 0.0625))) // 8
                     this.update() // For fast response to the above change
                 }
             )
@@ -212,17 +220,17 @@ namespace microcode {
                 () => {
                     if (this.guiState != GUI_STATE.ZOOMED_IN) {
                         this.yScrollOffset = Math.max(this.yScrollOffset - this.yScrollRate, this.maxYScrollOffset)
-                        if (this.yScrollOffset <= -60) {
-                            this.guiState = GUI_STATE.SENSOR_SELECTION
-                            this.informationSensorIndex = Math.abs(this.yScrollOffset + 60) / this.yScrollRate
-                            this.yScrollRate = 28
+                        if (this.yScrollOffset <= (Screen.HEIGHT * -0.46875)) { // -60
+                            this.guiState = GUI_STATE.SENSOR_SELECTION 
+                            this.informationSensorIndex = Math.abs(this.yScrollOffset + (Screen.HEIGHT * 0.46875)) / this.yScrollRate // 60
+                            this.yScrollRate = (Screen.HEIGHT * 0.21875) // 28
                         }
                         else {
                             this.guiState = GUI_STATE.GRAPH
-                            this.yScrollRate = 20   
+                            this.yScrollRate = (Screen.HEIGHT * 0.15625) // 20   
                         }
 
-                        this.sensors.forEach((sensor) => sensor.normaliseDataBuffer(this.windowBotBuffer - (2 * this.yScrollOffset) + 8))
+                        this.sensors.forEach((sensor) => sensor.normaliseDataBuffer(this.windowBotBuffer - (2 * this.yScrollOffset) + (Screen.HEIGHT * 0.0625))) // 8
                         this.update() // For fast response to the above change
                     }
 
@@ -237,12 +245,10 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.left.id,
                 () => {
-                    if (this.guiState == GUI_STATE.ZOOMED_IN) {
-                        if (this.oscXCoordinate > 0) {
-                            this.oscXCoordinate -= 1
-                            this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
-                            this.update() // For fast response to the above change
-                        }
+                    if (this.guiState == GUI_STATE.ZOOMED_IN && this.oscXCoordinate > 0) {
+                        this.oscXCoordinate -= 1
+                        this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
+                        this.update() // For fast response to the above change
                     }
                 }
             )
@@ -251,13 +257,11 @@ namespace microcode {
                 ControllerButtonEvent.Pressed,
                 controller.right.id,
                 () => {
-                    if (this.guiState == GUI_STATE.ZOOMED_IN) {
-                        if (this.oscXCoordinate < this.sensors[this.oscSensorIndex].getNormalisedBufferLength() - 1) {
-                            this.oscXCoordinate += 1
-                            this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
+                    if (this.guiState == GUI_STATE.ZOOMED_IN && this.oscXCoordinate < this.sensors[this.oscSensorIndex].getNormalisedBufferLength() - 1) {
+                        this.oscXCoordinate += 1
+                        this.oscReading = this.sensors[this.oscSensorIndex].getNthNormalisedReading(this.oscXCoordinate)
 
-                            this.update() // For fast response to the above change
-                        }
+                        this.update() // For fast response to the above change
                     }
                 }
             )
@@ -314,7 +318,7 @@ namespace microcode {
                     if (this.drawSensorStates[i]) {
                         const hasSpace = this.sensors[i].getBufferLength() < this.sensors[i].getMaxBufferSize()
                         if ((this.guiState != GUI_STATE.ZOOMED_IN) || (this.guiState == GUI_STATE.ZOOMED_IN && hasSpace))
-                            this.sensors[i].readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + 8)
+                            this.sensors[i].readIntoBufferOnce(this.windowBotBuffer - (2 * this.yScrollOffset) + (Screen.HEIGHT * 0.0625)) // 8
                     }
                         
                 }
@@ -337,7 +341,7 @@ namespace microcode {
 
                         // Draw the latest reading on the right-hand side as a Ticker if at no-zoom:
                         if (this.guiState != GUI_STATE.ZOOMED_IN && sensor.getNormalisedBufferLength() > 0) {
-                            const fromY = this.windowBotBuffer - 2 * this.yScrollOffset + 10
+                            const fromY = this.windowBotBuffer - 2 * this.yScrollOffset + (Screen.HEIGHT * 0.078125) // 10
 
                             const reading = sensor.getReading()
                             const range = Math.abs(sensor.getMinimum()) + sensor.getMaximum()
@@ -377,7 +381,7 @@ namespace microcode {
                 screen().print(
                     xText,
                     this.windowWidth - (1 + xText.length * font.charWidth),
-                    this.windowTopBuffer + 5,
+                    this.windowTopBuffer + (Screen.HEIGHT * 0.0390), // 5
                     1,
                     bitmap.font5,
                 );
@@ -385,7 +389,7 @@ namespace microcode {
                 screen().print(
                     yText,
                     this.windowWidth - (1 + yText.length * font.charWidth),
-                    this.windowTopBuffer + 15,
+                    this.windowTopBuffer + (Screen.HEIGHT * 0.1172), // 15
                     1,
                     bitmap.font5,
                 );
@@ -399,7 +403,7 @@ namespace microcode {
             //--------------------------------
             // Draw sensor information blocks:
             //--------------------------------
-            if (this.yScrollOffset <= 40 && this.guiState != GUI_STATE.ZOOMED_IN) {
+            if (this.yScrollOffset <= (Screen.HEIGHT * 0.3125) && this.guiState != GUI_STATE.ZOOMED_IN) { // 40
                 let y = this.windowHeight - 2 + (2 * this.yScrollOffset)
                 for (let i = 0; i < this.sensors.length; i++) {
                     // Black edges:
@@ -407,7 +411,7 @@ namespace microcode {
                         5,
                         y,
                         142,
-                        47,
+                        (Screen.HEIGHT * 0.3671), // 47
                         15
                     )
 
@@ -424,7 +428,7 @@ namespace microcode {
                         7,
                         y,
                         145,
-                        45,
+                        (Screen.HEIGHT * 0.3515), // 45
                         blockColor
                     )
 
@@ -436,7 +440,7 @@ namespace microcode {
                                 7 - thickness,
                                 y - thickness,
                                 145 + thickness,
-                                45 + thickness,
+                                (Screen.HEIGHT * 0.3515) + thickness, // 45
                                 6
                             )
                         }
@@ -446,28 +450,28 @@ namespace microcode {
                     screen().print(
                         this.sensors[i].getName(),
                         12,
-                        y + 2,
+                        y + (Screen.HEIGHT * 0.0156),// 2
                         textColor
                     )
 
                     screen().print(
                         "Sensor Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                         12,
-                        y + 16,
+                        y + (Screen.HEIGHT * 0.125),// 16
                         textColor
                     )
 
                     screen().print(
                         "Sensor Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                         12,
-                        y + 32,
+                        y + (Screen.HEIGHT * 0.25),// 32
                         textColor
                     )
 
-                    y += 55
+                    y += (Screen.HEIGHT * 0.4296) // 55
                 }
             }
-            basic.pause(100);
+            basic.pause(GRAPH_FRAME_TIME_MS);
         }
 
 
@@ -503,13 +507,13 @@ namespace microcode {
                 //----------
                 // Ordinate:
                 //----------
-                if (this.yScrollOffset > -60) {
+                if (this.yScrollOffset > (Screen.HEIGHT * -0.46875)) { // -60
                     if (this.globalSensorMinimum != null && this.globalSensorMaximum != null) {
                         // Bot:
                         screen().print(
                             this.globalSensorMinimum.toString(),
                             (6 * font.charWidth) - (this.globalSensorMinimum.toString().length * font.charWidth),
-                            this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - 4,
+                            this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset - (Screen.HEIGHT * 0.03125), // 4 
                             15
                         )
 
@@ -531,7 +535,7 @@ namespace microcode {
                 screen().print(
                     this.sensors[0].numberOfReadings.toString(),
                     this.windowLeftBuffer - 2,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + (Screen.HEIGHT * 0.03125), // 4
                     15
                 )
 
@@ -540,7 +544,7 @@ namespace microcode {
                 screen().print(
                     end,
                     Screen.WIDTH - this.windowRightBuffer - (end.length * font.charWidth) - 1,
-                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
+                    this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + (Screen.HEIGHT * 0.03125), // 4
                     15
                 )
             }

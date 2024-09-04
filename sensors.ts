@@ -2,6 +2,34 @@ namespace microcode {
     /** The period that the scheduler should wait before comparing a reading with the event's inequality */
     export const SENSOR_EVENT_POLLING_PERIOD_MS: number = 100
 
+    /**
+     * Used to lookup the implemented events via sensorEventFunctionLookup[]
+     * 
+     * Currently only events that check for inequalities are implemented,
+     *      The only sensors that are incompatible with this are Buttons
+     * The following code may be generalised to support them though.
+     */
+    export const sensorEventSymbols = ["=", ">", "<", ">=", "<="]
+
+
+    /**
+     * Type for value bound to inequality key within sensorEventFunctionLookup
+     * 
+     * One of these is optionally held by a sensor - see by sensor.setRecordingConfig
+     */
+    export type SensorEventFunction = (reading: number, comparator: number) => boolean
+
+    /** 
+     * Get aa function that performs that inequality check & logs it with an event description if the event has triggered.
+     */
+    export const sensorEventFunctionLookup: {[inequality: string]: SensorEventFunction} = {
+        "=":  function(reading: number, comparator: number) {return reading == comparator},
+        ">":  function(reading: number, comparator: number) {return reading >  comparator},
+        "<":  function(reading: number, comparator: number) {return reading <  comparator},
+        ">=": function(reading: number, comparator: number) {return reading >= comparator},
+        "<=": function(reading: number, comparator: number) {return reading <= comparator}
+    }
+
     /** Value returned by default if the abstract getMinimum() is not overriddent */
     const DEFAULT_SENSOR_MINIMUM = 0
     /** Value returned by default if the abstract getMaximum() is not overriddent */
@@ -9,6 +37,9 @@ namespace microcode {
 
     /** How many times should a line be duplicated when drawn? */
     const PLOT_SMOOTHING_CONSTANT: number = 4
+
+    /** To what precision whould readings fromt he sensor be cut to when they're logged? */
+    const READING_PRECISION: number = 8
 
     /**
      * Only used within this sensor file.
@@ -156,9 +187,148 @@ namespace microcode {
     }
 
 
+
+    /**
+     * Responsible for making an array of sensors with configurations read & log their data accurately.
+     * This class is used by both the DataRecorder (when an Arcade Shield is connected), and by a microbit without an Arcade Shield (see DistributedLoggingProtocol).
+     * The scheduler runs in a separate thread and accounts for sensors with different numbers of measurements, periods and events.
+     * see .start()
+     */
+    export class SensorScheduler {
+        /** Ordered sensor periods */
+        private schedule: {sensor: Sensor, waitTime: number}[];
+        private sensors: Sensor[];
+
+        /** This class can be used evven if an Arcade Shield is not connected; the 5x5 matrix will display the number of measurements for the sensor with the most time left if this is the case */
+        private sensorWithMostTimeLeft: Sensor
+
+        /** Should the information from the sensorWithMostTimeLeft be shown on the basic's 5x5 LED matrix? */
+        private showOnBasicScreen: boolean = false;
+
+        constructor(sensors: Sensor[], showOnBasicScreen?: boolean) {
+            this.schedule = []
+            this.sensors = sensors
+
+            if (showOnBasicScreen != null)
+                this.showOnBasicScreen = showOnBasicScreen
+
+            // Get the sensor that will take the longest to complete:
+            // The number of measurements this sensor has left is displayed on the microbit 5x5 led grid; when the Arcade Shield is not connected.
+            this.sensorWithMostTimeLeft = sensors[0]
+            let mostTimeLeft = this.sensorWithMostTimeLeft.totalMeasurements * this.sensorWithMostTimeLeft.getPeriod()
+            this.sensors.forEach(sensor => {
+                if ((sensor.totalMeasurements * sensor.getPeriod()) > mostTimeLeft) {
+                    mostTimeLeft = sensor.totalMeasurements * sensor.getPeriod()
+                    this.sensorWithMostTimeLeft = sensor
+                }
+            })
+
+            // Setup schedule so that periods are in order ascending
+            sensors.sort((a, b) => a.getPeriod() - b.getPeriod())
+            this.schedule = sensors.map((sensor) => {return {sensor, waitTime: sensor.getPeriod()}})
+        }
+
+
+        loggingComplete(): boolean {return !(this.schedule.length > 0)}
+
+
+        /**
+         * Schedules the sensors and orders them to .log()
+         * Runs within a separate fiber.
+         * 
+         * Time it takes for this algorithm to run is accounted for when calculating how long to wait inbetween logs
+         * Mutates this.schedule
+         * 
+         * @param callbackObj is used by the DistributedLoggingProtocol; after each log & after the algorithm finishes a callback will be made
+        */
+        start(callbackObj?: ITargetDataLoggedCallback) {
+            const callbackAfterLog: boolean = (callbackObj == null) ? false : true
+            
+            control.inBackground(() => {
+                let currentTime = 0;
+
+                // Log all sensors once:
+                for (let i = 0; i < this.schedule.length; i++) {
+                    if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
+                        basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
+
+                    // Make the datalogger log the data:
+                    const logAsCSV = this.schedule[i].sensor.log(0)
+
+                    // Optionally inform the caller of the log (In the case of the DistributedLoggingProtocol this information can be forwarded to the Commander over radio)
+                    if (callbackAfterLog)
+                        callbackObj.callback(logAsCSV)
+
+                    // Clear from schedule (A sensor may only have 1 reading):
+                    if (!this.schedule[i].sensor.hasMeasurements())
+                        this.schedule.splice(i, 1);
+                }
+
+
+                let lastLogTime = input.runningTime()
+
+                while (this.schedule.length > 0) {
+                    const nextLogTime = this.schedule[0].waitTime;
+                    const sleepTime = nextLogTime - currentTime;
+
+                    basic.pause(sleepTime + lastLogTime - input.runningTime()) // Discount for operation time
+                    lastLogTime = input.runningTime()
+                    currentTime += sleepTime
+
+                    for (let i = 0; i < this.schedule.length; i++) {
+                        // Clear from schedule:
+                        if (!this.schedule[i].sensor.hasMeasurements()) {
+                            this.schedule.splice(i, 1);
+                        }
+
+                        // Log sensors:
+                        else if (currentTime % this.schedule[i].waitTime == 0) {
+                            if (this.showOnBasicScreen && this.schedule[i].sensor == this.sensorWithMostTimeLeft)
+                                basic.showNumber(this.sensorWithMostTimeLeft.getMeasurements())
+
+                            // Make the datalogger log the data:
+                            const logAsCSV = this.schedule[i].sensor.log(currentTime)
+
+                            // Optionally inform the caller of the log (In the case of the DistributedLoggingProtocol this information can be forwarded to the Commander over radio)
+                            if (callbackAfterLog)
+                                callbackObj.callback(logAsCSV)
+
+                            // Update schedule with when they should next be logged:
+                            if (this.schedule[i].sensor.hasMeasurements()) {
+                                this.schedule[i].waitTime = nextLogTime + this.schedule[i].sensor.getPeriod()
+                            }
+                        }
+                    }
+
+                    // Ensure the schedule remains ordely after these potential deletions & recalculations:
+                    this.schedule.sort((
+                        a: {sensor: Sensor; waitTime: number;}, 
+                        b: {sensor: Sensor; waitTime: number;}) =>
+                        a.waitTime - b.waitTime
+                    )
+                }
+
+                // Done:
+                if (this.showOnBasicScreen) {
+                    basic.showLeds(`
+                        . # . # .
+                        . # . # .
+                        . . . . .
+                        # . . . #
+                        . # # # .
+                    `)
+                }
+                if (callbackAfterLog) {
+                    DistributedLoggingProtocol.finishedLogging = true
+                    callbackObj.callback("")
+                }
+            })
+        }
+    }
+
     /**
      * Abstraction for all available sensors.
-     * These are implmented by the 
+     * This class is extended by each of the concrete sensors which add on static methods for their name, getting their readings & optionally min/max readings
      */
     export abstract class Sensor implements ISensorable {
         /** Set inside .setConfig() */
@@ -216,6 +386,43 @@ namespace microcode {
             this.normalisedDataBuffer = []
         }
 
+
+        //------------------
+        // Factory Function:
+        //------------------
+
+        /**
+         * Factory function used to generate a Sensor from that sensors: .getName(), sensorSelect name, or its radio name
+         * This is a single factory within this abstract class to reduce binary size
+         * @param name either sensor.getName(), sensor.getRadioName() or the ariaID the button that represents the sensor in SensorSelect uses.
+         * @returns concrete sensor that the input name corresponds to.
+         */
+        public static getFromName(name: string): Sensor {
+            // basic.showString(name)
+            if      (name == "Accel. X" || name == "Accelerometer X" || name == "AX")  return new AccelerometerXSensor();
+            else if (name == "Accel. Y" || name == "Accelerometer Y" || name == "AY")  return new AccelerometerYSensor();
+            else if (name == "Accel. Z" || name == "Accelerometer Z" || name == "AZ")  return new AccelerometerZSensor();
+            else if (name == "Pitch" || name == "P")                                   return new PitchSensor();
+            else if (name == "Roll" || name == "R")                                    return new RollSensor();
+            else if (name == "T. Pin 0" || name == "Touch Pin 0" || name == "TP0")     return new TouchPinP0Sensor();
+            else if (name == "T. Pin 1" || name == "Touch Pin 1" || name == "TP1")     return new TouchPinP1Sensor();
+            else if (name == "T. Pin 2" || name == "Touch Pin 2" || name == "TP2")     return new TouchPinP2Sensor();
+            else if (name == "A. Pin 0" || name == "Analog Pin 0" || name == "AP0")    return new AnalogPinP0Sensor();
+            else if (name == "A. Pin 1" || name == "Analog Pin 1" || name == "AP1")    return new AnalogPinP1Sensor();
+            else if (name == "A. Pin 2" || name == "Analog Pin 2" || name == "AP2")    return new AnalogPinP2Sensor();
+            else if (name == "Light" || name == "L")                                   return new LightSensor();
+            else if (name == "Temp." || name == "Temperature" || name == "T")          return new TemperatureSensor();
+            else if (name == "Magnet" || name == "M")                                  return new MagnetXSensor();
+            else if (name == "Logo Pressed" || name == "Logo Press" || name == "LP")   return new LogoPressSensor();
+            else if (name == "Volume" || name == "Microphone" || name == "V")          return new VolumeSensor();
+            else if (name == "Compass" || name == "C")                                 return new CompassHeadingSensor();
+            else if (name == "Jac Light" || name == "Jacdac Light" || name == "JL")    return new JacdacLightSensor();
+            else if (name == "Jac Moist" || name == "Jacdac Moisture" || name == "JM") return new JacdacSoilMoistureSensor();
+            else if (name == "Jac Dist" || name == "Jacdac Distance" || name == "JD")  return new JacdacDistanceSensor();
+            // else if (name == "Jac Flex" || name == "Jacdac Flex" || name == "JF")      return new JacdacFlexSensor();
+            else                                                                       return new JacdacTemperatureSensor()
+        }
+
         //---------------------
         // Interface Functions:
         //---------------------
@@ -236,22 +443,44 @@ namespace microcode {
         getMeasurements(): number {return this.config.measurements}
         hasMeasurements(): boolean {return this.config.measurements > 0;}
 
-        getRecordingInformation(): string[] {
-            return [
-                this.getPeriod() / 1000 + " second period", 
-                this.config.measurements.toString() + " measurements left",
-                ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
-                "Last log was " + this.lastLoggedReading,
-            ]
-        }
 
+        /**
+         * Used by the DataRecorder to display information about the sensor as it is logging.
+         * @returns linles of information that can be printed out into a box for display.
+         */
+        getRecordingInformation(): string[] {
+            if (this.hasMeasurements())            
+                return [
+                    this.getPeriod() / 1000 + " second period", 
+                    this.config.measurements.toString() + " measurements left",
+                    ((this.config.measurements * this.getPeriod()) / 1000).toString() + " seconds left",
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
+                ]
+            else
+                return [
+                    "Logging complete.",
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
+                ]
+        }
+        
+        /**
+         * Used by the DataRecorder to display information about the sensor as it is logging.
+         * @returns linles of information that can be printed out into a box for display.
+         */
         getEventInformation(): string[] {
-            return [
-                this.config.measurements.toString() + " events left",
-                "Logging " + this.config.inequality + " " + this.config.comparator + " events",
-                "Last log was " + this.lastLoggedReading,
-                this.lastLoggedEventDescription
-            ]
+            if (this.hasMeasurements())
+                return [
+                    this.config.measurements.toString() + " events left",
+                    "Logging " + this.config.inequality + " " + this.config.comparator + " events",
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4),
+                    this.lastLoggedEventDescription
+                ]
+
+            else
+                return [
+                    "Logging complete.",
+                    "Last log was " + this.lastLoggedReading.toString().slice(0, 4)
+                ]
         }
 
         /**
@@ -328,17 +557,19 @@ namespace microcode {
          */
         log(time: number): string {
             this.lastLoggedReading = this.getReading()
+
+            const reading = this.lastLoggedReading.toString().slice(0, READING_PRECISION)
             
             if (this.isInEventMode) {
                 if (sensorEventFunctionLookup[this.config.inequality](this.lastLoggedReading, this.config.comparator)) {
                     datalogger.log(
                         datalogger.createCV("Sensor", this.getName()),
                         datalogger.createCV("Time (ms)", time),
-                        datalogger.createCV("Reading", this.lastLoggedReading.toString()),
-                        datalogger.createCV("Event", this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator)
+                        datalogger.createCV("Reading", reading),
+                        datalogger.createCV("Event", this.config.inequality + " " + this.config.comparator)
                     )
                     this.config.measurements -= 1
-                    return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + this.lastLoggedReading + " " + this.config.inequality + " " + this.config.comparator
+                    return this.getRadioName() + "," + time.toString() + "," + reading + "," + this.config.inequality + " " + this.config.comparator
                 }
             }
 
@@ -346,11 +577,11 @@ namespace microcode {
                 datalogger.log(
                     datalogger.createCV("Sensor", this.getName()),
                     datalogger.createCV("Time (ms)", time.toString()),
-                    datalogger.createCV("Reading", this.lastLoggedReading.toString()),
+                    datalogger.createCV("Reading", reading),
                     datalogger.createCV("Event", "N/A")
                 )
                 this.config.measurements -= 1
-                return this.getRadioName() + "," + time.toString() + "," + this.lastLoggedReading.toString() + "," + "N/A"
+                return this.getRadioName() + "," + time.toString() + "," + reading + "," + "N/A"
             }
             return ""
         }
@@ -407,48 +638,60 @@ namespace microcode {
     /**
      * Concrete implementation of onboard Accelerometer with Dimension X
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerXSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. X"}
         public static getRadioName(): string {return "AX"}
         public static getReading(): number {return input.acceleration(Dimension.X)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 
     /**
      * Concrete implementation of onboard Accelerometer with Dimension Y
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerYSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. Y"}
         public static getRadioName(): string {return "AY"}
         public static getReading(): number {return input.acceleration(Dimension.Y)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 
     /**
      * Concrete implementation of onboard Accelerometer with Dimension Z
      * Cannot be bundled with other Accelerometer's since getName() needs to be static.
-     * Ranged between -1023 to 1023
+     * AcceleratorRange is set to OneG
+     * Ranged between -2048 to 2048
      */
     export class AccelerometerZSensor extends Sensor {
-        constructor() {super()}
+        constructor() {
+            super()
+            input.setAccelerometerRange(AcceleratorRange.OneG)
+        }
 
         public static getName(): string {return "Accel. Z"}
         public static getRadioName(): string {return "AZ"}
         public static getReading(): number {return input.acceleration(Dimension.Z)}
-        public static getMinimum(): number {return -1023;}
-        public static getMaximum(): number {return 1023;}
+        public static getMinimum(): number {return -2048;}
+        public static getMaximum(): number {return 2048;}
         
     }
 
@@ -570,7 +813,7 @@ namespace microcode {
     export class MagnetXSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Magnet X"}
+        public static getName(): string {return "Magnet"}
         public static getRadioName(): string {return "M"}
         public static getReading(): number {return input.magneticForce(Dimension.X)}
     }
@@ -641,7 +884,7 @@ namespace microcode {
     export class VolumeSensor extends Sensor {
         constructor() {super()}
 
-        public static getName(): string {return "Volume"}
+        public static getName(): string {return "Microphone"}
         public static getRadioName(): string {return "V"}
         public static getReading(): number {return input.soundLevel()}
         public static getMinimum(): number {return 0;}

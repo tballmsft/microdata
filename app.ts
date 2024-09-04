@@ -7,6 +7,11 @@ namespace microcode {
         version?: string
     }
 
+
+    /**
+     * If an Arcade Shield is not present when starting MicroData that Microbit will enter DistributedLoggingProtocol.
+     *      It will show a :) on its LEDs and try to become a Target - where it will receive radio commands from a Commander Microbit (one with an Arcade Shield)
+     */
     export class App {
         sceneManager: SceneManager 
 

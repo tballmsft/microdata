@@ -23,7 +23,7 @@ namespace microcode {
         private jacdacSensorSelected: boolean
         
         constructor(app: App, nextSceneEnum: CursorSceneEnum) {
-            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5));
+            super(app, function () {app.popScene(); app.pushScene(new Home(this.app))}, new GridNavigator(4, 5)); // 4x5 grid
             this.btns = [];
             this.selectedSensorAriaIDs = [];
             this.nextSceneEnum = nextSceneEnum;
@@ -36,14 +36,14 @@ namespace microcode {
             this.cursor.resetOutlineColourOnMove = true
             const icons: string[] = [
                 "accelerometer", "accelerometer", "accelerometer", "right_turn", "right_spin", "pin_0", "pin_1", "pin_2",
-                "led_light_sensor", "thermometer", "magnet", "finger_press", "speaker", "compass", 
-                // "microbitLogoWhiteBackground","microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
+                "led_light_sensor", "thermometer", "magnet", "finger_press", "microphone", "compass", "microbitLogoWhiteBackground",
+                "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground", "microbitLogoWhiteBackground"
             ]
 
             const ariaIDs: string[] = [
-                "accelerometer X", "accelerometer Y", "accelerometer Z", "Pitch", "Roll", "A. Pin 0", "A. Pin 1", "A. Pin 2", "led_light_sensor",
-                "thermometer", "S10", "Logo Press", "Volume", "Compass", 
-                // "Jacdac Flex", "Jacdac Temperature", "Jacdac Light", "Jacdac Moisture", "Jacdac Distance"
+                "Accelerometer X", "Accelerometer Y", "Accelerometer Z", "Pitch", "Roll", "Analog Pin 0", "Analog Pin 1", "Analog Pin 2", "Light",
+                "Temperature", "Magnet", "Logo Press", "Microphone", "Compass", "Jacdac Flex", "Jacdac Temperature", "Jacdac Light",
+                "Jacdac Moisture", "Jacdac Distance"
             ]
 
             //-----------------------------------------------------
@@ -51,7 +51,7 @@ namespace microcode {
             //-----------------------------------------------------
 
             let x: number = -60;
-            let y: number = -40;
+            let y: number = Screen.HEIGHT * -0.3125 // y = -40 on an Arcade Shield of height 128 pixels
             for (let i = 0; i < icons.length; i++) {
                 this.btns.push(new Button({
                     parent: null,
@@ -64,9 +64,10 @@ namespace microcode {
                         // Deletion:
                         const index = this.selectedSensorAriaIDs.indexOf(button.ariaId)
                         if (index != -1) {
+                            this.cursor.setOutlineColour()
                             this.selectedSensorAriaIDs.splice(index, 1)
     
-                            if (SensorFactory.getFromNameRadioOrID(button.ariaId).isJacdac()) {
+                            if (Sensor.getFromName(button.ariaId).isJacdac()) {
                                 this.jacdacSensorSelected = false
                                 this.setOtherJacdacButtonsTo(true)
                             }
@@ -80,7 +81,7 @@ namespace microcode {
                         // Addition:
                         else if (this.selectedSensorAriaIDs.length < MAX_NUMBER_OF_SENSORS) {
                             this.cursor.setOutlineColour(7)
-                            if (SensorFactory.getFromNameRadioOrID(button.ariaId).isJacdac()) {
+                            if (Sensor.getFromName(button.ariaId).isJacdac()) {
                                 if (!this.jacdacSensorSelected) {
                                     this.selectedSensorAriaIDs.push(button.ariaId)
                                     this.jacdacSensorSelected = true
@@ -117,7 +118,7 @@ namespace microcode {
                 x += 30
                 if (x > 60) {
                     x = -60
-                    y += 28
+                    y += Screen.HEIGHT * 0.21875 // 28 on 128 pixel high Arcade Shield
                 }
             }
 
@@ -132,24 +133,11 @@ namespace microcode {
                     if (this.selectedSensorAriaIDs.length === 0) {
                         return
                     }
-                    const sensors = this.selectedSensorAriaIDs.map((ariaID) => SensorFactory.getFromNameRadioOrID(ariaID))
+                    const sensors = this.selectedSensorAriaIDs.map((ariaID) => Sensor.getFromName(ariaID))
 
                     this.app.popScene()
                     if (this.nextSceneEnum === CursorSceneEnum.LiveDataViewer) {
-                        this.app.pushScene(new TutorialWindow(this.app, {
-                            tips: [
-                                {text: "The next screen\nshows live\nsensor readings."},
-                                {text: "Press UP & DOWN\nto scroll.\nTry it now!"},
-                                {text: "Press A on the\ngraph zoom in.", keywords: [" A "], keywordColors: [6]},
-                                {text: "Press A when below\nthe graph to\ntoggle a\nsensor on/off.", keywords: [" A "], keywordColors: [6]},
-                                {text: "Press A to see\nsome data!", keywords: [" A "], keywordColors: [6]}, // Red
-                            ],
-                            backFn: () => {
-                                this.app.popScene()
-                                this.app.pushScene(new SensorSelect(this.app, CursorSceneEnum.LiveDataViewer))
-                            }
-                        },
-                        new LiveDataViewer(this.app, sensors)))
+                        this.app.pushScene(new LiveDataViewer(this.app, sensors))
                     }
                     
                     else if (this.nextSceneEnum === CursorSceneEnum.RecordingConfigSelect)

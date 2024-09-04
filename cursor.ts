@@ -1,4 +1,7 @@
 namespace microcode {
+    /**
+     * See .setOutlineColour()
+     */
     const DEFAULT_CURSOR_OUTLINE_COLOUR = 9
 
     export type CursorCancelHandler = () => void
@@ -73,7 +76,7 @@ namespace microcode {
             else this.size = size.clone()
         }
 
-        public setOutlineColour(colour: number) {
+        public setOutlineColour(colour: number = 9) { // 9 is the DEFAULT_CURSOR_OUTLINE_COLOUR
             this.cursorOutlineColour = colour
         }
 
