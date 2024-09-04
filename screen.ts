@@ -2,10 +2,10 @@
     export class Screen {
         private static image_: Bitmap
 
-        public static WIDTH = screen.width
-        public static HEIGHT = screen.height
-        public static HALF_WIDTH = screen.width >> 1
-        public static HALF_HEIGHT = screen.height >> 1 
+        public static WIDTH = screen().width
+        public static HEIGHT = screen().height
+        public static HALF_WIDTH = screen().width >> 1
+        public static HALF_HEIGHT = screen().height >> 1 
         public static LEFT_EDGE = -Screen.HALF_WIDTH
         public static RIGHT_EDGE = Screen.HALF_WIDTH
         public static TOP_EDGE = -Screen.HALF_HEIGHT
@@ -45,13 +45,13 @@
         }
         public static get image(): Bitmap {
             if (!Screen.image_) {
-                Screen.image_ = screen
+                Screen.image_ = screen()
                 Screen.updateBounds()
             }
             return Screen.image_
         }
         public static resetScreenImage() {
-            Screen.image_ = screen
+            Screen.image_ = screen()
             Screen.updateBounds()
         }
 

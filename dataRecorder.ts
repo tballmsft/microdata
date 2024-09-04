@@ -100,12 +100,12 @@ namespace microcode {
 
             // Check if all sensors have finished their work:
             if (this.scheduler.loggingComplete()) {
-                screen.printCenter("Data Logging Complete.", (screen.height / 2) - 10);
-                screen.printCenter("Press B to back out.", screen.height / 2);
+                screen().printCenter("Data Logging Complete.", (screen().height / 2) - 10);
+                screen().printCenter("Press B to back out.", screen().height / 2);
             }
 
             else {
-                screen.printCenter("Recording data...", 4);
+                screen().printCenter("Recording data...", 4);
                 let y = 16
 
                 for (let i = this.sensorIndexOffset; i < this.numberOfSensors; i++) {
@@ -119,7 +119,7 @@ namespace microcode {
 
                     // Draw box as collapsed:
                     if (i != this.currentSensorIndex) {
-                        screen.fillRect(
+                        screen().fillRect(
                             5,
                             y,
                             boxWidth,
@@ -127,7 +127,7 @@ namespace microcode {
                             16
                         )
                         
-                        screen.fillRect(
+                        screen().fillRect(
                             7,
                             y,
                             boxWidth + 3,
@@ -135,7 +135,7 @@ namespace microcode {
                             this.sensorBoxColor
                         )
 
-                        screen.print(
+                        screen().print(
                             this.sensors[i].getName(),
                             12,
                             y + 2,
@@ -145,7 +145,7 @@ namespace microcode {
 
                     // Box is selected: Draw all information:
                     else {
-                        screen.fillRect(
+                        screen().fillRect(
                             5,
                             y,
                             boxWidth,
@@ -153,7 +153,7 @@ namespace microcode {
                             15
                         )
 
-                        screen.fillRect(
+                        screen().fillRect(
                             7,
                             y,
                             boxWidth + 3,
@@ -166,7 +166,7 @@ namespace microcode {
                         //-------------------------------
 
                         const sensor = this.sensors[i]
-                        screen.print(
+                        screen().print(
                             sensor.getName(),
                             12,
                             y + 2,
@@ -179,7 +179,7 @@ namespace microcode {
                         const sensorInfo: string[] = (sensor.isInEventMode) ? sensor.getEventInformation() : sensor.getRecordingInformation();
                         sensorInfo.forEach((info) => {
                             y += 12
-                            screen.print(
+                            screen().print(
                                 info,
                                 24,
                                 y,

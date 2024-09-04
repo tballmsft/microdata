@@ -7,7 +7,7 @@
         "radio": "*",
         "microphone": "*",
         "datalogger": "*",
-        "pxt-arcadeshield": "github:microsoft/pxt-arcadeshield#v0.1.0",
+        "pxt-arcadeshield": "github:microsoft/pxt-arcadeshield#v0.1.2",
         "jacdac": "github:microsoft/pxt-jacdac#v1.9.28",
         "jacdac-light-level": "github:microsoft/pxt-jacdac/light-level#v1.9.28",
         "jacdac-soil-moisture": "github:microsoft/pxt-jacdac/tree/master/soil-moisture#v1.9.28",
@@ -53,7 +53,7 @@
     ],
     "testFiles": [],
     "targetVersions": {
-        "target": "^7.1.2",
+        "target": "7.1.2",
         "targetId": "microbit"
     },
     "supportedTargets": [

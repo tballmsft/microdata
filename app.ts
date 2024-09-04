@@ -23,7 +23,7 @@ namespace microcode {
             this.sceneManager = new SceneManager()
 
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
-            const arcadeShieldConnected = _screen_internal.displayPresent();
+            const arcadeShieldConnected = screenhelpers.displayPresent();
 
             if (arcadeShieldConnected)
                 this.pushScene(new Home(this))

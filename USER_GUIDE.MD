@@ -27,7 +27,7 @@ MicroData allows you to select and independently configure multiple sensors to l
 You can scroll left and right to see the other columns:
 ![tabular_data_viewer_2](https://github.com/KierPalin/MicroData/blob/main/resources/tabular_data_viewer_2.jpg?raw=true)
 
-MicroData also supports recording events. You can configure a sensor to only record readings that match an inequality condition - such as only taking a log of the temperature when the reading is > 20. The screen below shows the configuration screen for the Accelerometer on the X dimension. This screen is entered after pressing 'Done' on the sensor select screen.
+MicroData also supports recording events. You can configure a sensor to only record readings that match an inequality condition - such as only taking a log of the temperature when the reading is > 20. The screen below shows the configuration screen for the Accelerometer on the X dimension. This screen is entered after pressing 'Done' on the sensor select screen().
 ![configuration_selection](https://github.com/KierPalin/MicroData/blob/main/resources/configuration_selection.jpg?raw=true)
 
 

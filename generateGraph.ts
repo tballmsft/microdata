@@ -282,7 +282,7 @@ namespace microcode {
         }
 
         /**
-         * Normalise the readings in this.dataRows relative to the screen.
+         * Normalise the readings in this.dataRows relative to the screen().
          * Invoked upon UP, DOWN, LEFT, RIGHT.
          * Fills this.readings, then invokes this.normaliseReadings() to setup this.normalisedReadings
          */
@@ -471,10 +471,10 @@ namespace microcode {
         }
 
         update() {
-            screen.fill(this.backgroundColor);
+            screen().fill(this.backgroundColor);
             
             // Make graph region black:
-            screen.fillRect(
+            screen().fillRect(
                 this.windowLeftBuffer,
                 this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
                 Screen.WIDTH - this.windowLeftBuffer - this.windowRightBuffer,
@@ -497,7 +497,7 @@ namespace microcode {
                         if (this.drawSensorStates[this.sensors[sensor].getName()]) {
                             // Duplicate the line along the y axis to smooth out aliasing:
                             for (let j = -(PLOT_SMOOTHING_CONSTANT / 2); j < PLOT_SMOOTHING_CONSTANT / 2; j++) {
-                                screen.drawLine(
+                                screen().drawLine(
                                     this.processedCoordinates[sensor][i]   + 1,
                                     this.processedCoordinates[sensor][i+1] + j,
                                     this.processedCoordinates[sensor][i+2] + 1,
@@ -517,7 +517,7 @@ namespace microcode {
             let y = this.windowHeight - 2 + (2 * this.yScrollOffset)
             for (let i = 0; i < this.sensors.length; i++) {
                 // Black edges:
-                screen.fillRect(
+                screen().fillRect(
                     5,
                     y,
                     142,
@@ -535,7 +535,7 @@ namespace microcode {
                 }
 
                 // Coloured block:
-                screen.fillRect(
+                screen().fillRect(
                     7,
                     y,
                     145,
@@ -547,7 +547,7 @@ namespace microcode {
                 if (this.uiState == UI_STATE.SENSOR_SELECTION && i == this.currentlySelectedSensorIndex) {
                     // Blue edges:
                     for (let thickness = 0; thickness < 3; thickness++) {
-                        screen.drawRect(
+                        screen().drawRect(
                             7 - thickness,
                             y - thickness,
                             145 + thickness,
@@ -561,21 +561,21 @@ namespace microcode {
                 // Sensor information:
                 //--------------------
 
-                screen.print(
+                screen().print(
                     this.sensors[i].getName(),
                     12,
                     y + 2,
                     textColor
                 )
 
-                screen.print(
+                screen().print(
                     "Minimum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MIN],
                     12,
                     y + 16,
                     textColor
                 )
 
-                screen.print(
+                screen().print(
                     "Maximum: " + this.sensorMinsAndMaxs[i][MIN_MAX_COLUMNS.MAX],
                     12,
                     y + 32,
@@ -592,14 +592,14 @@ namespace microcode {
          */
         draw_axes() {
             for (let i = 0; i < 2; i++) {
-                screen.drawLine(
+                screen().drawLine(
                     this.windowLeftBuffer,
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     this.windowWidth - this.windowRightBuffer, 
                     this.windowHeight - this.windowBotBuffer + i + this.yScrollOffset + this.yScrollOffset, 
                     5
                 );
-                screen.drawLine(
+                screen().drawLine(
                     this.windowLeftBuffer + i, 
                     this.windowTopBuffer + this.yScrollOffset + this.yScrollOffset, 
                     this.windowLeftBuffer + i, 
@@ -617,7 +617,7 @@ namespace microcode {
                     const globalSensorMaximumDraw: number = Screen.HEIGHT - this.windowHeight + this.windowTopBuffer - Math.floor(0.1 * this.yScrollOffset)
 
                     // Bot:
-                    screen.print(
+                    screen().print(
                         globalSensorMinimum,
                         (6 * font.charWidth) - (globalSensorMinimum.length * font.charWidth),
                         globalSensorMinimumDraw,
@@ -630,7 +630,7 @@ namespace microcode {
                         if (this.drawSensorStates[this.sensors[index].getName()]) {
                             const yWrite: string = this.rawCoordinates[this.sensors[index].getName()][1].toString().slice(0, 5);
                             const yDraw = this.processedCoordinates[index][1] - Math.floor(0.1 * this.yScrollOffset) - 1;
-                            screen.print(
+                            screen().print(
                                 yWrite,
                                 (6 * font.charWidth) - (yWrite.length * font.charWidth),
                                 yDraw,
@@ -640,7 +640,7 @@ namespace microcode {
                     }
 
                     // Top:
-                    screen.print(
+                    screen().print(
                         globalSensorMaximum,
                         (6 * font.charWidth) - (globalSensorMaximum.length * font.charWidth),
                         globalSensorMaximumDraw,
@@ -651,7 +651,7 @@ namespace microcode {
 
             // X axis:
             // Start
-            screen.print(
+            screen().print(
                 this.lowestPeriod / 1000 + "s",
                 this.windowLeftBuffer - 2,
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,
@@ -660,7 +660,7 @@ namespace microcode {
 
             // End:
             const end: string = this.greatestPeriod / 1000 + "s";
-            screen.print(
+            screen().print(
                 end,
                 Screen.WIDTH - this.windowRightBuffer - (end.length * font.charWidth),
                 this.windowHeight - this.windowBotBuffer + this.yScrollOffset + this.yScrollOffset + 4,

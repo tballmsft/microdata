@@ -90,7 +90,7 @@ namespace microcode {
      * The Commander can get a list of the IDs of connected Targets and see the data from sensors being streamed back.
      */
     export class DistributedLoggingProtocol implements ITargetDataLoggedCallback {
-        /** The DistributedLoggingScreen which uses this protocol needs to switch between scenes - so that the user can select sensors, etc, then come back to the screen. */
+        /** The DistributedLoggingScreen which uses this protocol needs to switch between scenes - so that the user can select sensors, etc, then come back to the screen(). */
         private app: App;
 
         //------------------------------------------------------
@@ -663,7 +663,7 @@ namespace microcode {
                 case UI_STATE.SHOWING_OPTIONS: {
                     switch (this.distributedLogger.radioMode) {
                         case RADIO_LOGGING_MODE.UNCONFIGURED: {
-                            screen.printCenter(
+                            screen().printCenter(
                                 "Searching for Microbits...",
                                 2
                             )
@@ -671,7 +671,7 @@ namespace microcode {
                         }
     
                         case RADIO_LOGGING_MODE.COMMANDER: {
-                            screen.printCenter(
+                            screen().printCenter(
                                 "Commander Mode",
                                 2
                             )
@@ -688,14 +688,14 @@ namespace microcode {
                             const connectedText = "Connected to Commander,"
                             const asMicrobit    = "as Microbit " + this.distributedLogger.id + "."
                             
-                            screen.print(
+                            screen().print(
                                 connectedText,
                                 Screen.HALF_WIDTH - ((connectedText.length * font.charWidth) / 2),
                                 2
                             )
     
                             // Left-aligned with above text
-                            screen.print(
+                            screen().print(
                                 asMicrobit,
                                 Screen.HALF_WIDTH - ((connectedText.length * font.charWidth) / 2),
                                 12
@@ -710,11 +710,11 @@ namespace microcode {
                 } // end of UI_STATE.SHOWING_OPTIONS case
 
                 case UI_STATE.SHOWING_CONNECTED_MICROBITS: {
-                    screen.printCenter("Microbits connected", 2)
+                    screen().printCenter("Microbits connected", 2)
                     let y = 15
                     this.targetIDCache.forEach((id) => {
                         if (id != UNINITIALISED_MICROBIT_ID) {
-                            screen.print(
+                            screen().print(
                                 "Microbit " + id,
                                 1,
                                 y

@@ -97,7 +97,7 @@ namespace microcode {
 
             // Sub-window:
             // Outline:
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH - 70,
                 subWindowTopEdge,
                 subWindowWidth,
@@ -105,7 +105,7 @@ namespace microcode {
                 15 // Black
             )
 
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH - 70 + 3,
                 subWindowTopEdge + 3,
                 subWindowWidth - 6,
@@ -118,7 +118,7 @@ namespace microcode {
             //------------
 
             const tutorialTextLength = ("Tutorial".length * font.charWidth)
-            screen.print(
+            screen().print(
                 "Tutorial",
                 headerX - (tutorialTextLength / 2),
                 headerY,
@@ -126,7 +126,7 @@ namespace microcode {
             )
                 
             // Underline the title:
-            screen.fillRect(
+            screen().fillRect(
                 headerX - (tutorialTextLength / 2) - 3,
                 subWindowTopEdge + 16,
                 tutorialTextLength + 4,
@@ -138,7 +138,7 @@ namespace microcode {
             // Scrollbar:
             //-----------
 
-            screen.fillRect(
+            screen().fillRect(
                 subWindowRightEdge - 8,
                 subWindowTopEdge + 10 + (this.tutorialTextIndexOffset / (this.numberOfTips - MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)) * (subWindowHeight - 20),
                 3,
@@ -157,7 +157,7 @@ namespace microcode {
             const tipsOnScreen = Math.min(this.tutorialTextTips.length, this.tutorialTextIndexOffset + MAX_NUMBER_OF_TUTORIAL_TIPS_ON_SCREEN)
 
             this.tutorialTextTips.slice(this.tutorialTextIndexOffset, tipsOnScreen).forEach((tip) => {
-                screen.print(
+                screen().print(
                     tip.text,
                     headerX - 55,
                     tutorialTextYOffset,
@@ -196,7 +196,7 @@ namespace microcode {
                         }
 
                         // Print them directly ontop of the word in black, but with the specified colouring:
-                        screen.print(
+                        screen().print(
                             keyword, 
                             headerX - 55 + xOffset,
                             tutorialTextYOffset,
@@ -206,7 +206,7 @@ namespace microcode {
                 }
 
                 // Bullet point:
-                screen.fillCircle(
+                screen().fillCircle(
                     headerX - 61,
                     tutorialTextYOffset + 4,
                     2,

@@ -87,11 +87,11 @@ namespace microcode {
                 0xc
             )
 
-            screen.printCenter("Sensor Selection", 4)
+            screen().printCenter("Sensor Selection", 4)
             const headerX = Screen.HALF_WIDTH // Log has data in it
 
             // Outline:
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH - 70, 
                 Screen.HALF_HEIGHT - 40,
                 140,
@@ -99,7 +99,7 @@ namespace microcode {
                 15 // Black
             )
 
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH - 70 + 3,
                 Screen.HALF_HEIGHT - 40 + 3,
                 140 - 6,
@@ -108,7 +108,7 @@ namespace microcode {
             ) 
 
             const tutorialTextLength = ("Clear the data log?".length * font.charWidth)
-            screen.print(
+            screen().print(
                 "Clear the data log?",
                 headerX - (tutorialTextLength / 2),
                 Screen.HALF_HEIGHT - 40 + 7,
@@ -116,7 +116,7 @@ namespace microcode {
             )
             
             // Underline the title:
-            screen.fillRect(
+            screen().fillRect(
                 headerX - (tutorialTextLength / 2) + 2,
                 Screen.HALF_HEIGHT - 40 + 25,
                 tutorialTextLength - (1 * font.charWidth),
@@ -125,17 +125,17 @@ namespace microcode {
             )
 
             if (this.currentlyDeleting)
-                screen.printCenter("Deleting data...", Screen.HALF_HEIGHT - 9, 15)
+                screen().printCenter("Deleting data...", Screen.HALF_HEIGHT - 9, 15)
 
             // Draw button prompts:
-            screen.print(
+            screen().print(
                 "Yes",
                 Screen.HALF_WIDTH - 48,
                 Screen.HALF_HEIGHT + 28,
                 15
             )
 
-            screen.print(
+            screen().print(
                 "No",
                 Screen.HALF_WIDTH + 33,
                 Screen.HALF_HEIGHT + 28,
@@ -143,7 +143,7 @@ namespace microcode {
             )
 
             // White boxes behind yes & no btns:
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH - 47,
                 Screen.HALF_HEIGHT + 14,
                 12,
@@ -151,7 +151,7 @@ namespace microcode {
                 1
             )
 
-            screen.fillRect(
+            screen().fillRect(
                 Screen.HALF_WIDTH + 34,
                 Screen.HALF_HEIGHT + 14,
                 12,
