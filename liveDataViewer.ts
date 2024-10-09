@@ -353,7 +353,7 @@ namespace microcode {
                                     Screen.WIDTH - this.windowRightBuffer - (4 * font.charWidth),
                                     y,
                                     color,
-                                    bitmap.font5,
+                                    bitmaps.font5,
                                 )
                             }
                         }
@@ -383,7 +383,7 @@ namespace microcode {
                     this.windowWidth - (1 + xText.length * font.charWidth),
                     this.windowTopBuffer + (Screen.HEIGHT * 0.0390), // 5
                     1,
-                    bitmap.font5,
+                    bitmaps.font5,
                 );
 
                 screen().print(
@@ -391,7 +391,7 @@ namespace microcode {
                     this.windowWidth - (1 + yText.length * font.charWidth),
                     this.windowTopBuffer + (Screen.HEIGHT * 0.1172), // 15
                     1,
-                    bitmap.font5,
+                    bitmaps.font5,
                 );
             }
 

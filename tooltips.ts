@@ -1,7 +1,7 @@
 // auto-generated, run 'node scripts/lochex.mjs' to refresh
 namespace microcode {
     export const lang = "en"
-    export const font = bitmap.font8
+    export const font = bitmaps.font8
 
 
     /**

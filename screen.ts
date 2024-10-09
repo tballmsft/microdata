@@ -56,7 +56,7 @@
         }
 
         public static setImageSize(width: number, height: number) {
-            Screen.image_ = bitmap.create(width, height)
+            Screen.image_ = bitmaps.create(width, height)
             Screen.updateBounds()
         }
 
@@ -341,7 +341,7 @@
             x: number,
             y: number,
             color?: number,
-            font?: bitmap.Font,
+            font?: bitmaps.Font,
             offsets?: texteffects.TextEffectState[]
         ) {
             Screen.image.print(
