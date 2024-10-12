@@ -24,7 +24,7 @@ namespace microcode {
 
             datalogger.includeTimestamp(FlashLogTimeStampFormat.None)
             
-            const arcadeShieldConnected = screenhelpers.displayPresent();
+            const arcadeShieldConnected = shieldhelpers.shieldPresent();
             if (arcadeShieldConnected)
                 this.pushScene(new Home(this))
             else
